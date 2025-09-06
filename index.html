@@ -4,350 +4,307 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Work & Earn</title>
-    <!-- Telegram Mini App Script -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Material Design Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
+    <!-- Telegram Mini App Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Monetag SDK -->
+    <script src='//libtl.com/sdk.js' data-zone='9829935' data-sdk='show_9829935'></script>
+    
     <style>
-        /* General Styles */
+        :root {
+            --primary-color: #0088cc;
+            --primary-light: #00b3ee;
+            --youtube-red: #FF0000;
+            --background-light: #f4f6f9;
+            --card-light: #ffffff;
+            --text-light: #333;
+            --shadow: 0 4px 15px rgba(0,0,0,0.06);
+            --border-radius: 12px;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f2f5;
-            color: #333;
-            -webkit-user-select: none;
-            user-select: none;
-            overflow-x: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0; padding: 0; background-color: var(--background-light);
+            color: var(--text-light); -webkit-user-select: none; user-select: none;
+            overflow-x: hidden; transition: background-color 0.3s, color 0.3s;
         }
-
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            padding-bottom: 70px; /* Space for fixed bottom nav */
+        
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--background-light); display: flex; justify-content: center;
+            align-items: center; z-index: 9999; transition: opacity 0.5s, visibility 0.5s;
         }
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid rgba(0,0,0,0.1);
+            border-left-color: var(--primary-color); border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Header */
+        .container { max-width: 500px; margin: 0 auto; padding-bottom: 70px; }
+
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            background-color: #0088cc;
-            color: white;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            max-width: 500px;
-            box-sizing: border-box;
-            z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 15px; background-color: var(--primary-color); color: white;
+            position: fixed; top: 0; width: 100%; max-width: 500px;
+            box-sizing: border-box; z-index: 100; transition: background-color 0.3s;
         }
-
-        .header .logo { font-weight: bold; font-size: 1.2em; transition: display 0.3s; }
-        .header .icons button { background: none; border: none; color: white; font-size: 24px; margin-left: 15px; cursor: pointer; padding: 5px; }
+        .header .logo { font-weight: bold; font-size: 1.2em; transition: opacity 0.3s; }
+        .header .icons button { background: none; border: none; color: white; cursor: pointer; padding: 5px; border-radius: 50%; }
+        .header .icons button:active { background-color: rgba(255,255,255,0.2); }
         
-        /* Search Bar Styles */
         #searchBar { display: none; width: 100%; align-items: center; }
-        #searchInput { width: 100%; border: none; padding: 8px 12px; border-radius: 15px; background-color: rgba(255, 255, 255, 0.9); color: #333; }
-        #searchInput:focus { outline: none; }
+        #searchInput { width: 100%; border: none; padding: 8px 12px; border-radius: 18px; background-color: rgba(255, 255, 255, 0.9); color: #333; }
         
-        /* Notification Panel Styles */
-        #notificationPanel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 300px; height: 100%; background-color: white; box-shadow: -5px 0 15px rgba(0,0,0,0.1); z-index: 1001; transition: right 0.3s ease-in-out; display: flex; flex-direction: column; }
+        #notificationPanel { 
+            position: fixed; top: 0; right: -100%; width: 100%; max-width: 300px; height: 100%; 
+            background-color: var(--card-light); box-shadow: -5px 0 15px rgba(0,0,0,0.1); 
+            z-index: 1001; transition: right 0.3s ease-in-out, background-color 0.3s; 
+            display: flex; flex-direction: column; 
+        }
         #notificationPanel.show { right: 0; }
         .notification-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
-        .notification-header h3 { margin: 0; }
-        .notification-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; }
-        .notification-list li { padding: 15px; border-bottom: 1px solid #f0f0f0; }
-        .notification-list p { margin: 0; font-size: 0.9em; }
-        .notification-list .time { font-size: 0.7em; color: #888; margin-top: 5px; }
-        #notificationOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; display: none; }
-        .notification-badge { background-color: red; color: white; border-radius: 50%; padding: 2px 5px; font-size: 0.7em; position: absolute; top: 5px; right: 5px; }
-        
-        /* Bottom Navigation */
-        .nav-bottom { display: flex; justify-content: space-around; padding: 5px 0; background-color: white; border-top: 1px solid #eee; position: fixed; bottom: 0; width: 100%; max-width: 500px; box-sizing: border-box; z-index: 100; }
-        .nav-bottom button { background: none; border: none; color: #555; font-size: 12px; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 5px 10px; flex-grow: 1; }
-        .nav-bottom button.active { color: #0088cc; }
+        .notification-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
+        .notification-list li { padding: 15px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+        .notification-list li:hover { background-color: rgba(0,0,0,0.03); }
+        #notificationOverlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.4); z-index: 1000; 
+            opacity: 0; transition: opacity 0.3s; pointer-events: none; 
+        }
+        #notificationOverlay.show { opacity: 1; pointer-events: auto; }
+
+        .nav-bottom { 
+            display: flex; justify-content: space-around; padding: 5px 0; 
+            background-color: var(--card-light); border-top: 1px solid #eee; 
+            position: fixed; bottom: 0; width: 100%; max-width: 500px; 
+            box-sizing: border-box; z-index: 100;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .nav-bottom button { 
+            background: none; border: none; color: #555; font-size: 12px; 
+            display: flex; flex-direction: column; align-items: center; 
+            cursor: pointer; padding: 5px 10px; flex-grow: 1; 
+            border-radius: var(--border-radius);
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .nav-bottom button:active { background-color: rgba(0,0,0,0.05); }
+        .nav-bottom button.active { color: var(--primary-color); }
         .nav-bottom button .material-icons { font-size: 24px; margin-bottom: 2px; }
 
-        /* Pages */
-        .page { display: none; padding: 70px 15px 15px; }
+        .page { 
+            display: none; padding: 70px 15px 15px; 
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .page.active { display: block; }
         
-        /* Card Style */
-        .card { background-color: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .card { 
+            background-color: var(--card-light); border-radius: var(--border-radius); 
+            padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow);
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
 
-        /* Auth Page Styles */
-        #authPage .input-group { margin-bottom: 15px; }
-        #authPage label { display: block; margin-bottom: 5px; font-weight: 500; color: #555; }
-        #authPage input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; box-sizing: border-box; }
-        #authPage .password-container { position: relative; }
-        #authPage .password-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #888; }
-        #authPage button.submit-btn { width: 100%; background-color: #0088cc; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 1.1em; cursor: pointer; margin-top: 10px; }
-        #authPage p { text-align: center; margin-top: 20px; }
-        #authPage a { color: #0088cc; text-decoration: none; font-weight: bold; }
+        .youtube-card {
+            display: flex; align-items: center; justify-content: space-between;
+            background: linear-gradient(45deg, #ff0000, #ff5c5c);
+            color: white; cursor: pointer;
+        }
+        .youtube-card h3 { margin: 0; }
+        .youtube-card .material-icons { font-size: 40px; }
+        
+        .task-list .task-item {
+            display: flex; align-items: center; padding: 15px;
+            border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;
+        }
+        .task-list .task-item:last-child { border-bottom: none; }
+        .task-list .task-item:active { background-color: rgba(0,0,0,0.05); }
+        .task-icon { font-size: 30px; color: var(--primary-color); margin-right: 15px; }
+        .task-details h4 { margin: 0 0 5px; }
+        .task-details p { margin: 0; font-size: 0.9em; color: #666; }
+        .task-reward { margin-left: auto; color: #28a745; font-weight: bold; }
 
-        /* Home Page Styles */
-        .welcome-banner { background: linear-gradient(45deg, #0088cc, #00b3ee); color: white; text-align: center; padding: 25px; border-radius: 12px; margin-bottom: 20px; }
-        .welcome-banner h2 { margin: 0; }
-        .card .counter { font-size: 2em; font-weight: bold; color: #333; }
+        #adModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 2000;
+            display: none; justify-content: center; align-items: center;
+        }
+        .ad-modal-content {
+            background: white; padding: 30px; border-radius: var(--border-radius);
+            text-align: center; color: #333;
+        }
+        #adTimer { font-size: 2em; font-weight: bold; margin: 15px 0; }
+        #closeAdBtn {
+            background-color: #ccc; color: white; border: none;
+            padding: 10px 20px; border-radius: 8px; cursor: not-allowed;
+        }
+        #closeAdBtn.enabled { background-color: var(--primary-color); cursor: pointer; }
+        .withdraw-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; box-sizing: border-box; margin-bottom: 10px;}
 
-        /* Profile Page Styles */
-        .profile-header { text-align: center; }
-        .profile-pic-container { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 15px; position: relative; cursor: pointer; }
-        .profile-pic-container img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid #0088cc; }
-        .profile-pic-container input[type="file"] { display: none; }
-        .profile-pic-container .camera-icon { position: absolute; bottom: 0; right: 0; background-color: white; border-radius: 50%; padding: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
-        .setting-item:last-child { border-bottom: none; }
-        .setting-item button { background-color: #eee; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; }
-        .logout-button { width: 100%; background-color: #dc3545; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 1.1em; cursor: pointer; margin-top: 20px; }
-        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 20px; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
-        .toggle-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .toggle-slider { background-color: #0088cc; }
-        input:checked + .toggle-slider:before { transform: translateX(20px); }
-
-        /* Withdraw Page Styles */
-        .balance-card { text-align: center; background: linear-gradient(45deg, #2a2a72, #009ffd); color: white; }
-        .balance-amount { font-size: 2.5em; font-weight: bold; margin: 10px 0 0 0; }
-        .payment-method-header { display: flex; align-items: center; margin-bottom: 15px; }
-        .payment-logo { width: 30px; height: 30px; margin-right: 10px; border-radius: 5px; }
-        .withdraw-input-group { margin-bottom: 15px; }
-        .withdraw-input-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9em; color: #555; }
-        .withdraw-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; box-sizing: border-box; }
-        .withdraw-btn { width: 100%; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 1.1em; cursor: pointer; margin-top: 10px; }
-
-        /* Dark Mode */
-        body.dark-mode { background-color: #1e2a36; color: #e0e0e0; }
-        body.dark-mode .header, body.dark-mode .nav-bottom { background-color: #2c3e50; border-color: #3f556a; }
-        body.dark-mode .nav-bottom button { color: #b0c4de; }
-        body.dark-mode .nav-bottom button.active { color: #00b3ee; }
-        body.dark-mode .card, body.dark-mode .welcome-banner, body.dark-mode #notificationPanel { background-color: #2c3e50; }
-        body.dark-mode .card .counter, body.dark-mode h2, body.dark-mode h3 { color: #e0e0e0; }
-        body.dark-mode #authPage input, body.dark-mode #searchInput, body.dark-mode .withdraw-input { background-color: #3f556a; border-color: #5a738c; color: #e0e0e0; }
-        body.dark-mode .setting-item { border-bottom-color: #3f556a; }
-        body.dark-mode .setting-item button { background-color: #3f556a; color: #e0e0e0; }
-        body.dark-mode .logout-button { background-color: #b33939; }
-        body.dark-mode .notification-header, body.dark-mode .notification-list li { border-color: #3f556a; }
-        body.dark-mode .withdraw-input-group label { color: #b0c4de; }
     </style>
 </head>
 <body>
-    <div id="appContainer">
-        <!-- Top Bar (Header) -->
+    <div id="loader"><div class="spinner"></div></div>
+
+    <div id="appContainer" style="visibility: hidden;">
+        <div id="toast" style="position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background-color: rgba(30,30,30,0.9); color: white; padding: 12px 25px; border-radius: 25px; z-index: 2000; transition: bottom 0.5s ease-in-out; font-size: 0.9em; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"></div>
         <div class="header" style="display: none;">
-            <span class="logo">Work & Earn</span>
-            <div id="searchBar">
-                <input type="text" id="searchInput" placeholder="Search tasks...">
-            </div>
+             <span class="logo">Work & Earn</span>
+            <div id="searchBar"> <input type="text" id="searchInput" placeholder="Search tasks..."> </div>
             <div class="icons">
                 <button id="searchButton"><i class="material-icons">search</i></button>
                 <button id="notificationButton" style="position: relative;">
                     <i class="material-icons">notifications</i>
-                    <span id="notificationBadge" class="notification-badge">3</span>
+                    <span id="notificationBadge" class="notification-badge">0</span>
                 </button>
                 <button id="profileButton"><i class="material-icons">person</i></button>
             </div>
         </div>
 
         <div class="container">
-            <!-- Authentication Page -->
+            <!-- Auth Page -->
             <div id="authPage" class="page">
-                <div class="card" style="margin-top: 30px;">
+                 <div class="card" style="margin-top: 30px;">
                     <h2 id="authTitle" style="text-align: center;">Welcome Back!</h2>
-                    
-                    <!-- Login Form -->
                     <div id="loginForm">
-                        <div class="input-group">
-                            <label for="loginEmail">Email</label>
-                            <input type="email" id="loginEmail" placeholder="your@email.com">
-                        </div>
-                        <div class="input-group">
-                            <label for="loginPassword">Password</label>
-                            <div class="password-container">
-                                <input type="password" id="loginPassword" placeholder="••••••••">
-                                <button class="password-toggle" type="button" onclick="togglePasswordVisibility('loginPassword')"><i class="material-icons">visibility</i></button>
-                            </div>
-                        </div>
-                        <button class="submit-btn" onclick="handleLogin()">Log In</button>
-                        <p>Don't have an account? <a href="#" onclick="showSignup()">Signup here</a></p>
+                        <div class="input-group"> <label for="loginEmail">Email</label> <input type="email" id="loginEmail" placeholder="your@email.com"> </div>
+                        <div class="input-group"> <label for="loginPassword">Password</label> <input type="password" id="loginPassword" placeholder="••••••••"> </div>
+                        <button id="loginBtn" class="submit-btn">Log In</button>
+                        <p>Don't have an account? <a href="#" id="showSignupLink">Signup here</a></p>
                     </div>
-
-                    <!-- Signup Form -->
                     <div id="signupForm" style="display: none;">
-                        <div class="input-group">
-                            <label for="signupFullName">Full Name</label>
-                            <input type="text" id="signupFullName" placeholder="John Doe">
-                        </div>
-                        <div class="input-group">
-                            <label for="signupEmail">Email</label>
-                            <input type="email" id="signupEmail" placeholder="your@email.com">
-                        </div>
-                        <div class="input-group">
-                            <label for="signupPassword">Password</label>
-                             <div class="password-container">
-                                <input type="password" id="signupPassword" placeholder="••••••••">
-                                <button class="password-toggle" type="button" onclick="togglePasswordVisibility('signupPassword')"><i class="material-icons">visibility</i></button>
-                            </div>
-                        </div>
-                        <button class="submit-btn" onclick="handleSignup()">Sign Up</button>
-                        <p>Already have an account? <a href="#" onclick="showLogin()">Login here</a></p>
+                         <div class="input-group"> <label for="signupFullName">Full Name</label> <input type="text" id="signupFullName" placeholder="John Doe"> </div>
+                        <div class="input-group"> <label for="signupEmail">Email</label> <input type="email" id="signupEmail" placeholder="your@email.com"> </div>
+                        <div class="input-group"> <label for="signupPassword">Password</label> <input type="password" id="signupPassword" placeholder="••••••••"> </div>
+                        <button id="signupBtn" class="submit-btn">Sign Up</button>
+                        <p>Already have an account? <a href="#" id="showLoginLink">Login here</a></p>
                     </div>
                 </div>
             </div>
 
             <!-- Home Page -->
             <div id="homePage" class="page">
-                <div class="welcome-banner">
-                    <h2 id="welcomeMessage">Hello, User!</h2>
+                <div class="welcome-banner card"> <h2 id="welcomeMessage">Hello, User!</h2> </div>
+                <div id="youtubeCard" class="card youtube-card">
+                    <h3>Join our YouTube</h3>
+                    <i class="material-icons">play_circle_filled</i>
                 </div>
                 <div class="card">
                     <h3><i class="material-icons" style="vertical-align: middle;">group</i> Users Working Now</h3>
-                    <p class="counter" id="workingUsersCount">1,245</p>
-                </div>
-                <div class="card">
-                    <h3><i class="material-icons" style="vertical-align: middle;">paid</i> Users Withdrawing Now</h3>
-                    <p class="counter" id="withdrawingUsersCount">24</p>
-                </div>
-                 <div class="card">
-                    <h3><i class="material-icons" style="vertical-align: middle;">show_chart</i> Total Earnings</h3>
-                    <p class="counter" id="totalEarnings">$15,780.50</p>
+                    <p class="counter">1,245</p>
                 </div>
             </div>
 
             <!-- Work Page -->
             <div id="workPage" class="page">
                 <h2>Task Board</h2>
-                <div class="card">Task content will go here...</div>
+                <div class="card task-list"></div>
             </div>
 
             <!-- Withdraw Page -->
             <div id="withdrawPage" class="page">
-                <h2>Withdraw Funds</h2>
-
-                <div class="card balance-card">
+                <h2>Withdraw & Convert</h2>
+                 <div class="card balance-card">
                     <h4>Your Current Balance</h4>
-                    <p class="balance-amount">$52.75</p>
+                    <p id="balanceAmount" class="balance-amount">$0.00</p>
                 </div>
-
-                <!-- Bkash Card -->
                 <div class="card">
-                    <div class="payment-method-header">
-                        <img src="https://i.ibb.co/c2R9S2V/bkash.png" alt="Bkash" class="payment-logo">
-                        <h3>Withdraw via Bkash</h3>
-                    </div>
-                    <div class="withdraw-input-group">
-                        <label for="bkashAmount">Amount (USD)</label>
-                        <input type="number" id="bkashAmount" class="withdraw-input" placeholder="e.g., 10">
-                    </div>
-                    <div class="withdraw-input-group">
-                        <label for="bkashNumber">Your Bkash Number</label>
-                        <input type="text" id="bkashNumber" class="withdraw-input" placeholder="e.g., 01700000000">
-                    </div>
-                    <button class="withdraw-btn" onclick="handleWithdrawalRequest('Bkash')">Request Withdrawal</button>
+                    <h4>Points Wallet</h4>
+                    <p>Current Points: <b id="pointsAmount">0</b></p>
+                    <p style="font-size: 0.8em; color: #666;">1,000 Points = $1.00 USD</p>
+                    <button id="convertPointsBtn" class="submit-btn" style="background-color: #ff9800;">Convert to Cash</button>
                 </div>
-
-                <!-- Nagad Card -->
+                
                 <div class="card">
-                    <div class="payment-method-header">
-                        <img src="https://i.ibb.co/qY02x1Q/nagad.png" alt="Nagad" class="payment-logo">
-                        <h3>Withdraw via Nagad</h3>
-                    </div>
-                    <div class="withdraw-input-group">
-                        <label for="nagadAmount">Amount (USD)</label>
-                        <input type="number" id="nagadAmount" class="withdraw-input" placeholder="e.g., 10">
-                    </div>
-                    <div class="withdraw-input-group">
-                        <label for="nagadNumber">Your Nagad Number</label>
-                        <input type="text" id="nagadNumber" class="withdraw-input" placeholder="e.g., 01800000000">
-                    </div>
-                    <button class="withdraw-btn" onclick="handleWithdrawalRequest('Nagad')">Request Withdrawal</button>
+                    <div class="payment-method-header"> <img src="https://i.ibb.co/c2R9S2V/bkash.png" alt="Bkash" class="payment-logo"> <h3>Withdraw via Bkash</h3> </div>
+                    <input type="number" class="withdraw-input" id="bkashAmount" placeholder="Amount (USD)">
+                    <input type="text" class="withdraw-input" id="bkashNumber" placeholder="Your Bkash Number">
+                    <button class="withdraw-btn" data-method="Bkash">Request Withdrawal</button>
                 </div>
-
-                <!-- USDT Card -->
                 <div class="card">
-                    <div class="payment-method-header">
-                        <img src="https://i.ibb.co/wSpT1k2/usdt.png" alt="USDT" class="payment-logo">
-                        <h3>Withdraw via USDT (TRC20)</h3>
-                    </div>
-                    <div class="withdraw-input-group">
-                        <label for="usdtAmount">Amount (USD)</label>
-                        <input type="number" id="usdtAmount" class="withdraw-input" placeholder="e.g., 10">
-                    </div>
-                    <div class="withdraw-input-group">
-                        <label for="usdtAddress">Your USDT (TRC20) Address</label>
-                        <input type="text" id="usdtAddress" class="withdraw-input" placeholder="e.g., Txxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
-                    </div>
-                    <button class="withdraw-btn" onclick="handleWithdrawalRequest('USDT')">Request Withdrawal</button>
+                    <div class="payment-method-header"> <img src="https://i.ibb.co/qY02x1Q/nagad.png" alt="Nagad" class="payment-logo"> <h3>Withdraw via Nagad</h3> </div>
+                    <input type="number" class="withdraw-input" id="nagadAmount" placeholder="Amount (USD)">
+                    <input type="text" class="withdraw-input" id="nagadNumber" placeholder="Your Nagad Number">
+                    <button class="withdraw-btn" data-method="Nagad">Request Withdrawal</button>
+                </div>
+                 <div class="card">
+                    <div class="payment-method-header"> <img src="https://i.ibb.co/wSpT1k2/usdt.png" alt="USDT" class="payment-logo"> <h3>Withdraw via USDT (TRC20)</h3> </div>
+                    <input type="number" class="withdraw-input" id="usdtAmount" placeholder="Amount (USD)">
+                    <input type="text" class="withdraw-input" id="usdtAddress" placeholder="Your USDT Address">
+                    <button class="withdraw-btn" data-method="USDT">Request Withdrawal</button>
                 </div>
             </div>
-
+            
             <!-- Profile Page -->
             <div id="profilePage" class="page">
                 <div class="card profile-header">
-                    <div class="profile-pic-container" onclick="document.getElementById('profilePicUpload').click()">
-                        <input type="file" id="profilePicUpload" accept="image/*" onchange="previewProfilePic(event)">
-                        <img id="profileImage" src="https://via.placeholder.com/100" alt="Profile Picture">
-                        <div class="camera-icon"><i class="material-icons" style="font-size: 18px;">photo_camera</i></div>
-                    </div>
-                    <h2 id="profileName">John Doe</h2>
-                    <p id="profileEmail">john.doe@example.com</p>
+                    <img id="profileImage" src="https://via.placeholder.com/100" alt="Profile Picture" style="width:100px; height:100px; border-radius:50%;">
+                    <h2 id="profileName">User</h2>
+                    <p id="profileEmail">user@email.com</p>
                 </div>
-
                 <div class="card">
-                    <div class="setting-item">
-                        <span>Referral Code: <b id="referralCode">REF12345</b></span>
-                        <button onclick="copyReferralCode()">Copy</button>
-                    </div>
-                    <div class="setting-item">
-                        <span>Dark Mode</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="darkModeToggle">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
+                    <h4>Your Referral Code</h4>
+                    <p>Share this code with friends:</p>
+                    <b id="userReferralCode" style="font-size: 1.2em; letter-spacing: 2px;"></b>
+                    <button id="copyReferralBtn" class="submit-btn" style="margin-top:10px;">Copy Code</button>
                 </div>
-                
                 <div class="card">
-                    <div class="setting-item" onclick="alert('Viewing Task History')"><span>Task History</span> <i class="material-icons">chevron_right</i></div>
-                    <div class="setting-item" onclick="alert('Viewing Withdrawal History')"><span>Withdrawal History</span> <i class="material-icons">chevron_right</i></div>
-                    <div class="setting-item" onclick="openSupport()"><span>Support / Help</span> <i class="material-icons">chevron_right</i></div>
+                    <h4>Apply a Code</h4>
+                    <input type="text" id="referralCodeInput" placeholder="Enter referral code" class="withdraw-input">
+                    <button id="submitReferralBtn" class="submit-btn">Apply Code</button>
                 </div>
-                
-                <button class="logout-button" onclick="handleLogout()">Logout</button>
+                 <div class="card">
+                    <div id="historyBtn" class="setting-item"><span>Task History</span> <i class="material-icons">chevron_right</i></div>
+                 </div>
+                 <button id="logoutBtn" class="logout-button">Logout</button>
+            </div>
+            
+            <!-- History Page -->
+            <div id="historyPage" class="page">
+                <h2>Task History</h2>
+                <div id="historyList" class="card"> <p>No activity yet.</p> </div>
             </div>
         </div>
 
-        <!-- Bottom Navigation Bar -->
-        <div class="nav-bottom" style="display: none;">
-            <button id="navHome" class="active" onclick="showPage('home')"><i class="material-icons">home</i>Home</button>
-            <button id="navWork" onclick="showPage('work')"><i class="material-icons">work</i>Work</button>
-            <button id="navWithdraw" onclick="showPage('withdraw')"><i class="material-icons">account_balance_wallet</i>Withdraw</button>
+        <!-- Ad Modal -->
+        <div id="adModal">
+            <div class="ad-modal-content">
+                <h4>Watching Ad...</h4>
+                <p>Please wait for the timer to finish.</p>
+                <div id="adTimer">10</div>
+                <button id="closeAdBtn">Close</button>
+            </div>
         </div>
-
-        <!-- Notification Panel and Overlay -->
+        
+        <!-- UI -->
+        <div class="nav-bottom" style="display: none;">
+            <button id="navHome"><i class="material-icons">home</i>Home</button>
+            <button id="navWork"><i class="material-icons">work</i>Work</button>
+            <button id="navWithdraw"><i class="material-icons">account_balance_wallet</i>Withdraw</button>
+        </div>
         <div id="notificationOverlay"></div>
         <div id="notificationPanel">
             <div class="notification-header">
                 <h3>Notifications</h3>
-                <button id="closeNotificationBtn" style="background:none; border:none; cursor:pointer; font-size: 24px;"><i class="material-icons">close</i></button>
+                <button id="closeNotificationBtn"><i class="material-icons">close</i></button>
             </div>
-            <ul class="notification-list">
-                <!-- Demo Notifications -->
-                <li><p><strong>Congratulations!</strong> Your withdrawal of $25.00 has been approved.</p><div class="time">5 minutes ago</div></li>
-                <li><p>A new task "Data Entry Project" is now available.</p><div class="time">1 hour ago</div></li>
-            </ul>
+            <ul class="notification-list"></ul>
         </div>
     </div>
 
-    <!-- ========= FIREBASE SDKs ========= -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script>
-        // Your web app's Firebase configuration
         const firebaseConfig = {
           apiKey: "AIzaSyAQG6aZY3kaleNFi2vdR5_FPk8fHnI8kRk",
           authDomain: "income-hobei.firebaseapp.com",
@@ -356,263 +313,259 @@
           messagingSenderId: "87846212742",
           appId: "1:87846212742:web:6b5961db7f2a7df3932d07"
         };
-
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
     </script>
 
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Telegram Mini App safely
             const Telegram = window.Telegram ? window.Telegram.WebApp : null;
-            if (Telegram) {
-                Telegram.ready();
-                Telegram.expand();
-            }
+            if (Telegram) Telegram.ready();
 
-            // --- UI Element References ---
-            const header = document.querySelector('.header');
-            const navBottom = document.querySelector('.nav-bottom');
-            const pages = document.querySelectorAll('.page');
-            const navButtons = document.querySelectorAll('.nav-bottom button');
-            const darkModeToggle = document.getElementById('darkModeToggle');
-            const logo = document.querySelector('.logo');
-            const searchButton = document.getElementById('searchButton');
-            const searchBar = document.getElementById('searchBar');
-            const searchInput = document.getElementById('searchInput');
-            const notificationButton = document.getElementById('notificationButton');
-            const notificationPanel = document.getElementById('notificationPanel');
-            const notificationOverlay = document.getElementById('notificationOverlay');
-            const closeNotificationBtn = document.getElementById('closeNotificationBtn');
-            const notificationBadge = document.getElementById('notificationBadge');
+            // --- STATE MANAGEMENT ---
+            let currentUser = null;
+            let currentBalance = 0;
+            let userPoints = 0;
+            let taskHistory = [];
+            let userReferralCode = '';
+            let referralCodeUsed = false;
 
-            // --- State Management ---
-            let isSearchActive = false; 
-            let currentUser = null; // Store user data here
+            // --- UI ELEMENTS ---
+            const loader = document.getElementById('loader');
+            const appContainer = document.getElementById('appContainer');
 
-            // --- Page Navigation Logic ---
-            window.showPage = (pageId, isProfile = false) => {
-                pages.forEach(page => page.classList.remove('active'));
+            // --- CORE FUNCTIONS ---
+            const showToast = (message) => {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.style.bottom = '80px';
+                setTimeout(() => { toast.style.bottom = '-100px'; }, 3000);
+            };
+
+            const updateBalanceDisplay = () => document.getElementById('balanceAmount').innerText = `$${currentBalance.toFixed(2)}`;
+            const updatePointsDisplay = () => document.getElementById('pointsAmount').innerText = userPoints;
+            
+            const showPage = (pageId) => {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
                 document.getElementById(pageId + 'Page').classList.add('active');
-
-                navButtons.forEach(btn => btn.classList.remove('active'));
-                if (!isProfile) {
-                    const activeBtn = document.getElementById('nav' + pageId.charAt(0).toUpperCase() + pageId.slice(1));
-                    if (activeBtn) activeBtn.classList.add('active');
-                }
+                document.querySelectorAll('.nav-bottom button').forEach(b => b.classList.remove('active'));
+                const activeBtn = document.getElementById('nav' + pageId.charAt(0).toUpperCase() + pageId.slice(1));
+                if (activeBtn) activeBtn.classList.add('active');
             };
             
-            // --- FIREBASE AUTH LISTENER ---
+            const addHistory = (type, detail) => {
+                taskHistory.unshift({ type, detail, date: new Date().toLocaleTimeString() });
+                updateHistoryPage();
+            };
+
+            const addNotification = (message, link = null) => {
+                const notificationList = document.querySelector('.notification-list');
+                const badge = document.getElementById('notificationBadge');
+                const newNotif = document.createElement('li');
+                newNotif.innerHTML = `<p>${message}</p>`;
+                if(link) newNotif.dataset.link = link;
+                notificationList.prepend(newNotif);
+                badge.innerText = parseInt(badge.innerText) + 1;
+            };
+
+            const updateHistoryPage = () => {
+                const historyList = document.getElementById('historyList');
+                if(taskHistory.length === 0) { historyList.innerHTML = '<p>No activity yet.</p>'; return; }
+                historyList.innerHTML = taskHistory.map(item => 
+                    `<div class="task-item" style="padding: 10px; border-bottom: 1px solid #eee;">
+                        <div class="task-details">
+                            <h4>${item.type}</h4> <p>${item.detail}</p> <small>${item.date}</small>
+                        </div>
+                    </div>`
+                ).join('');
+            };
+
+            // --- AUTHENTICATION ---
             auth.onAuthStateChanged(user => {
+                loader.style.opacity = '0';
+                loader.style.visibility = 'hidden';
+                appContainer.style.visibility = 'visible';
                 if (user) {
-                    // User is signed in.
-                    currentUser = user; 
-                    initAppAfterAuth(user);
+                    currentUser = user;
+                    currentBalance = 0.50; userPoints = 0; taskHistory = []; referralCodeUsed = false;
+                    userReferralCode = `REF${user.uid.substring(0, 6).toUpperCase()}`;
+                    addHistory('Welcome Bonus', '+$0.50 for creating account.');
+                    addNotification('Welcome! You received a $0.50 bonus.');
+                    
+                    document.querySelector('.header').style.display = 'flex';
+                    document.querySelector('.nav-bottom').style.display = 'flex';
+                    document.getElementById('welcomeMessage').innerText = `Hello, ${user.displayName || 'User'}!`;
+                    document.getElementById('profileName').innerText = user.displayName || 'User';
+                    document.getElementById('profileEmail').innerText = user.email;
+                    document.getElementById('userReferralCode').innerText = userReferralCode;
+                    
+                    updateBalanceDisplay(); updatePointsDisplay(); updateHistoryPage();
+                    generateTasks(); showPage('home');
                 } else {
-                    // User is signed out.
                     currentUser = null;
-                    header.style.display = 'none';
-                    navBottom.style.display = 'none';
+                    document.querySelector('.header').style.display = 'none';
+                    document.querySelector('.nav-bottom').style.display = 'none';
                     showPage('auth');
                 }
             });
 
-            // --- Auth UI Switching ---
-            window.showLogin = () => {
-                document.getElementById('authTitle').innerText = 'Welcome Back!';
-                document.getElementById('loginForm').style.display = 'block';
-                document.getElementById('signupForm').style.display = 'none';
-            };
-            window.showSignup = () => {
-                document.getElementById('authTitle').innerText = 'Create Your Account';
-                document.getElementById('loginForm').style.display = 'none';
-                document.getElementById('signupForm').style.display = 'block';
+            // --- TASK & AD LOGIC ---
+            const tasks = [
+                { id: 1, title: "Watch Video Ad 1", desc: "Watch a short ad to earn points.", points: 10, icon: "play_circle_filled" },
+                { id: 2, title: "Watch Video Ad 2", desc: "Watch a short ad to earn points.", points: 10, icon: "play_circle_filled" },
+                { id: 3, title: "Watch Extended Ad", desc: "Watch a longer ad for more points.", points: 15, icon: "movie" },
+                { id: 4, title: "Watch Video Ad 3", desc: "Watch a short ad to earn points.", points: 10, icon: "play_circle_filled" },
+                { id: 5, title: "Special Offer Ad", desc: "Complete a special ad offer.", points: 20, icon: "star" }
+            ];
+            const generateTasks = () => {
+                const taskList = document.querySelector('.task-list');
+                taskList.innerHTML = tasks.map(task => `
+                    <div class="task-item" data-points="${task.points}" data-title="${task.title}">
+                        <i class="material-icons task-icon">${task.icon}</i>
+                        <div class="task-details"> <h4>${task.title}</h4> <p>${task.desc}</p> </div>
+                        <span class="task-reward">+${task.points} Pts</span>
+                    </div>`).join('');
+                document.querySelectorAll('.task-list .task-item').forEach(item => item.addEventListener('click', () => handleTaskClick(item)));
             };
 
-            // --- Authentication Handlers ---
-            window.handleLogin = () => {
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
-                if (!email || !password) {
-                    alert('Please enter both email and password.');
-                    return;
-                }
-                auth.signInWithEmailAndPassword(email, password)
-                    .catch((error) => {
-                        alert(`Login Failed: ${error.message}`);
-                    });
-            };
-            window.handleSignup = () => {
-                const fullName = document.getElementById('signupFullName').value;
-                const email = document.getElementById('signupEmail').value;
-                const password = document.getElementById('signupPassword').value;
-
-                if (!fullName || !email || !password) {
-                    alert('Please fill out all fields.');
-                    return;
-                }
+            let adTimerInterval;
+            const handleTaskClick = (taskElement) => {
+                const points = parseInt(taskElement.dataset.points);
+                const taskName = taskElement.dataset.title;
+                const adModal = document.getElementById('adModal');
+                const adTimer = document.getElementById('adTimer');
+                const closeAdBtn = document.getElementById('closeAdBtn');
                 
-                auth.createUserWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        return userCredential.user.updateProfile({
-                            displayName: fullName
-                        });
-                    })
-                    .catch((error) => {
-                        alert(`Signup Failed: ${error.message}`);
-                    });
-            };
-            window.handleLogout = () => {
-                auth.signOut().then(() => {
-                    alert('You have been logged out.');
-                }).catch(error => {
-                    console.error("Logout Error", error);
-                });
-            };
-
-            // --- UI Initialization after Authentication ---
-            function initAppAfterAuth(user) {
-                header.style.display = 'flex';
-                navBottom.style.display = 'flex';
-                updateProfileUI(user);
-                showPage('home');
-                startRealtimeCounters();
-            }
-
-            // --- UI Update Functions ---
-            function updateProfileUI(user) {
-                const displayName = user.displayName || 'User';
-                document.getElementById('welcomeMessage').innerText = `Hello, ${displayName}!`;
-                document.getElementById('profileName').innerText = displayName;
-                document.getElementById('profileEmail').innerText = user.email;
-            }
-
-            window.previewProfilePic = (event) => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    document.getElementById('profileImage').src = reader.result;
-                };
-                reader.readAsDataURL(event.target.files[0]);
-                alert('Profile picture preview updated. (This is a demo, not saved)');
-            };
-
-            // --- Helper Functions ---
-            window.togglePasswordVisibility = (id) => {
-                const input = document.getElementById(id);
-                const icon = input.parentElement.querySelector('i');
-                input.type = input.type === "password" ? "text" : "password";
-                icon.innerText = input.type === "password" ? "visibility" : "visibility_off";
-            };
-
-            window.copyReferralCode = () => {
-                const code = document.getElementById('referralCode').innerText;
-                navigator.clipboard.writeText(code).then(() => {
-                    alert('Referral Code copied!');
-                });
+                let timeLeft = 10;
+                adTimer.innerText = timeLeft;
+                closeAdBtn.classList.remove('enabled'); closeAdBtn.disabled = true;
+                adModal.style.display = 'flex';
+                
+                adTimerInterval = setInterval(() => {
+                    timeLeft--;
+                    adTimer.innerText = timeLeft;
+                    if (timeLeft <= 0) {
+                        clearInterval(adTimerInterval);
+                        adTimer.innerText = 'Done!';
+                        closeAdBtn.classList.add('enabled'); closeAdBtn.disabled = false;
+                        
+                        userPoints += points;
+                        updatePointsDisplay();
+                        addHistory('Task Reward', `+${points} Pts for ${taskName}`);
+                        addNotification(`+${points} points earned for completing a task!`, 'work');
+                        showToast(`+${points} points earned!`);
+                    }
+                }, 1000);
             };
             
-            window.openSupport = () => {
-                if (Telegram) {
-                    Telegram.openTelegramLink('https://t.me/telegram');
-                } else {
-                    alert("This opens a Telegram link (works only inside the Telegram app).");
+            // --- EVENT LISTENERS ---
+            document.getElementById('closeAdBtn').addEventListener('click', () => {
+                if(document.getElementById('closeAdBtn').classList.contains('enabled')) {
+                    clearInterval(adTimerInterval);
+                    document.getElementById('adModal').style.display = 'none';
                 }
-            };
-
-            // --- Real-time Counter Simulation ---
-            function startRealtimeCounters() {
-                 if (window.counterInterval) clearInterval(window.counterInterval);
-                 window.counterInterval = setInterval(() => {
-                    let working = parseInt(document.getElementById('workingUsersCount').innerText.replace(',', '')) || 1245;
-                    let withdrawing = parseInt(document.getElementById('withdrawingUsersCount').innerText) || 24;
-                    document.getElementById('workingUsersCount').innerText = (working + Math.floor(Math.random() * 3) - 1).toLocaleString();
-                    document.getElementById('withdrawingUsersCount').innerText = Math.max(0, withdrawing + (Math.random() > 0.8 ? (Math.random() > 0.5 ? 1 : -1) : 0));
-                }, 2500);
-            }
-
-            // --- Withdrawal Logic ---
-            window.handleWithdrawalRequest = (method) => {
-                let amountEl, accountEl;
-
-                if (method === 'Bkash') {
-                    amountEl = document.getElementById('bkashAmount');
-                    accountEl = document.getElementById('bkashNumber');
-                } else if (method === 'Nagad') {
-                    amountEl = document.getElementById('nagadAmount');
-                    accountEl = document.getElementById('nagadNumber');
-                } else if (method === 'USDT') {
-                    amountEl = document.getElementById('usdtAmount');
-                    accountEl = document.getElementById('usdtAddress');
-                }
-
-                const amount = parseFloat(amountEl.value);
-                const account = accountEl.value.trim();
-
-                if (!account || isNaN(amount) || amount <= 0) {
-                    alert('Please enter a valid amount and your account details.');
-                    return;
-                }
-                
-                const confirmationMessage = `Your withdrawal request for $${amount.toFixed(2)} to your ${method} account (${account}) has been submitted for review.`;
-                alert(confirmationMessage);
-
-                amountEl.value = '';
-                accountEl.value = '';
-            };
-            
-            // --- Search Logic ---
-            searchButton.addEventListener('click', () => {
-                isSearchActive = !isSearchActive;
-                logo.style.display = isSearchActive ? 'none' : 'block';
-                searchBar.style.display = isSearchActive ? 'flex' : 'none';
-                searchButton.innerHTML = isSearchActive ? '<i class="material-icons">close</i>' : '<i class="material-icons">search</i>';
-                if(isSearchActive) searchInput.focus();
             });
-            searchInput.addEventListener('keyup', e => { if (e.key === 'Enter') alert(`Searching for: "${searchInput.value}"`); });
             
-            // --- Notification Logic ---
-            const showNotificationPanel = () => {
-                notificationPanel.classList.add('show');
-                notificationOverlay.style.display = 'block';
-                notificationBadge.style.display = 'none';
-            };
-            const hideNotificationPanel = () => {
-                notificationPanel.classList.remove('show');
-                notificationOverlay.style.display = 'none';
-            };
+            document.getElementById('submitReferralBtn').addEventListener('click', () => {
+                const code = document.getElementById('referralCodeInput').value;
+                if(referralCodeUsed) return showToast('You have already used a referral code.');
+                if(code === userReferralCode) return showToast('You cannot use your own referral code.');
+                if(code.trim() !== "") {
+                    currentBalance += 0.20;
+                    referralCodeUsed = true;
+                    updateBalanceDisplay();
+                    addHistory('Referral Bonus', '+$0.20 for applying code.');
+                    addNotification('+$0.20 Referral Bonus added!');
+                    showToast('Referral bonus added!');
+                    document.getElementById('referralCodeInput').value = '';
+                } else {
+                    showToast('Please enter a valid code.');
+                }
+            });
+
+            document.getElementById('convertPointsBtn').addEventListener('click', () => {
+                if(userPoints >= 1000) {
+                    const dollarsToAdd = Math.floor(userPoints / 1000);
+                    const pointsToRemove = dollarsToAdd * 1000;
+                    userPoints -= pointsToRemove;
+                    currentBalance += dollarsToAdd;
+                    updatePointsDisplay(); updateBalanceDisplay();
+                    addHistory('Points Conversion', `-${pointsToRemove} Pts, +$${dollarsToAdd}.00 to balance.`);
+                    addNotification(`+$${dollarsToAdd}.00 added from points!`);
+                    showToast(`${pointsToRemove} points converted to $${dollarsToAdd}.00!`);
+                } else {
+                    showToast('Minimum 1,000 points required to convert.');
+                }
+            });
+            
+            document.querySelectorAll('.notification-list').forEach(list => {
+                list.addEventListener('click', (e) => {
+                    const targetLi = e.target.closest('li');
+                    if(targetLi && targetLi.dataset.link){
+                        showPage(targetLi.dataset.link);
+                        hideNotificationPanel();
+                    }
+                });
+            });
+
+            document.getElementById('youtubeCard').addEventListener('click', () => window.open('https://www.youtube.com', '_blank'));
+            document.getElementById('historyBtn').addEventListener('click', () => showPage('history'));
+            document.getElementById('loginBtn').addEventListener('click', () => auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value).catch(e => showToast(e.message)));
+            document.getElementById('signupBtn').addEventListener('click', () => {
+                const name = document.getElementById('signupFullName').value, email = document.getElementById('signupEmail').value, pass = document.getElementById('signupPassword').value;
+                if(!name || !email || !pass) return showToast("Please fill all fields");
+                auth.createUserWithEmailAndPassword(email, pass).then(c=>c.user.updateProfile({displayName: name})).catch(e => showToast(e.message))
+            });
+            document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+            document.getElementById('navHome').addEventListener('click', () => showPage('home'));
+            document.getElementById('navWork').addEventListener('click', () => showPage('work'));
+            document.getElementById('navWithdraw').addEventListener('click', () => showPage('withdraw'));
+            document.getElementById('profileButton').addEventListener('click', () => showPage('profile'));
+            
+            const notificationButton = document.getElementById('notificationButton'), closeNotificationBtn = document.getElementById('closeNotificationBtn'), notificationOverlay = document.getElementById('notificationOverlay');
+            const showNotificationPanel = () => { document.getElementById('notificationPanel').classList.add('show'); notificationOverlay.classList.add('show'); };
+            const hideNotificationPanel = () => { document.getElementById('notificationPanel').classList.remove('show'); notificationOverlay.classList.remove('show'); };
             notificationButton.addEventListener('click', showNotificationPanel);
             closeNotificationBtn.addEventListener('click', hideNotificationPanel);
             notificationOverlay.addEventListener('click', hideNotificationPanel);
 
-            // --- Dark Mode ---
-            darkModeToggle.addEventListener('change', () => {
-                const isChecked = darkModeToggle.checked;
-                document.body.classList.toggle('dark-mode', isChecked);
-                localStorage.setItem('darkMode', isChecked);
-                
-                if (Telegram) {
-                    const themeParams = isChecked 
-                        ? { bg_color: '#1e2a36', text_color: '#e0e0e0', header_bg_color: '#2c3e50', section_bg_color: '#2c3e50' }
-                        : { bg_color: '#f0f2f5', text_color: '#333333', header_bg_color: '#0088cc', section_bg_color: '#ffffff' };
-                    Telegram.setThemeParams(themeParams);
-                }
+            let isSearchActive = false;
+            document.getElementById('searchButton').addEventListener('click', () => {
+                isSearchActive = !isSearchActive;
+                document.querySelector('.logo').style.display = isSearchActive ? 'none' : 'block';
+                document.getElementById('searchBar').style.display = isSearchActive ? 'flex' : 'none';
+                document.getElementById('searchButton').innerHTML = isSearchActive ? `<i class="material-icons">close</i>` : `<i class="material-icons">search</i>`;
+                if (isSearchActive) document.getElementById('searchInput').focus();
             });
 
-            // Check for saved dark mode preference
-            if (localStorage.getItem('darkMode') === 'true') {
-                darkModeToggle.checked = true;
-                document.body.classList.add('dark-mode');
-                 if (Telegram) {
-                    Telegram.setThemeParams({ bg_color: '#1e2a36', text_color: '#e0e0e0', header_bg_color: '#2c3e50', section_bg_color: '#2c3e50' });
-                }
-            }
+            document.getElementById('copyReferralBtn').addEventListener('click', () => navigator.clipboard.writeText(userReferralCode).then(() => showToast('Referral Code copied!')));
+        
+            document.querySelectorAll('.withdraw-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const method = btn.dataset.method;
+                    const amountElId = `${method.toLowerCase()}Amount`;
+                    const accountElId = method === 'USDT' ? 'usdtAddress' : `${method.toLowerCase()}Number`;
+                    
+                    const amountEl = document.getElementById(amountElId);
+                    const accountEl = document.getElementById(accountElId);
+                    
+                    const amount = parseFloat(amountEl.value);
+                    const account = accountEl.value.trim();
 
-            // --- Event Listeners ---
-            document.getElementById('profileButton').addEventListener('click', () => showPage('profile', true));
-
+                    if (!account || isNaN(amount) || amount <= 0) return showToast('Please provide valid amount and account details.');
+                    if (amount < 5) return showToast('Minimum withdrawal amount is $5.00.');
+                    if (amount > currentBalance) return showToast('Insufficient balance.');
+                    
+                    currentBalance -= amount;
+                    updateBalanceDisplay();
+                    addHistory('Withdrawal', `-$${amount.toFixed(2)} to ${method}.`);
+                    addNotification(`Your withdrawal request of $${amount.toFixed(2)} is being processed.`);
+                    showToast(`Withdrawal request for $${amount.toFixed(2)} successful!`);
+                    amountEl.value = ''; accountEl.value = '';
+                });
+            });
         });
     </script>
 </body>
 </html>
+
