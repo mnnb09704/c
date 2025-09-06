@@ -184,6 +184,11 @@
         .notification-list li { padding: 15px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
         #notificationOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none;}
         #notificationOverlay.show { opacity: 1; pointer-events: auto; }
+
+        .feed-container { max-height: 200px; overflow-y: auto; margin-top: 10px; }
+        .feed-item { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9em; }
+        .feed-item:last-child { border-bottom: none; }
+        .feed-item .material-icons { color: #28a745; margin-right: 10px; }
     </style>
 </head>
 <body>
@@ -241,6 +246,12 @@
                 <div class="card">
                     <h3><i class="material-icons" style="vertical-align: middle;">group</i> Users Working Now</h3>
                     <p class="counter">1,245</p>
+                </div>
+                <div class="card">
+                    <h3><i class="material-icons" style="vertical-align: middle;">history</i> Recent Withdrawals</h3>
+                    <div id="withdrawalFeed" class="feed-container">
+                        <p>No recent activity.</p>
+                    </div>
                 </div>
             </div>
 
@@ -355,8 +366,9 @@
             // --- STATE MANAGEMENT ---
             let currentUser = null;
             let userUnsubscribe; 
+            let userWithdrawalListener = null;
             let settings = { minWithdrawal: 5, themeColor: '#0088cc' };
-            let appConfig = { dailyAdLimit: 10 }; // Default config
+            let appConfig = { dailyAdLimit: 10 }; 
 
             // --- UI ELEMENTS ---
             const loader = document.getElementById('loader');
@@ -408,10 +420,64 @@
                 if (doc.exists) {
                     const data = doc.data();
                     settings = data;
-                    appConfig = { ...appConfig, ...data }; // Merge settings into appConfig
+                    appConfig = { ...appConfig, ...data };
                     document.documentElement.style.setProperty('--primary-color', settings.themeColor || '#0088cc');
                 }
             });
+
+            const setupWithdrawalFeedListener = () => {
+                const feedContainer = document.getElementById('withdrawalFeed');
+                db.collection('withdrawals')
+                  .where('status', '==', 'approved')
+                  .orderBy('timestamp', 'desc')
+                  .limit(5)
+                  .onSnapshot(snapshot => {
+                      if (snapshot.empty) {
+                          feedContainer.innerHTML = '<p>No recent approved withdrawals.</p>';
+                          return;
+                      }
+                      const feedHTML = snapshot.docs.map(doc => {
+                          const data = doc.data();
+                          const timeAgo = new Date(data.timestamp.seconds * 1000).toLocaleTimeString();
+                          return `
+                              <div class="feed-item">
+                                  <i class="material-icons">check_circle</i>
+                                  <span><b>${data.userName || 'Someone'}</b> just withdrew <b>$${data.amount.toFixed(2)}</b> via ${data.method}. <small>(${timeAgo})</small></span>
+                              </div>
+                          `;
+                      }).join('');
+                      feedContainer.innerHTML = feedHTML;
+                  }, error => {
+                      console.error("Error setting up withdrawal feed listener: ", error);
+                      feedContainer.innerHTML = '<p>Could not load recent activity.</p>';
+                  });
+            };
+
+            const setupUserNotificationListener = (userId) => {
+                if (userWithdrawalListener) userWithdrawalListener();
+
+                userWithdrawalListener = db.collection('withdrawals')
+                  .where('userId', '==', userId)
+                  .where('notified', '==', false)
+                  .onSnapshot(snapshot => {
+                      snapshot.docChanges().forEach(async (change) => {
+                          if (change.type === 'modified') {
+                              const data = change.doc.data();
+                              if (data.status === 'approved') {
+                                  addNotification(`Your withdrawal of $${data.amount.toFixed(2)} has been approved!`);
+                                  showToast('Withdrawal approved!');
+                                  await db.collection('withdrawals').doc(change.doc.id).update({ notified: true });
+                              } else if (data.status === 'rejected') {
+                                   addNotification(`Your withdrawal of $${data.amount.toFixed(2)} was rejected. Contact support.`);
+                                   showToast('Withdrawal rejected.');
+                                   await db.collection('withdrawals').doc(change.doc.id).update({ notified: true });
+                              }
+                          }
+                      });
+                  }, error => {
+                      console.error("Error setting up user notification listener: ", error);
+                  });
+            };
 
             // --- AUTHENTICATION ---
             auth.onAuthStateChanged(async (user) => {
@@ -449,7 +515,7 @@
                             points: 0, status: 'active', referralUsed: false,
                             referralCode: `REF${user.uid.substring(0, 6).toUpperCase()}`,
                             dailyAdCount: 0,
-                            lastAdWatchDate: new Date(0).toISOString().split('T')[0] // A date in the past
+                            lastAdWatchDate: new Date(0).toISOString().split('T')[0]
                         };
                         await userRef.set(newUser, { merge: true });
                         await db.collection('users').doc(user.uid).collection('history').add({
@@ -462,9 +528,13 @@
                     document.querySelector('.nav-bottom').style.display = 'flex';
                     document.getElementById('welcomeMessage').innerText = `Hello, ${user.displayName || 'User'}!`;
                     
-                    generateTasks(); showPage('home');
+                    generateTasks();
+                    setupWithdrawalFeedListener();
+                    setupUserNotificationListener(user.uid);
+                    showPage('home');
                 } else {
                     if(userUnsubscribe) userUnsubscribe();
+                    if(userWithdrawalListener) userWithdrawalListener();
                     currentUser = null;
                     document.querySelector('.header').style.display = 'none';
                     document.querySelector('.nav-bottom').style.display = 'none';
@@ -472,7 +542,6 @@
                 }
             });
 
-            // --- NEW REWARD FUNCTION ---
             window.claimReward = async function(taskType) {
                 if (!currentUser) return showToast("Please login first.");
                 const today = new Date().toISOString().split('T')[0];
@@ -529,50 +598,33 @@
                 }
             };
             
-            // --- TASK LOGIC ---
              const generateTasks = () => {
                 const taskList = document.querySelector('.task-list');
                 
-                // Add a static task for testing and to ensure there's always an option
                 const staticTaskHTML = `
                     <div class="task-item" data-task-type="interstitial">
                         <i class="material-icons task-icon">ads_click</i>
-                        <div class="task-details">
-                            <h4>Watch Ad 1</h4>
-                            <p>Click here to earn points by watching a short ad.</p>
-                        </div>
+                        <div class="task-details"><h4>Watch Ad 1</h4><p>Click here to earn points by watching a short ad.</p></div>
                         <span class="task-reward">+50 Pts</span>
                     </div>
                      <div class="task-item" data-task-type="popup">
                         <i class="material-icons task-icon">open_in_new</i>
-                        <div class="task-details">
-                            <h4>Watch Ad 2</h4>
-                            <p>Watch a short ad to complete the survey and earn rewards.</p>
-                        </div>
+                        <div class="task-details"><h4>Watch Ad 2</h4><p>Watch a short ad to complete the survey and earn rewards.</p></div>
                         <span class="task-reward">+50 Pts</span>
                     </div>
                      <div class="task-item" data-task-type="inApp">
                         <i class="material-icons task-icon">slideshow</i>
-                        <div class="task-details">
-                            <h4>Watch Ad 3</h4>
-                            <p>Watch a video from our sponsors to get your points.</p>
-                        </div>
+                        <div class="task-details"><h4>Watch Ad 3</h4><p>Watch a video from our sponsors to get your points.</p></div>
                         <span class="task-reward">+50 Pts</span>
                     </div>
                     <div class="task-item" data-task-type="miniApp">
                         <i class="material-icons task-icon">videogame_asset</i>
-                        <div class="task-details">
-                            <h4>Watch Ad 4</h4>
-                            <p>Engage with this special ad to earn a bigger reward.</p>
-                        </div>
+                        <div class="task-details"><h4>Watch Ad 4</h4><p>Engage with this special ad to earn a bigger reward.</p></div>
                         <span class="task-reward">+100 Pts</span>
                     </div>
                     <div class="task-item" data-task-type="interstitial">
                         <i class="material-icons task-icon">card_giftcard</i>
-                        <div class="task-details">
-                            <h4>Watch Ad 5</h4>
-                            <p>Watch this ad to claim your special daily bonus points.</p>
-                        </div>
+                        <div class="task-details"><h4>Watch Ad 5</h4><p>Watch this ad to claim your special daily bonus points.</p></div>
                         <span class="task-reward">+50 Pts</span>
                     </div>
                 `;
@@ -598,7 +650,6 @@
                     });
                 }, error => {
                     console.error("Error fetching tasks from Firestore:", error);
-                    // If Firestore fails, still show the static task
                     taskList.innerHTML = "<p>Could not load tasks. Please check your connection.</p>" + staticTaskHTML;
                     document.querySelectorAll('.task-list .task-item').forEach(item => {
                          item.addEventListener('click', () => window.claimReward(item.dataset.taskType));
@@ -637,7 +688,6 @@
                 if(userData.referralUsed) return showToast('You have already used a referral code.');
                 if(code === userData.referralCode) return showToast('You cannot use your own referral code.');
 
-                // Securely query to find if the referral code exists and belongs to another user
                 const referrerQuery = await db.collection('users').where('referralCode', '==', code).limit(1).get();
                 if (referrerQuery.empty) {
                     return showToast('Invalid referral code.');
@@ -699,20 +749,21 @@
                         await userRef.update({ balance: firebase.firestore.FieldValue.increment(-amount) });
                         await db.collection('withdrawals').add({
                             userId: currentUser.uid, email: currentUser.email,
+                            userName: currentUser.displayName || 'A User',
                             amount: amount, method: method, account: account, status: 'pending',
+                            notified: false,
                             timestamp: firebase.firestore.FieldValue.serverTimestamp()
                         });
                         await db.collection('users').doc(currentUser.uid).collection('history').add({
                             type: 'Withdrawal Request', detail: `-$${amount.toFixed(2)} via ${method}.`, date: firebase.firestore.FieldValue.serverTimestamp()
                         });
                         showToast('Withdrawal request has been sent successfully!');
-                        addNotification(`Your $${amount.toFixed(2)} withdrawal request via ${method} is pending.`);
+                        addNotification(`Your $${amount.toFixed(2)} withdrawal request via ${method} is pending approval.`);
                         amountInput.value = '';
                         accountInput.value = '';
                     } catch (error) {
                         console.error("Withdrawal error:", error);
                         showToast("Failed to process withdrawal. Please try again.");
-                        // Optional: Revert balance if withdrawal fails at a later step
                         await userRef.update({ balance: firebase.firestore.FieldValue.increment(amount) });
                     }
                 });
