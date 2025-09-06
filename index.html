@@ -706,6 +706,7 @@
                             type: 'Withdrawal Request', detail: `-$${amount.toFixed(2)} via ${method}.`, date: firebase.firestore.FieldValue.serverTimestamp()
                         });
                         showToast('Withdrawal request has been sent successfully!');
+                        addNotification(`Your $${amount.toFixed(2)} withdrawal request via ${method} is pending.`);
                         amountInput.value = '';
                         accountInput.value = '';
                     } catch (error) {
