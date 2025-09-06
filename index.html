@@ -222,13 +222,18 @@
         const adsLeftCountEl = document.getElementById('ads-left-count');
         const paymentDetailsContainer = document.getElementById('payment-details-container');
 
-        window.onload = () => {
-            lucide.createIcons();
-            setupEventListeners();
-            showMainPage('auth-section');
-            loader.style.display = 'none';
-            onAuthStateChanged(auth, handleAuthStateChange);
-        };
+        loader.style.display = 'flex';
+           onAuthStateChanged(auth, async (user) => {
+       if (user) {
+            await handleAuthStateChange(user);
+    } else {
+        currentUser = null;
+        userData = null;
+        showMainPage('auth-section');
+        loader.style.display = 'none';
+    }
+        });
+
 
         async function handleAuthStateChange(user) {
             if (user) {
