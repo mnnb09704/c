@@ -2,710 +2,351 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Income Hobei</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Work & Earn</title>
+    <!-- Telegram Mini App Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- Ad Code (Unchanged) -->
-    <script src='//libtl.com/sdk.js' data-zone='9829935' data-sdk='show_9829935'></script>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Material Design Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #121212; 
-            color: #ffffff; 
+        /* ==================== GENERAL STYLES ==================== */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            -webkit-user-select: none;
+            user-select: none;
+            overflow-x: hidden;
         }
-        .dark-bg { background-color: #121212; }
-        .card-bg { background-color: #1e1e1e; }
-        .border-accent { border-color: #ff8c00; }
-        .text-accent { color: #ff8c00; }
-        .btn, .btn-accent, .btn-outline-accent { transition: all 0.2s ease-in-out; transform: scale(1); }
-        .btn:active, .btn-accent:active, .btn-outline-accent:active { transform: scale(0.95); }
-        .btn-accent { background-color: #ff8c00; color: #121212; font-weight: bold; }
-        .btn-accent:hover { background-color: #e67e00; }
-        .btn-outline-accent { border: 1px solid #ff8c00; color: #ff8c00; }
-        .btn-outline-accent:hover { background-color: #ff8c00; color: #121212; }
-        .input-field { background-color: #2c2c2c; border: 1px solid #444; }
-        /* এখানে পরিবর্তন করা হয়েছে: .main-page আর শুরুতে 'display: none' থাকবে না। */
-        .main-page { display: flex; animation: fadeIn 0.5s ease-in-out; }
-        .sub-page { display: none; }
-        .sub-page.active { display: block; animation: fadeIn 0.3s ease-in-out; }
-        .bottom-nav a.active { color: #ff8c00; }
-        .notification-dot {
-            position: absolute; top: -2px; right: -2px; width: 10px; height: 10px;
-            background-color: #ef4444; border-radius: 50%; border: 2px solid #121212; display: none;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .container { max-width: 500px; margin: 0 auto; padding-bottom: 70px; }
+        .page { display: none; padding: 70px 15px 15px; }
+        .page.active { display: block; }
+        .card { background-color: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
-        /* Custom mobile-first styles */
-        body { font-size: 14px; }
-        h1.text-4xl { font-size: 2.25rem; }
-        .text-3xl { font-size: 1.875rem; }
-        .text-xl { font-size: 1.25rem; }
-        .text-lg { font-size: 1.125rem; }
+        /* ==================== HEADER & NAVIGATION ==================== */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background-color: #0088cc; color: white; position: fixed; top: 0; width: 100%; max-width: 500px; box-sizing: border-box; z-index: 100; }
+        .header .logo { font-weight: bold; font-size: 1.2em; }
+        .header .icons button { background: none; border: none; color: white; font-size: 24px; margin-left: 15px; cursor: pointer; padding: 5px; }
+        .nav-bottom { display: flex; justify-content: space-around; padding: 5px 0; background-color: white; border-top: 1px solid #eee; position: fixed; bottom: 0; width: 100%; max-width: 500px; box-sizing: border-box; z-index: 100; }
+        .nav-bottom button { background: none; border: none; color: #555; font-size: 12px; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 5px 10px; flex-grow: 1; }
+        .nav-bottom button.active { color: #0088cc; }
+        .nav-bottom button .material-icons { font-size: 24px; margin-bottom: 2px; }
 
-        /* Adjustments for larger screens */
-        @media (min-width: 640px) {
-            body { font-size: 16px; }
-            h1.text-4xl { font-size: 3rem; }
-            .text-3xl { font-size: 2rem; }
-            .text-xl { font-size: 1.5rem; }
-            .text-lg { font-size: 1.25rem; }
+        /* ==================== SEARCH & NOTIFICATION ==================== */
+        #searchBar { display: none; width: 100%; align-items: center; }
+        #searchInput { width: 100%; border: none; padding: 8px 12px; border-radius: 15px; background-color: #f0f2f5; color: #333; }
+        #searchInput:focus { outline: none; }
+        #notificationPanel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 300px; height: 100%; background-color: white; box-shadow: -5px 0 15px rgba(0,0,0,0.1); z-index: 1001; transition: right 0.3s ease-in-out; display: flex; flex-direction: column; }
+        #notificationPanel.show { right: 0; }
+        .notification-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
+        .notification-header h3 { margin: 0; }
+        .notification-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; }
+        .notification-list li { padding: 15px; border-bottom: 1px solid #f0f0f0; }
+        .notification-list p { margin: 0; font-size: 0.9em; }
+        .notification-list .time { font-size: 0.7em; color: #888; margin-top: 5px; }
+        #notificationOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; display: none; }
+        .notification-badge { background-color: red; color: white; border-radius: 50%; padding: 2px 5px; font-size: 0.7em; position: absolute; top: 5px; right: 5px; }
+
+        /* ==================== PAGE SPECIFIC STYLES ==================== */
+        /* --- Auth Page --- */
+        #authPage .input-group { margin-bottom: 15px; }
+        #authPage label { display: block; margin-bottom: 5px; font-weight: 500; }
+        #authPage input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; box-sizing: border-box; }
+        #authPage .password-container { position: relative; }
+        #authPage .password-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #888; }
+        #authPage button.submit-btn { width: 100%; background-color: #0088cc; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 1.1em; cursor: pointer; margin-top: 10px; }
+        #authPage p { text-align: center; margin-top: 20px; }
+        #authPage a { color: #0088cc; text-decoration: none; font-weight: bold; }
+        /* --- Home Page --- */
+        .welcome-banner { background: linear-gradient(45deg, #0088cc, #00b3ee); color: white; text-align: center; padding: 25px; border-radius: 12px; margin-bottom: 20px; }
+        .card .counter { font-size: 2em; font-weight: bold; }
+        /* --- Profile Page --- */
+        .profile-header { text-align: center; }
+        .profile-pic-container { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 15px; position: relative; cursor: pointer; }
+        .profile-pic-container img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid #0088cc; }
+        .profile-pic-container input[type="file"] { display: none; }
+        .profile-pic-container .camera-icon { position: absolute; bottom: 0; right: 0; background-color: white; border-radius: 50%; padding: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+        .setting-item:last-child { border-bottom: none; }
+        .setting-item button { background-color: #eee; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; }
+        .logout-button { width: 100%; background-color: #dc3545; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 1.1em; cursor: pointer; margin-top: 20px; }
+        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+        .toggle-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .toggle-slider { background-color: #0088cc; }
+        input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+        /* ==================== DARK MODE STYLES ==================== */
+        body.dark-mode { background-color: #1e2a36; color: #e0e0e0; }
+        body.dark-mode .header, body.dark-mode .nav-bottom { background-color: #2c3e50; border-color: #3f556a; }
+        body.dark-mode .nav-bottom button { color: #b0c4de; }
+        body.dark-mode .nav-bottom button.active { color: #00b3ee; }
+        body.dark-mode .card, body.dark-mode .welcome-banner, body.dark-mode #notificationPanel { background-color: #2c3e50; }
+        body.dark-mode .card .counter, body.dark-mode h2, body.dark-mode h3 { color: #e0e0e0; }
+        body.dark-mode input { background-color: #3f556a; border-color: #5a738c; color: #e0e0e0; }
+        body.dark-mode .setting-item { border-bottom-color: #3f556a; }
+        body.dark-mode .setting-item button { background-color: #3f556a; color: #e0e0e0; }
+        body.dark-mode .logout-button { background-color: #b33939; }
+        body.dark-mode .notification-header, body.dark-mode .notification-list li { border-color: #3f556a; }
+
+        /* ==================== DESKTOP RESPONSIVE ==================== */
+        @media (min-width: 768px) {
+            body { background-color: #e9ecef; }
+            .header, .nav-bottom { left: 50%; transform: translateX(-50%); }
+            .container { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); min-height: 100vh; background-color: #f0f2f5; }
+            body.dark-mode .container { background-color: #1e2a36; }
         }
     </style>
 </head>
-<body class="w-full mx-auto">
-    <!-- App Loader -->
-    <div id="loader" class="hidden fixed inset-0 dark-bg bg-opacity-75 flex items-center justify-center z-50">
-        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-accent"></div>
-    </div>
-
-    <!-- Custom Alert Modal -->
-    <div id="custom-alert" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-sm text-center">
-            <p id="alert-message" class="mb-4"></p>
-            <button id="alert-ok-btn" class="btn-accent px-6 py-2 rounded-lg">ঠিক আছে</button>
-        </div>
-    </div>
-
-    <!-- Authentication Section (শুরুতে দৃশ্যমান থাকবে) -->
-    <div id="auth-section" class="min-h-screen p-6 flex-col justify-center main-page">
-        <h1 class="text-4xl font-bold text-center mb-2 text-accent">Income Hobei</h1>
-        <p class="text-center text-gray-400 mb-8 text-sm">চালিয়ে যেতে লগইন বা সাইন আপ করুন</p>
-        <div id="auth-container">
-            <div id="login-view">
-                <input id="login-email" type="email" placeholder="ইমেইল" class="w-full p-3 rounded-lg input-field mb-4">
-                <input id="login-password" type="password" placeholder="পাসওয়ার্ড" class="w-full p-3 rounded-lg input-field mb-4">
-                <button id="login-btn" class="w-full p-3 rounded-lg btn-accent mb-4">লগইন</button>
-                <p class="text-center text-gray-400 text-sm">অ্যাকাউন্ট নেই? <a href="#" id="show-signup" class="font-semibold text-accent">সাইন আপ</a></p>
-            </div>
-            <div id="signup-view" class="hidden">
-                 <input id="signup-name" type="text" placeholder="পূর্ণ নাম" class="w-full p-3 rounded-lg input-field mb-4">
-                <input id="signup-email" type="email" placeholder="ইমেইল" class="w-full p-3 rounded-lg input-field mb-4">
-                <input id="signup-password" type="password" placeholder="পাসওয়ার্ড" class="w-full p-3 rounded-lg input-field mb-4">
-                <button id="signup-btn" class="w-full p-3 rounded-lg btn-accent mb-4">সাইন আপ</button>
-                <p class="text-center text-gray-400 text-sm">আগেই অ্যাকাউন্ট আছে? <a href="#" id="show-login" class="font-semibold text-accent">লগইন</a></p>
+<body>
+    <div id="appContainer">
+        <!-- Header -->
+        <div class="header" style="display: none;">
+            <span class="logo">Work & Earn</span>
+            <div id="searchBar"><input type="text" id="searchInput" placeholder="Search tasks..."></div>
+            <div class="icons">
+                <button id="searchButton"><i class="material-icons">search</i></button>
+                <button id="notificationButton" style="position: relative;">
+                    <i class="material-icons">notifications</i>
+                    <span id="notificationBadge" class="notification-badge">3</span>
+                </button>
+                <button id="profileButton"><i class="material-icons">person</i></button>
             </div>
         </div>
-    </div>
 
-    <!-- Main App Container (শুরুতে লুকানো থাকবে) -->
-    <div id="app-container" class="min-h-screen flex-col main-page hidden">
-        <header class="flex items-center justify-between p-4 sticky top-0 bg-opacity-80 backdrop-blur-md z-10 dark-bg">
-            <h1 class="text-xl font-bold">Income Hobei</h1>
-            <div class="flex items-center space-x-4">
-                <div id="notification-bell" class="relative cursor-pointer">
-                    <i data-lucide="bell" class="w-6 h-6"></i>
-                    <div id="notification-dot" class="notification-dot"></div>
+        <!-- Main Content Area -->
+        <div class="container">
+            <!-- Auth Page -->
+            <div id="authPage" class="page">
+                <div class="card" style="margin-top: 30px;">
+                    <h2 id="authTitle" style="text-align: center;">Welcome Back!</h2>
+                    <div id="loginForm">
+                        <div class="input-group"><label for="loginEmail">Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div>
+                        <div class="input-group"><label for="loginPassword">Password</label><div class="password-container"><input type="password" id="loginPassword" placeholder="••••••••"><button class="password-toggle" onclick="togglePasswordVisibility('loginPassword')"><i class="material-icons">visibility</i></button></div></div>
+                        <button class="submit-btn" onclick="handleLogin()">Log In</button>
+                        <p>Don't have an account? <a href="#" onclick="showSignup()">Signup here</a></p>
+                    </div>
+                    <div id="signupForm" style="display: none;">
+                         <div class="input-group"><label for="signupFullName">Full Name</label><input type="text" id="signupFullName" placeholder="John Doe"></div>
+                        <div class="input-group"><label for="signupEmail">Email</label><input type="email" id="signupEmail" placeholder="your@email.com"></div>
+                        <div class="input-group"><label for="signupPassword">Password</label><div class="password-container"><input type="password" id="signupPassword" placeholder="••••••••"><button class="password-toggle" onclick="togglePasswordVisibility('signupPassword')"><i class="material-icons">visibility</i></button></div></div>
+                        <button class="submit-btn" onclick="handleSignup()">Sign Up</button>
+                        <p>Already have an account? <a href="#" onclick="showLogin()">Login here</a></p>
+                    </div>
                 </div>
-                <i data-lucide="user" class="w-6 h-6 cursor-pointer" onclick="navigateTo('profile-page')"></i>
             </div>
-        </header>
-
-        <main class="flex-grow">
             <!-- Home Page -->
-            <div id="home-page" class="p-4 space-y-6 sub-page">
-                <div class="card-bg p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
-                    <div>
-                        <p class="text-gray-400 text-sm">আপনার ব্যালেন্স</p>
-                        <p class="text-3xl font-bold"><span id="coin-balance">0</span> কয়েন</p>
-                    </div>
-                    <button id="home-withdraw-btn" class="bg-white text-black font-semibold px-6 py-2 rounded-lg w-full sm:w-auto mt-2 sm:mt-0">উইথড্র করুন</button>
-                </div>
-                <section>
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h2 class="text-lg font-semibold">দৈনিক কাজ</h2>
-                            <p class="text-sm text-gray-400 mb-4">রিওয়ার্ড পেতে কাজগুলো সম্পূর্ণ করুন।</p>
-                        </div>
-                        <p class="text-sm text-gray-400">বাকি বিজ্ঞাপন: <span id="ads-left-count">...</span></p>
-                    </div>
-                    <div class="space-y-3">
-                        <div class="bg-orange-500 p-3 rounded-lg flex items-center justify-between text-black">
-                            <div class="flex items-center space-x-3"><span class="text-3xl">🤩</span><div><h3 class="font-bold">শর্ট বিজ্ঞাপন দেখুন</h3><p class="text-xs font-medium">রিওয়ার্ডেড ইন্টারস্টিশিয়াল</p></div></div>
-                            <button class="bg-white text-orange-500 font-bold px-4 py-2 rounded-lg text-sm btn">ক্লেইম করুন</button>
-                        </div>
-                        <div class="card-bg p-3 rounded-lg flex items-center justify-between">
-                            <div class="flex items-center space-x-3"><span class="text-3xl">😎</span><div><h3 class="font-semibold">রিওয়ার্ডের জন্য ক্লিক করুন</h3><p class="text-xs text-gray-400">রিওয়ার্ডেড পপআপ</p></div></div>
-                            <button class="bg-white text-black font-bold px-4 py-2 rounded-lg text-sm btn" onclick="claimReward('popup')">ক্লেইম করুন</button>
-                        </div>
-                        <div class="card-bg p-3 rounded-lg flex items-center justify-between">
-                            <div class="flex items-center space-x-3"><span class="text-3xl">👀</span><div><h3 class="font-semibold">ভিডিও দেখুন</h3><p class="text-xs text-gray-400">ইন-অ্যাপ ইন্টারস্টিশিয়াল</p></div></div>
-                            <button class="bg-gray-700 text-white font-bold px-4 py-2 rounded-lg text-sm btn" onclick="claimReward('inApp')">শুরু করুন</button>
-                        </div>
-                        <div class="card-bg p-3 rounded-lg flex items-center justify-between">
-                            <div class="flex items-center space-x-3"><span class="text-3xl">🎮</span><div><h3 class="font-semibold">মিনি অ্যাপ খেলুন</h3><p class="text-xs text-gray-400">বড় রিওয়ার্ড পান!</p></div></div>
-                            <button class="bg-blue-500 text-white font-bold px-4 py-2 rounded-lg text-sm btn" onclick="claimReward('miniApp')">খেলুন</button>
-                        </div>
-                    </div>
-                </section>
+            <div id="homePage" class="page">
+                <div class="welcome-banner"><h2 id="welcomeMessage">Hello, User!</h2></div>
+                <div class="card"><h3><i class="material-icons" style="vertical-align: middle;">group</i> Users Working Now</h3><p class="counter" id="workingUsersCount">0</p></div>
+                <div class="card"><h3><i class="material-icons" style="vertical-align: middle;">paid</i> Users Withdrawing Now</h3><p class="counter" id="withdrawingUsersCount">0</p></div>
+                <div class="card"><h3><i class="material-icons" style="vertical-align: middle;">show_chart</i> Total Earnings</h3><p class="counter" id="totalEarnings">$0.00</p></div>
             </div>
-
-            <!-- Wallet Page -->
-            <div id="wallet-page" class="p-4 space-y-6 sub-page">
-                <h2 class="text-xl font-bold text-center">আমার ওয়ালেট</h2>
-                <div class="card-bg p-4 rounded-lg">
-                    <h3 class="font-semibold mb-3">আয় উইথড্র করুন</h3>
-                    <p class="text-sm text-gray-400 mb-1">বর্তমান ব্যালেন্স: <span class="font-bold text-accent"><span id="wallet-coin-balance">0</span> কয়েন</span></p>
-                    <p class="text-sm text-gray-400 mb-2">সর্বনিম্ন উইথড্র: <span id="min-withdrawal-info">...</span> কয়েন</p>
-                    <p class="text-sm text-gray-400 mb-4 font-semibold" id="coin-value-info">...</p>
-                    <input id="withdraw-amount" type="number" placeholder="কত কয়েন তুলবেন লিখুন" class="w-full p-3 rounded-lg input-field mb-3">
-                    <select id="withdraw-method" class="w-full p-3 rounded-lg input-field mb-3"></select>
-                    <div id="payment-details-container"></div>
-                    <button id="withdraw-btn" class="w-full p-3 rounded-lg btn-accent mt-3">উইথড্রল রিকোয়েস্ট করুন</button>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold mb-3">উইথড্রল হিস্ট্রি</h3>
-                    <div id="withdrawal-history-list" class="space-y-3"></div>
-                </div>
-            </div>
-
-            <!-- Refer Page -->
-            <div id="refer-page" class="p-4 space-y-6 sub-page">
-                <h2 class="text-xl font-bold text-center">রেফার করে আয়</h2>
-                <div class="card-bg p-6 rounded-lg text-center">
-                    <p class="text-gray-400 mb-2 text-sm">আপনার রেফারেল কোড</p>
-                    <div class="bg-gray-800 p-3 rounded-lg flex items-center justify-center mb-4">
-                        <span id="referral-code" class="text-xl sm:text-2xl font-bold tracking-widest">লোডিং...</span>
-                        <button id="copy-code-btn" class="ml-4"><i data-lucide="copy" class="w-6 h-6 text-gray-400"></i></button>
-                    </div>
-                    <p class="text-sm text-gray-300">বন্ধুদের সাথে কোডটি শেয়ার করুন।</p>
-                </div>
-                <button id="share-btn" class="w-full p-3 rounded-lg btn-accent">আপনার কোড শেয়ার করুন</button>
-                <div class="card-bg p-4 rounded-lg mt-6">
-                    <h3 class="font-semibold mb-3 text-center">কোনো রেফারেল কোড আছে?</h3>
-                    <input id="enter-referral-code" type="text" placeholder="এখানে কোড লিখুন" class="w-full p-3 rounded-lg input-field mb-3">
-                    <button id="apply-referral-btn" class="w-full p-3 rounded-lg btn-outline-accent">কোড অ্যাপ্লাই করুন</button>
-                </div>
-            </div>
-
+            <!-- Work Page -->
+            <div id="workPage" class="page"><h2>Task Board</h2><div class="card">Task content will go here...</div></div>
+            <!-- Withdraw Page -->
+            <div id="withdrawPage" class="page"><h2>Withdraw Funds</h2><div class="card">Withdrawal options will go here...</div></div>
             <!-- Profile Page -->
-            <div id="profile-page" class="p-4 space-y-6 sub-page">
-                <h2 class="text-xl font-bold text-center mb-4">প্রোফাইল</h2>
-                <div class="flex flex-col items-center">
-                    <img src="https://placehold.co/100x100/1e1e1e/ff8c00?text=U" class="rounded-full mb-2">
-                    <h2 id="profile-name" class="text-xl font-bold">ইউজার নেম</h2>
-                    <p id="profile-email" class="text-gray-400 text-sm">user@email.com</p>
-                    <p id="profile-userid" class="text-gray-500 text-xs sm:text-sm mt-2 font-mono break-all">UserID: ...</p>
+            <div id="profilePage" class="page">
+                <div class="card profile-header">
+                    <div class="profile-pic-container" onclick="document.getElementById('profilePicUpload').click()">
+                        <input type="file" id="profilePicUpload" accept="image/*" onchange="previewProfilePic(event)"><img id="profileImage" src="https://via.placeholder.com/100" alt="Profile Picture">
+                        <div class="camera-icon"><i class="material-icons" style="font-size: 18px;">photo_camera</i></div>
+                    </div>
+                    <h2 id="profileName">John Doe</h2><p id="profileEmail">john.doe@example.com</p>
                 </div>
-                <button id="logout-btn" class="w-full mt-6 p-3 rounded-lg bg-red-600 text-white font-bold">লগআউট</button>
+                <div class="card">
+                    <div class="setting-item"><span>Referral Code: <b id="referralCode">REF12345</b></span><button onclick="copyReferralCode()">Copy</button></div>
+                    <div class="setting-item"><span>Dark Mode</span><label class="toggle-switch"><input type="checkbox" id="darkModeToggle"><span class="toggle-slider"></span></label></div>
+                </div>
+                <div class="card">
+                    <div class="setting-item" onclick="alert('Viewing Task History')"><span>Task History</span><i class="material-icons">chevron_right</i></div>
+                    <div class="setting-item" onclick="alert('Viewing Withdrawal History')"><span>Withdrawal History</span><i class="material-icons">chevron_right</i></div>
+                    <div class="setting-item" onclick="openSupport()"><span>Support / Help</span><i class="material-icons">chevron_right</i></div>
+                </div>
+                <button class="logout-button" onclick="handleLogout()">Logout</button>
             </div>
-            
-            <!-- Notifications Page -->
-            <div id="notifications-page" class="p-4 space-y-4 sub-page">
-                <h2 class="text-xl font-bold text-center">নোটিফিকেশন</h2>
-                <div id="notifications-list" class="space-y-3"></div>
-            </div>
-        </main>
+        </div>
 
-        <nav class="bottom-nav fixed bottom-0 left-0 right-0 grid grid-cols-4 items-center text-center py-2 card-bg">
-            <a href="#" class="nav-link" data-page="home-page"><i data-lucide="home" class="mx-auto w-6 h-6"></i><span class="text-xs">হোম</span></a>
-            <a href="#" class="nav-link" data-page="wallet-page"><i data-lucide="wallet" class="mx-auto w-6 h-6"></i><span class="text-xs">ওয়ালেট</span></a>
-            <a href="#" class="nav-link" data-page="refer-page"><i data-lucide="users" class="mx-auto w-6 h-6"></i><span class="text-xs">রেফার</span></a>
-            <a href="#" class="nav-link" data-page="profile-page"><i data-lucide="user" class="mx-auto w-6 h-6"></i><span class="text-xs">প্রোফাইল</span></a>
-        </nav>
+        <!-- Bottom Navigation -->
+        <div class="nav-bottom" style="display: none;">
+            <button id="navHome" onclick="showPage('home')"><i class="material-icons">home</i>Home</button>
+            <button id="navWork" onclick="showPage('work')"><i class="material-icons">work</i>Work</button>
+            <button id="navWithdraw" onclick="showPage('withdraw')"><i class="material-icons">account_balance_wallet</i>Withdraw</button>
+        </div>
+
+        <!-- Notification Panel -->
+        <div id="notificationOverlay"></div>
+        <div id="notificationPanel">
+            <div class="notification-header"><h3>Notifications</h3><button id="closeNotificationBtn" style="background:none;border:none;cursor:pointer;font-size:24px;"><i class="material-icons">close</i></button></div>
+            <ul class="notification-list">
+                <li><p><strong>Congratulations!</strong> Your withdrawal of $25.00 has been approved.</p><div class="time">5 minutes ago</div></li>
+                <li><p>A new task "Data Entry Project" is now available.</p><div class="time">1 hour ago</div></li>
+                <li><p>Welcome to Work & Earn! Complete your profile to get started.</p><div class="time">1 day ago</div></li>
+            </ul>
+        </div>
     </div>
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, serverTimestamp, query, where, onSnapshot, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-        // Firebase configuration and authentication token are provided by the environment.
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = {
-            apiKey: "AIzaSyCtFNGqxHYRIlGFggwiyIUvs2EGv_CtWXQ",
-            authDomain: "come-hobei.firebaseapp.com",
-            databaseURL: "https://come-hobei-default-rtdb.firebaseio.com",
-            projectId: "come-hobei",
-            storageBucket: "come-hobei.firebasestorage.app",
-            messagingSenderId: "635487421984",
-            appId: "1:635487421984:web:288b97a2efea9068b05e45"
-        };
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        let app;
-        let auth;
-        let db;
-        let currentUser;
-        let userData;
-        let appConfig = {};
-        let isAuthReady = false;
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- TELEGRAM APP INITIALIZATION ---
+            const Telegram = window.Telegram.WebApp;
+            Telegram.ready();
+            Telegram.expand();
 
-        const loader = document.getElementById('loader');
-        const authSection = document.getElementById('auth-section');
-        const appContainer = document.getElementById('app-container');
+            // --- UI ELEMENT REFERENCES ---
+            const header = document.querySelector('.header');
+            const navBottom = document.querySelector('.nav-bottom');
+            const logo = document.querySelector('.logo');
+            // Search
+            const searchButton = document.getElementById('searchButton');
+            const searchBar = document.getElementById('searchBar');
+            const searchInput = document.getElementById('searchInput');
+            // Notifications
+            const notificationButton = document.getElementById('notificationButton');
+            const notificationPanel = document.getElementById('notificationPanel');
+            const notificationOverlay = document.getElementById('notificationOverlay');
+            const closeNotificationBtn = document.getElementById('closeNotificationBtn');
+            const notificationBadge = document.getElementById('notificationBadge');
+            // Dark Mode
+            const darkModeToggle = document.getElementById('darkModeToggle');
 
-        const coinBalanceEl = document.getElementById('coin-balance');
-        const walletCoinBalanceEl = document.getElementById('wallet-coin-balance');
-        const profileNameEl = document.getElementById('profile-name');
-        const profileEmailEl = document.getElementById('profile-email');
-        const profileUserIdEl = document.getElementById('profile-userid');
-        const referralCodeEl = document.getElementById('referral-code');
-        const minWithdrawalInfoEl = document.getElementById('min-withdrawal-info');
-        const coinValueInfoEl = document.getElementById('coin-value-info');
-        const withdrawMethodSelect = document.getElementById('withdraw-method');
-        const notificationDot = document.getElementById('notification-dot');
-        const adsLeftCountEl = document.getElementById('ads-left-count');
-        const paymentDetailsContainer = document.getElementById('payment-details-container');
-        const alertModal = document.getElementById('custom-alert');
-        const alertMessageEl = document.getElementById('alert-message');
-        const alertOkBtn = document.getElementById('alert-ok-btn');
+            // --- STATE MANAGEMENT (DEMO) ---
+            let isAuthenticated = false; // WARNING: Use a secure backend for real auth.
+            let currentUser = { fullName: "John Doe", email: "john.doe@example.com", profilePic: "https://via.placeholder.com/100", referralCode: "REF12345" };
+            let isSearchActive = false;
 
-        function showAlert(message) {
-            alertMessageEl.textContent = message;
-            alertModal.classList.remove('hidden');
-        }
+            // --- CORE FUNCTIONS ---
+            window.showPage = (pageId, isProfile = false) => {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(pageId + 'Page').classList.add('active');
 
-        alertOkBtn.addEventListener('click', () => {
-            alertModal.classList.add('hidden');
-        });
-
-        async function initFirebase() {
-            try {
-                // Firebase অ্যাপ ইনিশিয়ালাইজ করা হচ্ছে
-                app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                
-                // অথেন্টিকেশন স্ট্যাটাস পরিবর্তন হলে UI আপডেট হবে
-                onAuthStateChanged(auth, async (user) => {
-                    loader.classList.add('hidden'); // লোডার লুকানো হলো
-                    if (user) {
-                        currentUser = user;
-                        isAuthReady = true;
-                        // অথেন্টিকেশন সফল হলে মূল অ্যাপটি দেখানো হচ্ছে
-                        appContainer.classList.remove('hidden');
-                        authSection.classList.add('hidden');
-                        setupRealtimeListeners();
-                        navigateTo('home-page');
-                    } else {
-                        isAuthReady = true;
-                        currentUser = null;
-                        userData = null;
-                        // অথেন্টিকেশন না হলে লগইন/সাইনআপ স্ক্রিন দেখানো হচ্ছে
-                        authSection.classList.remove('hidden');
-                        appContainer.classList.add('hidden');
-                        
-                        // নতুন ব্যবহারকারীর জন্য স্বতঃপ্রণোদিত লগইন ব্যবস্থা
-                        if (initialAuthToken) {
-                           await signInWithCustomToken(auth, initialAuthToken);
-                        } else {
-                           await signInAnonymously(auth);
-                        }
-                    }
-                });
-
-            } catch (error) {
-                console.error("Firebase initialization failed:", error);
-                showAlert("অ্যাপ লোড করতে সমস্যা হচ্ছে।");
-                loader.classList.add('hidden');
-                authSection.classList.remove('hidden'); // কোনো সমস্যা হলে অথ স্ক্রিন দেখাও
-            }
-        }
-
-        function setupRealtimeListeners() {
-            if (!currentUser || !isAuthReady) return;
-
-            const userDocRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}`, 'profile');
-            onSnapshot(userDocRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    userData = docSnap.data();
-                    if (userData.isBlocked) {
-                        showAlert("আপনার অ্যাকাউন্ট ব্লক করা হয়েছে।");
-                        signOut(auth);
-                        return;
-                    }
-                    updateUI();
-                } else {
-                    initializeNewUser();
+                document.querySelectorAll('.nav-bottom button').forEach(b => b.classList.remove('active'));
+                if (!isProfile) {
+                   const activeNavBtn = document.getElementById('nav' + pageId.charAt(0).toUpperCase() + pageId.slice(1));
+                   if(activeNavBtn) activeNavBtn.classList.add('active');
                 }
-            }, (error) => {
-                console.error("Error listening to user data:", error);
-                showAlert("ব্যবহারকারীর ডেটা লোড করতে সমস্যা হয়েছে।");
-            });
+            };
 
-            const configDocRef = doc(db, `artifacts/${appId}/public/data`, 'config');
-            onSnapshot(configDocRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    appConfig = docSnap.data();
-                    updateUI();
-                } else {
-                    appConfig = { minWithdrawal: 5000, paymentMethods: ["UPI", "Paytm"], dailyAdLimit: 10, coinValueCoins: 1000, coinValueInr: 10 };
-                    showAlert("অ্যাপ কনফিগারেশন লোড করা যায়নি। ডিফল্ট ব্যবহার করা হচ্ছে।");
+            const initAppAfterAuth = () => {
+                if (isAuthenticated) {
+                    header.style.display = 'flex';
+                    navBottom.style.display = 'flex';
+                    updateProfileUI();
+                    showPage('home');
+                    startRealtimeCounters();
                 }
-            }, (error) => {
-                console.error("Error listening to app config:", error);
-            });
-
-            onSnapshot(query(collection(db, `artifacts/${appId}/public/data`, "notifications"), limit(10)), (querySnapshot) => {
-                const notifications = querySnapshot.docs.map(doc => doc.data());
-                updateNotificationDot(notifications);
-            });
-        }
-        
-        async function initializeNewUser() {
-            try {
-                const ownReferralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-                const defaultUserData = {
-                    uid: currentUser.uid,
-                    name: currentUser.email ? currentUser.email.split('@')[0] : 'Guest',
-                    email: currentUser.email,
-                    balance: 50,
-                    referralCode: ownReferralCode,
-                    referredBy: null,
-                    lastNotificationCheck: serverTimestamp(),
-                    createdAt: serverTimestamp(),
-                    dailyAdCount: 0,
-                    lastAdWatchDate: new Date().toISOString().split('T')[0],
-                    isBlocked: false
-                };
-                await setDoc(doc(db, `artifacts/${appId}/users/${currentUser.uid}`, 'profile'), defaultUserData);
-                userData = defaultUserData;
-                updateUI();
-            } catch (error) {
-                console.error("Error initializing new user:", error);
-                showAlert("নতুন ব্যবহারকারীর ডেটা তৈরি করতে সমস্যা হয়েছে।");
-            }
-        }
-
-        function updateUI() {
-            if (!userData || !appConfig) return;
-            const balance = userData.balance || 0;
-            coinBalanceEl.textContent = balance;
-            walletCoinBalanceEl.textContent = balance;
-            profileNameEl.textContent = userData.name || 'নাম নেই';
-            profileEmailEl.textContent = userData.email || 'ইমেইল নেই';
-            profileUserIdEl.textContent = `UserID: ${currentUser.uid}`;
-            referralCodeEl.textContent = userData.referralCode || '...';
-            minWithdrawalInfoEl.textContent = `${appConfig.minWithdrawal || 5000} কয়েন`;
-            coinValueInfoEl.textContent = `${appConfig.coinValueCoins || 1000} কয়েন = ₹${appConfig.coinValueInr || 10}`;
-            withdrawMethodSelect.innerHTML = '';
-            (appConfig.paymentMethods || []).forEach(method => {
-                const option = document.createElement('option');
-                option.value = method;
-                option.textContent = method;
-                withdrawMethodSelect.appendChild(option);
-            });
-            updateDynamicPaymentFields();
-            updateAdsLeftCount();
-        }
-
-        function updateAdsLeftCount() {
-            const today = new Date().toISOString().split('T')[0];
-            if (userData.lastAdWatchDate !== today) {
-                userData.dailyAdCount = 0;
-            }
-            const adsLeft = Math.max(0, (appConfig.dailyAdLimit || 10) - userData.dailyAdCount);
-            adsLeftCountEl.textContent = adsLeft;
-        }
-
-        function updateDynamicPaymentFields() {
-            const selectedMethod = withdrawMethodSelect.value.toLowerCase();
-            let placeholder = "নম্বর লিখুন";
-            if (selectedMethod.includes('bkash')) placeholder = "আপনার Bkash নম্বর লিখুন";
-            if (selectedMethod.includes('nagad')) placeholder = "আপনার Nagad নম্বর লিখুন";
-            paymentDetailsContainer.innerHTML = `<input id="payment-detail-input" type="text" placeholder="${placeholder}" class="w-full p-3 rounded-lg input-field">`;
-        }
-
-        function updateNotificationDot(notifications) {
-            const lastCheckTimestamp = userData.lastNotificationCheck?.seconds || 0;
-            const hasNew = notifications.some(n => n.createdAt?.seconds > lastCheckTimestamp);
-            notificationDot.style.display = hasNew ? 'block' : 'none';
-        }
-
-        // এই ফাংশনগুলি আর প্রয়োজন নেই, কারণ আমরা CSS দিয়ে শুরুতেই ঠিক করে নিয়েছি।
-        // function showMainPage(pageId) {
-        //     document.querySelectorAll('.main-page').forEach(p => p.classList.remove('active'));
-        //     document.getElementById(pageId).classList.add('active');
-        // }
-
-        function navigateTo(pageId) {
-            document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active', 'text-accent');
-                if (link.dataset.page === pageId) link.classList.add('active', 'text-accent');
-            });
-            lucide.createIcons();
-        }
-        window.navigateTo = navigateTo;
-
-        function setupEventListeners() {
-            document.getElementById('show-signup').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('login-view').classList.add('hidden'); document.getElementById('signup-view').classList.remove('hidden'); });
-            document.getElementById('show-login').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('signup-view').classList.add('hidden'); document.getElementById('login-view').classList.remove('hidden'); });
-            document.getElementById('signup-btn').addEventListener('click', handleSignup);
-            document.getElementById('login-btn').addEventListener('click', handleLogin);
-            document.getElementById('logout-btn').addEventListener('click', handleLogout);
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const pageId = link.dataset.page;
-                    if (pageId === 'wallet-page') loadWithdrawalHistory();
-                    if (pageId === 'notifications-page') loadNotifications();
-                    navigateTo(pageId);
-                });
-            });
-            document.getElementById('notification-bell').addEventListener('click', () => { navigateTo('notifications-page'); loadNotifications(); });
-            document.getElementById('copy-code-btn').addEventListener('click', copyReferralCode);
-            document.getElementById('share-btn').addEventListener('click', shareReferralCode);
-            document.getElementById('withdraw-btn').addEventListener('click', handleWithdrawal);
-            document.getElementById('home-withdraw-btn').addEventListener('click', () => navigateTo('wallet-page'));
-            document.getElementById('apply-referral-btn').addEventListener('click', handleApplyReferralCode);
-            withdrawMethodSelect.addEventListener('change', updateDynamicPaymentFields);
-        }
-
-        async function handleSignup() {
-            const name = document.getElementById('signup-name').value;
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            if (!name || !email || !password) return showAlert("দয়া করে সব ঘর পূরণ করুন।");
-            loader.classList.remove('hidden');
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}`, 'profile');
-                await setDoc(userDocRef, {
-                    uid: user.uid,
-                    name: name,
-                    email: email,
-                    balance: 50,
-                    referralCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
-                    referredBy: null,
-                    lastNotificationCheck: serverTimestamp(),
-                    createdAt: serverTimestamp(),
-                    dailyAdCount: 0,
-                    lastAdWatchDate: new Date().toISOString().split('T')[0],
-                    isBlocked: false
-                });
-                await initializeNewUser(); // To ensure data is in sync
-                showAlert("সাইন আপ সফল হয়েছে! লগইন করুন।");
-                document.getElementById('signup-view').classList.add('hidden');
-                document.getElementById('login-view').classList.remove('hidden');
-            } catch (error) {
-                showAlert(error.message);
-            } finally {
-                loader.classList.add('hidden');
-            }
-        }
-
-        async function handleLogin() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            if (!email || !password) return showAlert("দয়া করে ইমেইল এবং পাসওয়ার্ড লিখুন।");
-            loader.classList.remove('hidden');
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-            } catch (error) {
-                showAlert(error.message);
-            } finally {
-                loader.classList.add('hidden');
-            }
-        }
-
-        async function handleLogout() { 
-            try {
-                await signOut(auth);
-            } catch(error) {
-                console.error("Logout error:", error);
-                showAlert("লগআউট করতে সমস্যা হয়েছে।");
-            }
-        }
-        
-        async function loadNotifications() {
-            const listEl = document.getElementById('notifications-list');
-            listEl.innerHTML = '<p class="text-gray-400">লোড হচ্ছে...</p>';
-            notificationDot.style.display = 'none';
-            try {
-                const q = query(collection(db, `artifacts/${appId}/public/data`, "notifications"), limit(20)); // Limit for performance
-                const querySnapshot = await getDocs(q);
-                if (querySnapshot.empty) {
-                    listEl.innerHTML = '<p class="text-gray-400 text-center">কোনো নোটিফিকেশন নেই।</p>';
-                    return;
-                }
-                listEl.innerHTML = '';
-                querySnapshot.forEach(doc => {
-                    const msg = doc.data();
-                    const date = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
-                    listEl.innerHTML += `<div class="card-bg p-4 rounded-lg"><div class="flex justify-between items-center mb-1"><h3 class="font-bold">${msg.title}</h3><p class="text-xs text-gray-400">${date}</p></div><p class="text-sm text-gray-300">${msg.message}</p></div>`;
-                });
-                await updateDoc(doc(db, `artifacts/${appId}/users/${currentUser.uid}`, 'profile'), { lastNotificationCheck: serverTimestamp() });
-            } catch (error) {
-                console.error("Error loading notifications:", error);
-                listEl.innerHTML = '<p class="text-red-400">নোটিফিকেশন লোড করতে সমস্যা হয়েছে।</p>';
-            }
-        }
-
-        async function loadWithdrawalHistory() {
-            const historyList = document.getElementById('withdrawal-history-list');
-            historyList.innerHTML = '<p class="text-gray-400">হিস্ট্রি লোড হচ্ছে...</p>';
-            try {
-                const q = query(collection(db, `artifacts/${appId}/users/${currentUser.uid}`, "withdrawals"));
-                const querySnapshot = await getDocs(q);
-                if (querySnapshot.empty) {
-                    historyList.innerHTML = '<p class="text-gray-400">এখনও কোনো উইথড্র করেননি।</p>';
-                    return;
-                }
-                const withdrawals = [];
-                querySnapshot.forEach(doc => withdrawals.push(doc.data()));
-                withdrawals.sort((a, b) => (b.requestedAt?.seconds || 0) - (a.requestedAt?.seconds || 0));
-                historyList.innerHTML = '';
-                withdrawals.forEach(request => {
-                    const status = request.status;
-                    let statusColor = 'text-yellow-400';
-                    if (status === 'approved') statusColor = 'text-green-400';
-                    else if (status === 'rejected') statusColor = 'text-red-400';
-                    const date = request.requestedAt ? new Date(request.requestedAt.seconds * 1000).toLocaleDateString() : 'N/A';
-                    historyList.innerHTML += `<div class="card-bg p-3 rounded-lg flex items-center justify-between"><div><p class="font-semibold">${request.amount} কয়েন - ${request.method}</p><p class="text-xs text-gray-400">${date}</p></div><p class="font-bold ${statusColor} capitalize">${status}</p></div>`;
-                });
-            } catch (error) {
-                console.error("Error fetching withdrawal history: ", error);
-                historyList.innerHTML = '<p class="text-red-400">হিস্ট্রি লোড করতে সমস্যা হয়েছে।</p>';
-            }
-        }
-        
-        async function handleApplyReferralCode() {
-            if (userData.referredBy) return showAlert("আপনি আগে থেকেই একটি রেফারেল কোড ব্যবহার করেছেন।");
-            const codeInput = document.getElementById('enter-referral-code');
-            const code = codeInput.value.trim().toUpperCase();
-            if (!code) return showAlert("দয়া করে একটি কোড লিখুন।");
-            if (code === userData.referralCode) return showAlert("নিজের রেফারেল কোড ব্যবহার করা যাবে না।");
-            loader.classList.remove('hidden');
-            await applyReferralBonus(code, true);
-            codeInput.value = '';
-            loader.classList.add('hidden');
-        }
-
-        async function applyReferralBonus(referrerCode, isManualApply = false) {
-            const usersRef = collection(db, `artifacts/${appId}/users`);
-            const q = query(usersRef, where("profile.referralCode", "==", referrerCode));
-            try {
-                const querySnapshot = await getDocs(q);
-                if (!querySnapshot.empty) {
-                    const referrerDoc = querySnapshot.docs[0];
-                    const referrerProfileDocRef = doc(db, `artifacts/${appId}/users/${referrerDoc.id}`, 'profile');
-                    const referrerData = referrerDoc.data().profile;
-                    await updateDoc(referrerProfileDocRef, { balance: (referrerData.balance || 0) + 100 });
-                    const newUserProfileDocRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}`, 'profile');
-                    await updateDoc(newUserProfileDocRef, { balance: (userData.balance || 0) + 100, referredBy: referrerCode });
-                    userData.balance += 100; userData.referredBy = referrerCode;
-                    updateUI();
-                    if(isManualApply) showAlert("কোড সফলভাবে প্রয়োগ হয়েছে! আপনি ১০০ কয়েন পেয়েছেন।");
-                } else {
-                    if(isManualApply) showAlert("ভুল রেফারেল কোড।");
-                }
-            } catch(error) {
-                console.error("Error applying referral bonus: ", error);
-                if(isManualApply) showAlert("কোড প্রয়োগ করতে সমস্যা হয়েছে।");
-            }
-        }
-
-        async function updateBalance(amount) {
-            if (!currentUser || !userData) return;
-            try {
-                const newBalance = Math.max(0, (userData.balance || 0) + amount);
-                const userRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}`, 'profile');
-                await updateDoc(userRef, { balance: newBalance });
-                userData.balance = newBalance;
-                updateUI();
-            } catch(error) {
-                console.error("Error updating balance:", error);
-                showAlert("ব্যালেন্স আপডেট করতে সমস্যা হয়েছে।");
-            }
-        }
-
-        async function handleWithdrawal() {
-            const amount = parseInt(document.getElementById('withdraw-amount').value);
-            const method = document.getElementById('withdraw-method').value;
-            const paymentDetailInput = document.getElementById('payment-detail-input');
-            const paymentDetail = paymentDetailInput ? paymentDetailInput.value.trim() : '';
-            const minWithdrawal = appConfig.minWithdrawal || 5000;
-
-            if (!amount || amount <= 0) return showAlert("দয়া করে সঠিক এমাউন্ট দিন।");
-            if (amount < minWithdrawal) return showAlert(`সর্বনিম্ন উইথড্র ${minWithdrawal} কয়েন।`);
-            if (amount > userData.balance) return showAlert("পর্যাপ্ত ব্যালেন্স নেই।");
-            if (!paymentDetail) return showAlert("দয়া করে পেমেন্ট ডিটেইল দিন (UPI আইডি বা Paytm নম্বর)।");
-
-            try {
-                await updateBalance(-amount);
-                await addDoc(collection(db, `artifacts/${appId}/users/${currentUser.uid}`, "withdrawals"), {
-                    userId: currentUser.uid, userName: userData.name, userEmail: userData.email,
-                    amount: amount, method: method, paymentDetail: paymentDetail, status: "pending", requestedAt: serverTimestamp()
-                });
-                showAlert("উইথড্রল রিকোয়েস্ট সফলভাবে সাবমিট হয়েছে!");
-                document.getElementById('withdraw-amount').value = '';
-                paymentDetailInput.value = '';
-            } catch (error) {
-                showAlert("রিকোয়েস্ট সাবমিট করতে সমস্যা হয়েছে: " + error.message);
-                await updateBalance(amount);
-            }
-        }
-
-        function copyReferralCode() {
-            const code = referralCodeEl.textContent;
-            if (code && code !== '...') {
-                try {
-                    const tempInput = document.createElement('textarea');
-                    tempInput.value = code;
-                    document.body.appendChild(tempInput);
-                    tempInput.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(tempInput);
-                    showAlert("রেফারেল কোড কপি করা হয়েছে!");
-                } catch (err) {
-                    showAlert("কপি করতে সমস্যা হয়েছে।");
-                }
-            }
-        }
-
-        function shareReferralCode() {
-            const code = referralCodeEl.textContent;
-            if (navigator.share && code && code !== '...') {
-                navigator.share({
-                    title: 'আমার ইনকাম হবেই রেফারেল কোড',
-                    text: `ইনকাম হবেই অ্যাপে যোগ দিতে আমার রেফারেল কোড ব্যবহার করুন: ${code}`,
-                }).catch(error => console.log('Error sharing', error));
-            } else {
-                showAlert("আপনার ডিভাইসে শেয়ার অপশন নেই।");
-            }
-        }
-
-        function claimReward(type) {
-            if (!userData || !appConfig) return showAlert("অ্যাপ কনফিগারেশন লোড হচ্ছে, দয়া করে অপেক্ষা করুন।");
-
-            const today = new Date().toISOString().split('T')[0];
-            if (userData.lastAdWatchDate !== today) {
-                userData.dailyAdCount = 0;
-            }
-
-            const adsLeft = Math.max(0, (appConfig.dailyAdLimit || 10) - userData.dailyAdCount);
-            if (adsLeft <= 0) {
-                return showAlert("আজকের জন্য আপনার সমস্ত কাজ শেষ হয়েছে। আগামীকাল আবার চেষ্টা করুন।");
-            }
-
-            const reward = 50;
-            updateBalance(reward);
-            updateDoc(doc(db, `artifacts/${appId}/users/${currentUser.uid}`, 'profile'), {
-                dailyAdCount: (userData.dailyAdCount || 0) + 1,
-                lastAdWatchDate: today
-            }).catch(error => console.error("Error updating ad count:", error));
+            };
             
-            showAlert(`আপনি ${reward} কয়েন পেয়েছেন!`);
-        }
-        window.claimReward = claimReward;
-        
-        // Initial setup
-        window.onload = () => {
-            loader.classList.remove('hidden'); // লোডারটি দেখাও
-            initFirebase();
-            setupEventListeners();
-        };
+            const updateProfileUI = () => {
+                document.getElementById('welcomeMessage').innerText = `Hello, ${currentUser.fullName}!`;
+                document.getElementById('profileName').innerText = currentUser.fullName;
+                document.getElementById('profileEmail').innerText = currentUser.email;
+                document.getElementById('profileImage').src = currentUser.profilePic;
+                document.getElementById('referralCode').innerText = currentUser.referralCode;
+            };
 
-        // Create lucide icons after a page change
-        document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
+            // --- AUTHENTICATION ---
+            window.showLogin = () => {
+                document.getElementById('authTitle').innerText = 'Welcome Back!';
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('signupForm').style.display = 'none';
+            };
+            window.showSignup = () => {
+                document.getElementById('authTitle').innerText = 'Create Your Account';
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('signupForm').style.display = 'block';
+            };
+            window.handleLogin = () => {
+                if (document.getElementById('loginEmail').value) {
+                    alert('Login successful! (Demo)');
+                    isAuthenticated = true;
+                    initAppAfterAuth();
+                } else { alert('Please enter your email.'); }
+            };
+            window.handleSignup = () => {
+                alert('Signup successful! (Demo)');
+                isAuthenticated = true;
+                initAppAfterAuth();
+            };
+            window.handleLogout = () => {
+                isAuthenticated = false;
+                header.style.display = 'none';
+                navBottom.style.display = 'none';
+                showPage('auth');
+                alert('You have been logged out.');
+            };
+
+            // --- HEADER BUTTONS (SEARCH & NOTIFICATION) ---
+            searchButton.addEventListener('click', () => {
+                isSearchActive = !isSearchActive;
+                logo.style.display = isSearchActive ? 'none' : 'block';
+                searchBar.style.display = isSearchActive ? 'flex' : 'none';
+                searchButton.innerHTML = isSearchActive ? '<i class="material-icons">close</i>' : '<i class="material-icons">search</i>';
+                if(isSearchActive) searchInput.focus();
+            });
+            searchInput.addEventListener('keyup', e => { if (e.key === 'Enter') alert(`Searching for: "${searchInput.value}"`); });
+            
+            const showNotificationPanel = () => {
+                notificationPanel.classList.add('show');
+                notificationOverlay.style.display = 'block';
+                notificationBadge.style.display = 'none';
+            };
+            const hideNotificationPanel = () => {
+                notificationPanel.classList.remove('show');
+                notificationOverlay.style.display = 'none';
+            };
+            notificationButton.addEventListener('click', showNotificationPanel);
+            closeNotificationBtn.addEventListener('click', hideNotificationPanel);
+            notificationOverlay.addEventListener('click', hideNotificationPanel);
+            document.getElementById('profileButton').addEventListener('click', () => showPage('profile', true));
+
+            // --- HELPER & OTHER FUNCTIONS ---
+            window.togglePasswordVisibility = id => {
+                const input = document.getElementById(id); const icon = input.nextElementSibling.querySelector('i');
+                if (input.type === "password") { input.type = "text"; icon.innerText = "visibility_off"; } 
+                else { input.type = "password"; icon.innerText = "visibility"; }
+            };
+            window.previewProfilePic = event => {
+                const reader = new FileReader();
+                reader.onload = () => { document.getElementById('profileImage').src = reader.result; };
+                reader.readAsDataURL(event.target.files[0]);
+                alert('Profile picture preview updated. A backend is needed to save the image.');
+            };
+            window.copyReferralCode = () => navigator.clipboard.writeText(currentUser.referralCode).then(() => alert('Referral Code copied!'));
+            window.openSupport = () => Telegram.openTelegramLink('https://t.me/telegram');
+            
+            // Real-time counter simulation
+            const startRealtimeCounters = () => {
+                setInterval(() => {
+                    let working = parseInt(document.getElementById('workingUsersCount').innerText.replace(',', '')) || 1245;
+                    document.getElementById('workingUsersCount').innerText = (working + Math.floor(Math.random() * 5) - 2).toLocaleString();
+                    let withdrawing = parseInt(document.getElementById('withdrawingUsersCount').innerText) || 24;
+                    document.getElementById('withdrawingUsersCount').innerText = Math.max(0, withdrawing + (Math.random() > 0.8 ? (Math.random() > 0.5 ? 1 : -1) : 0));
+                }, 2000);
+            };
+
+            // --- DARK MODE ---
+            const applyTheme = isDark => {
+                document.body.classList.toggle('dark-mode', isDark);
+                const themeParams = isDark ? { bg_color: '#1e2a36', header_bg_color: '#2c3e50' } : { bg_color: '#f0f2f5', header_bg_color: '#0088cc' };
+                Telegram.setThemeParams(themeParams);
+            };
+            darkModeToggle.addEventListener('change', () => {
+                const isChecked = darkModeToggle.checked;
+                localStorage.setItem('darkMode', isChecked);
+                applyTheme(isChecked);
+            });
+
+            // --- INITIAL LOAD ---
+            const savedTheme = localStorage.getItem('darkMode') === 'true';
+            darkModeToggle.checked = savedTheme;
+            applyTheme(savedTheme);
+            showPage('auth');
         });
     </script>
 </body>
