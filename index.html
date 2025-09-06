@@ -20,10 +20,10 @@
         :root {
             --primary-color: #0088cc;
             --primary-light: #00b3ee;
-            --youtube-red: #FF0000;
             --background-light: #f4f6f9;
             --card-light: #ffffff;
             --text-light: #333;
+            --text-light-secondary: #7f8c8d;
             --shadow: 0 4px 15px rgba(0,0,0,0.06);
             --border-radius: 12px;
         }
@@ -55,101 +55,141 @@
             position: fixed; top: 0; width: 100%; max-width: 500px;
             box-sizing: border-box; z-index: 100; transition: background-color 0.3s;
         }
-        .header .logo { font-weight: bold; font-size: 1.2em; transition: opacity 0.3s; }
+        .header .logo { font-weight: bold; font-size: 1.2em; }
         .header .icons button { background: none; border: none; color: white; cursor: pointer; padding: 5px; border-radius: 50%; }
-        .header .icons button:active { background-color: rgba(255,255,255,0.2); }
         
-        #searchBar { display: none; width: 100%; align-items: center; }
-        #searchInput { width: 100%; border: none; padding: 8px 12px; border-radius: 18px; background-color: rgba(255, 255, 255, 0.9); color: #333; }
-        
-        #notificationPanel { 
-            position: fixed; top: 0; right: -100%; width: 100%; max-width: 300px; height: 100%; 
-            background-color: var(--card-light); box-shadow: -5px 0 15px rgba(0,0,0,0.1); 
-            z-index: 1001; transition: right 0.3s ease-in-out, background-color 0.3s; 
-            display: flex; flex-direction: column; 
-        }
-        #notificationPanel.show { right: 0; }
-        .notification-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
-        .notification-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
-        .notification-list li { padding: 15px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-        .notification-list li:hover { background-color: rgba(0,0,0,0.03); }
-        #notificationOverlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.4); z-index: 1000; 
-            opacity: 0; transition: opacity 0.3s; pointer-events: none; 
-        }
-        #notificationOverlay.show { opacity: 1; pointer-events: auto; }
-
         .nav-bottom { 
             display: flex; justify-content: space-around; padding: 5px 0; 
             background-color: var(--card-light); border-top: 1px solid #eee; 
             position: fixed; bottom: 0; width: 100%; max-width: 500px; 
             box-sizing: border-box; z-index: 100;
-            transition: background-color 0.3s, border-color 0.3s;
         }
         .nav-bottom button { 
             background: none; border: none; color: #555; font-size: 12px; 
             display: flex; flex-direction: column; align-items: center; 
             cursor: pointer; padding: 5px 10px; flex-grow: 1; 
-            border-radius: var(--border-radius);
-            transition: background-color 0.2s, color 0.2s;
         }
-        .nav-bottom button:active { background-color: rgba(0,0,0,0.05); }
         .nav-bottom button.active { color: var(--primary-color); }
         .nav-bottom button .material-icons { font-size: 24px; margin-bottom: 2px; }
 
         .page { 
-            display: none; padding: 70px 15px 15px; 
+            display: none; padding: 15px; 
             animation: fadeIn 0.5s ease-in-out;
         }
+        .page.active { display: block; }
+        .page#homePage, .page#workPage, .page#withdrawPage, .page#profilePage, .page#historyPage { padding-top: 70px; }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .page.active { display: block; }
         
         .card { 
             background-color: var(--card-light); border-radius: var(--border-radius); 
             padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow);
-            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        
+        /* New 3D Auth Page Styles */
+        #authPage {
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .auth-container {
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; min-height: 100vh;
+            perspective: 1200px;
+        }
+        #authCard {
+            width: 100%; max-width: 380px; box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transform: rotateY(-5deg);
+            transition: transform 0.5s ease-in-out;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+        #authCard:hover {
+            transform: rotateY(0deg);
+        }
+        .auth-flipper {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        .auth-flipper.flipped {
+            transform: rotateY(180deg);
+        }
+        #loginForm, #signupForm {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            width: 100%;
+        }
+        #signupForm {
+            transform: rotateY(180deg);
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
-        .youtube-card {
-            display: flex; align-items: center; justify-content: space-between;
-            background: linear-gradient(45deg, #ff0000, #ff5c5c);
-            color: white; cursor: pointer;
+        .auth-header { text-align: center; margin-bottom: 25px; }
+        .auth-header h2 { color: var(--text-light); margin: 0; }
+
+        .input-group { position: relative; margin-bottom: 20px; }
+        .input-group input {
+            width: 100%; padding: 15px 15px 15px 50px; border: 1px solid #ddd;
+            border-radius: 8px; font-size: 1em; box-sizing: border-box;
+            background: #f9f9f9;
         }
+        .input-group .material-icons {
+            position: absolute; left: 15px; top: 50%;
+            transform: translateY(-50%); color: var(--text-light-secondary);
+        }
+        .auth-switch { text-align: center; margin-top: 20px; font-size: 0.9em; }
+        .auth-switch a { color: var(--primary-color); text-decoration: none; font-weight: bold; }
+
+        .submit-btn {
+            width: 100%; border: none; padding: 15px; border-radius: 8px;
+            font-size: 1.1em; font-weight: 500; cursor: pointer;
+            color: white;
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .submit-btn:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(0, 136, 204, 0.4); }
+        
+        /* Other existing styles */
+        .youtube-card { display: flex; align-items: center; justify-content: space-between; background: linear-gradient(45deg, #ff0000, #ff5c5c); color: white; cursor: pointer; }
         .youtube-card h3 { margin: 0; }
         .youtube-card .material-icons { font-size: 40px; }
-        
-        .task-list .task-item {
-            display: flex; align-items: center; padding: 15px;
-            border-bottom: 1px solid #eee; cursor: pointer; transition: background-color 0.2s;
-        }
-        .task-list .task-item:last-child { border-bottom: none; }
-        .task-list .task-item:active { background-color: rgba(0,0,0,0.05); }
+        .task-list .task-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; }
         .task-icon { font-size: 30px; color: var(--primary-color); margin-right: 15px; }
         .task-details h4 { margin: 0 0 5px; }
         .task-details p { margin: 0; font-size: 0.9em; color: #666; }
         .task-reward { margin-left: auto; color: #28a745; font-weight: bold; }
-
-        #adModal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); z-index: 2000;
-            display: none; justify-content: center; align-items: center;
-        }
-        .ad-modal-content {
-            background: white; padding: 30px; border-radius: var(--border-radius);
-            text-align: center; color: #333;
-        }
-        #adTimer { font-size: 2em; font-weight: bold; margin: 15px 0; }
-        #closeAdBtn {
-            background-color: #ccc; color: white; border: none;
-            padding: 10px 20px; border-radius: 8px; cursor: not-allowed;
-        }
-        #closeAdBtn.enabled { background-color: var(--primary-color); cursor: pointer; }
         .withdraw-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; box-sizing: border-box; margin-bottom: 10px;}
-
+        .logout-button, .withdraw-btn, #copyReferralBtn {
+            width: 100%; border: none; padding: 15px; border-radius: 8px;
+            font-size: 1.1em; font-weight: 500; cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        #copyReferralBtn { margin-top: 10px; }
+        .logout-button { background-color: #dc3545; color: white; margin-top:0; }
+        .withdraw-btn { background-color: #28a745; color: white; margin-top:0; }
+        .payment-logo { width: 30px; height: 30px; margin-right: 10px; border-radius: 5px; }
+        .balance-amount { font-size: 2.5em; font-weight: bold; margin: 10px 0 0 0; }
+        .setting-item { cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        #adModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; display: none; justify-content: center; align-items: center;}
+        .ad-modal-content { background: white; padding: 30px; border-radius: var(--border-radius); text-align: center; color: #333;}
+        #adTimer { font-size: 2em; font-weight: bold; margin: 15px 0; }
+        #closeAdBtn { background-color: #ccc; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: not-allowed;}
+        #closeAdBtn.enabled { background-color: var(--primary-color); cursor: pointer; }
+        #notificationPanel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 300px; height: 100%; background-color: var(--card-light); box-shadow: -5px 0 15px rgba(0,0,0,0.1); z-index: 1001; transition: right 0.3s ease-in-out; display: flex; flex-direction: column;}
+        #notificationPanel.show { right: 0; }
+        .notification-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
+        .notification-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
+        .notification-list li { padding: 15px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+        #notificationOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none;}
+        #notificationOverlay.show { opacity: 1; pointer-events: auto; }
     </style>
 </head>
 <body>
@@ -157,9 +197,10 @@
 
     <div id="appContainer" style="visibility: hidden;">
         <div id="toast" style="position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background-color: rgba(30,30,30,0.9); color: white; padding: 12px 25px; border-radius: 25px; z-index: 2000; transition: bottom 0.5s ease-in-out; font-size: 0.9em; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"></div>
+        
         <div class="header" style="display: none;">
              <span class="logo">Work & Earn</span>
-            <div id="searchBar"> <input type="text" id="searchInput" placeholder="Search tasks..."> </div>
+            <div id="searchBar" style="display:none;"> <input type="text" id="searchInput" placeholder="Search tasks..."> </div>
             <div class="icons">
                 <button id="searchButton"><i class="material-icons">search</i></button>
                 <button id="notificationButton" style="position: relative;">
@@ -173,20 +214,25 @@
         <div class="container">
             <!-- Auth Page -->
             <div id="authPage" class="page">
-                 <div class="card" style="margin-top: 30px;">
-                    <h2 id="authTitle" style="text-align: center;">Welcome Back!</h2>
-                    <div id="loginForm">
-                        <div class="input-group"> <label for="loginEmail">Email</label> <input type="email" id="loginEmail" placeholder="your@email.com"> </div>
-                        <div class="input-group"> <label for="loginPassword">Password</label> <input type="password" id="loginPassword" placeholder="••••••••"> </div>
-                        <button id="loginBtn" class="submit-btn">Log In</button>
-                        <p>Don't have an account? <a href="#" id="showSignupLink">Signup here</a></p>
-                    </div>
-                    <div id="signupForm" style="display: none;">
-                         <div class="input-group"> <label for="signupFullName">Full Name</label> <input type="text" id="signupFullName" placeholder="John Doe"> </div>
-                        <div class="input-group"> <label for="signupEmail">Email</label> <input type="email" id="signupEmail" placeholder="your@email.com"> </div>
-                        <div class="input-group"> <label for="signupPassword">Password</label> <input type="password" id="signupPassword" placeholder="••••••••"> </div>
-                        <button id="signupBtn" class="submit-btn">Sign Up</button>
-                        <p>Already have an account? <a href="#" id="showLoginLink">Login here</a></p>
+                <div class="auth-container">
+                    <div class="card" id="authCard">
+                        <div class="auth-flipper">
+                            <div id="loginForm">
+                                <div class="auth-header"><h2>Welcome Back!</h2></div>
+                                <div class="input-group"> <i class="material-icons">email</i> <input type="email" id="loginEmail" placeholder="Email"> </div>
+                                <div class="input-group"> <i class="material-icons">lock</i> <input type="password" id="loginPassword" placeholder="Password"> </div>
+                                <button id="loginBtn" class="submit-btn">Log In</button>
+                                <p class="auth-switch">Don't have an account? <a href="#" id="showSignupLink">Signup</a></p>
+                            </div>
+                            <div id="signupForm">
+                                <div class="auth-header"><h2>Create Account</h2></div>
+                                <div class="input-group"> <i class="material-icons">person</i> <input type="text" id="signupFullName" placeholder="Full Name"> </div>
+                                <div class="input-group"> <i class="material-icons">email</i> <input type="email" id="signupEmail" placeholder="Email"> </div>
+                                <div class="input-group"> <i class="material-icons">lock</i> <input type="password" id="signupPassword" placeholder="Password"> </div>
+                                <button id="signupBtn" class="submit-btn">Create Account</button>
+                                <p class="auth-switch">Already have an account? <a href="#" id="showLoginLink">Login</a></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -221,7 +267,7 @@
                     <h4>Points Wallet</h4>
                     <p>Current Points: <b id="pointsAmount">0</b></p>
                     <p style="font-size: 0.8em; color: #666;">1,000 Points = $1.00 USD</p>
-                    <button id="convertPointsBtn" class="submit-btn" style="background-color: #ff9800;">Convert to Cash</button>
+                    <button id="convertPointsBtn" class="submit-btn" style="background: linear-gradient(45deg, #ff9800, #ffc107); box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);">Convert to Cash</button>
                 </div>
                 
                 <div class="card">
@@ -275,17 +321,14 @@
             </div>
         </div>
 
-        <!-- Ad Modal -->
-        <div id="adModal">
-            <div class="ad-modal-content">
+        <div id="adModal" style="display:none;">
+             <div class="ad-modal-content">
                 <h4>Watching Ad...</h4>
                 <p>Please wait for the timer to finish.</p>
                 <div id="adTimer">10</div>
                 <button id="closeAdBtn">Close</button>
             </div>
         </div>
-        
-        <!-- UI -->
         <div class="nav-bottom" style="display: none;">
             <button id="navHome"><i class="material-icons">home</i>Home</button>
             <button id="navWork"><i class="material-icons">work</i>Work</button>
@@ -293,42 +336,40 @@
         </div>
         <div id="notificationOverlay"></div>
         <div id="notificationPanel">
-            <div class="notification-header">
+             <div class="notification-header">
                 <h3>Notifications</h3>
-                <button id="closeNotificationBtn"><i class="material-icons">close</i></button>
+                <button id="closeNotificationBtn" style="background:none; border:none; color: var(--text-light); cursor:pointer;"><i class="material-icons">close</i></button>
             </div>
             <ul class="notification-list"></ul>
         </div>
     </div>
 
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <script>
         const firebaseConfig = {
           apiKey: "AIzaSyAQG6aZY3kaleNFi2vdR5_FPk8fHnI8kRk",
           authDomain: "income-hobei.firebaseapp.com",
           projectId: "income-hobei",
-          storageBucket: "income-hobei.appspot.com",
+          storageBucket: "income-hobei.firebasestorage.app",
           messagingSenderId: "87846212742",
           appId: "1:87846212742:web:6b5961db7f2a7df3932d07"
         };
+        
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-    </script>
+        const db = firebase.firestore();
 
-    <script>
         document.addEventListener('DOMContentLoaded', function() {
             const Telegram = window.Telegram ? window.Telegram.WebApp : null;
             if (Telegram) Telegram.ready();
 
             // --- STATE MANAGEMENT ---
             let currentUser = null;
-            let currentBalance = 0;
-            let userPoints = 0;
-            let taskHistory = [];
-            let userReferralCode = '';
-            let referralCodeUsed = false;
+            let userUnsubscribe; 
+            let settings = { minWithdrawal: 5, themeColor: '#0088cc' };
 
             // --- UI ELEMENTS ---
             const loader = document.getElementById('loader');
@@ -342,8 +383,8 @@
                 setTimeout(() => { toast.style.bottom = '-100px'; }, 3000);
             };
 
-            const updateBalanceDisplay = () => document.getElementById('balanceAmount').innerText = `$${currentBalance.toFixed(2)}`;
-            const updatePointsDisplay = () => document.getElementById('pointsAmount').innerText = userPoints;
+            const updateBalanceDisplay = (balance) => document.getElementById('balanceAmount').innerText = `$${balance.toFixed(2)}`;
+            const updatePointsDisplay = (points) => document.getElementById('pointsAmount').innerText = points;
             
             const showPage = (pageId) => {
                 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -351,11 +392,6 @@
                 document.querySelectorAll('.nav-bottom button').forEach(b => b.classList.remove('active'));
                 const activeBtn = document.getElementById('nav' + pageId.charAt(0).toUpperCase() + pageId.slice(1));
                 if (activeBtn) activeBtn.classList.add('active');
-            };
-            
-            const addHistory = (type, detail) => {
-                taskHistory.unshift({ type, detail, date: new Date().toLocaleTimeString() });
-                updateHistoryPage();
             };
 
             const addNotification = (message, link = null) => {
@@ -368,40 +404,76 @@
                 badge.innerText = parseInt(badge.innerText) + 1;
             };
 
-            const updateHistoryPage = () => {
+            const updateHistoryPage = (history) => {
                 const historyList = document.getElementById('historyList');
-                if(taskHistory.length === 0) { historyList.innerHTML = '<p>No activity yet.</p>'; return; }
-                historyList.innerHTML = taskHistory.map(item => 
+                if(!history || history.length === 0) { historyList.innerHTML = '<p>No activity yet.</p>'; return; }
+                historyList.innerHTML = history.sort((a, b) => b.date - a.date).map(item => 
                     `<div class="task-item" style="padding: 10px; border-bottom: 1px solid #eee;">
                         <div class="task-details">
-                            <h4>${item.type}</h4> <p>${item.detail}</p> <small>${item.date}</small>
+                            <h4>${item.type}</h4> <p>${item.detail}</p> <small>${new Date(item.date.seconds * 1000).toLocaleTimeString()}</small>
                         </div>
                     </div>`
                 ).join('');
             };
 
+            // --- Firestore Listeners ---
+            db.collection('config').doc('settings').onSnapshot(doc => {
+                if (doc.exists) {
+                    settings = doc.data();
+                    document.documentElement.style.setProperty('--primary-color', settings.themeColor || '#0088cc');
+                }
+            });
+
             // --- AUTHENTICATION ---
-            auth.onAuthStateChanged(user => {
+            auth.onAuthStateChanged(async (user) => {
                 loader.style.opacity = '0';
                 loader.style.visibility = 'hidden';
                 appContainer.style.visibility = 'visible';
+
                 if (user) {
                     currentUser = user;
-                    currentBalance = 0.50; userPoints = 0; taskHistory = []; referralCodeUsed = false;
-                    userReferralCode = `REF${user.uid.substring(0, 6).toUpperCase()}`;
-                    addHistory('Welcome Bonus', '+$0.50 for creating account.');
-                    addNotification('Welcome! You received a $0.50 bonus.');
+                    const userRef = db.collection('users').doc(user.uid);
+                    
+                    if (userUnsubscribe) userUnsubscribe(); 
+
+                    userUnsubscribe = userRef.onSnapshot(doc => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            updateBalanceDisplay(data.balance || 0);
+                            updatePointsDisplay(data.points || 0);
+                            document.getElementById('userReferralCode').innerText = data.referralCode;
+                            document.getElementById('profileName').innerText = data.name || 'User';
+                            document.getElementById('profileEmail').innerText = data.email;
+                            db.collection('users').doc(user.uid).collection('history').orderBy('date', 'desc').onSnapshot(snap => {
+                                updateHistoryPage(snap.docs.map(d => d.data()));
+                            });
+                            if (data.status === 'blocked') {
+                                document.body.innerHTML = '<h1>Your account has been blocked by the administrator.</h1>';
+                            }
+                        }
+                    });
+
+                    const userDoc = await userRef.get();
+                    if (!userDoc.exists) {
+                        const newUser = {
+                            email: user.email, name: user.displayName, balance: 0.50,
+                            points: 0, status: 'active', referralUsed: false,
+                            referralCode: `REF${user.uid.substring(0, 6).toUpperCase()}`
+                        };
+                        await userRef.set(newUser);
+                        await db.collection('users').doc(user.uid).collection('history').add({
+                             type: 'Welcome Bonus', detail: '+$0.50 for creating account', date: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        addNotification('Welcome! You received a $0.50 bonus.');
+                    }
                     
                     document.querySelector('.header').style.display = 'flex';
                     document.querySelector('.nav-bottom').style.display = 'flex';
                     document.getElementById('welcomeMessage').innerText = `Hello, ${user.displayName || 'User'}!`;
-                    document.getElementById('profileName').innerText = user.displayName || 'User';
-                    document.getElementById('profileEmail').innerText = user.email;
-                    document.getElementById('userReferralCode').innerText = userReferralCode;
                     
-                    updateBalanceDisplay(); updatePointsDisplay(); updateHistoryPage();
                     generateTasks(); showPage('home');
                 } else {
+                    if(userUnsubscribe) userUnsubscribe();
                     currentUser = null;
                     document.querySelector('.header').style.display = 'none';
                     document.querySelector('.nav-bottom').style.display = 'none';
@@ -410,22 +482,20 @@
             });
 
             // --- TASK & AD LOGIC ---
-            const tasks = [
-                { id: 1, title: "Watch Video Ad 1", desc: "Watch a short ad to earn points.", points: 10, icon: "play_circle_filled" },
-                { id: 2, title: "Watch Video Ad 2", desc: "Watch a short ad to earn points.", points: 10, icon: "play_circle_filled" },
-                { id: 3, title: "Watch Extended Ad", desc: "Watch a longer ad for more points.", points: 15, icon: "movie" },
-                { id: 4, title: "Watch Video Ad 3", desc: "Watch a short ad to earn points.", points: 10, icon: "play_circle_filled" },
-                { id: 5, title: "Special Offer Ad", desc: "Complete a special ad offer.", points: 20, icon: "star" }
-            ];
-            const generateTasks = () => {
+             const generateTasks = () => {
                 const taskList = document.querySelector('.task-list');
-                taskList.innerHTML = tasks.map(task => `
-                    <div class="task-item" data-points="${task.points}" data-title="${task.title}">
-                        <i class="material-icons task-icon">${task.icon}</i>
-                        <div class="task-details"> <h4>${task.title}</h4> <p>${task.desc}</p> </div>
-                        <span class="task-reward">+${task.points} Pts</span>
-                    </div>`).join('');
-                document.querySelectorAll('.task-list .task-item').forEach(item => item.addEventListener('click', () => handleTaskClick(item)));
+                db.collection('tasks').onSnapshot(snapshot => {
+                    taskList.innerHTML = snapshot.docs.map(doc => {
+                        const task = doc.data();
+                        return `
+                        <div class="task-item" data-points="${task.points}" data-title="${task.title}">
+                            <i class="material-icons task-icon">play_circle_filled</i>
+                            <div class="task-details"> <h4>${task.title}</h4> <p>${task.desc}</p> </div>
+                            <span class="task-reward">+${task.points} Pts</span>
+                        </div>`
+                    }).join('');
+                     document.querySelectorAll('.task-list .task-item').forEach(item => item.addEventListener('click', () => handleTaskClick(item)));
+                });
             };
 
             let adTimerInterval;
@@ -449,79 +519,126 @@
                         adTimer.innerText = 'Done!';
                         closeAdBtn.classList.add('enabled'); closeAdBtn.disabled = false;
                         
-                        userPoints += points;
-                        updatePointsDisplay();
-                        addHistory('Task Reward', `+${points} Pts for ${taskName}`);
-                        addNotification(`+${points} points earned for completing a task!`, 'work');
+                        const userRef = db.collection('users').doc(currentUser.uid);
+                        userRef.update({ points: firebase.firestore.FieldValue.increment(points) });
+                        db.collection('users').doc(currentUser.uid).collection('history').add({
+                            type: 'Task Reward', detail: `+${points} Pts for ${taskName}`, date: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        addNotification(`+${points} points earned!`, 'work');
                         showToast(`+${points} points earned!`);
                     }
                 }, 1000);
             };
             
             // --- EVENT LISTENERS ---
+            const flipper = document.querySelector('.auth-flipper');
+            document.getElementById('showSignupLink').addEventListener('click', e => { e.preventDefault(); flipper.classList.add('flipped'); });
+            document.getElementById('showLoginLink').addEventListener('click', e => { e.preventDefault(); flipper.classList.remove('flipped'); });
+
+            document.getElementById('loginBtn').addEventListener('click', () => {
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                if(!email || !password) return showToast("Please fill all fields");
+                auth.signInWithEmailAndPassword(email, password).catch(e => showToast(e.message));
+            });
+            document.getElementById('signupBtn').addEventListener('click', () => {
+                const name = document.getElementById('signupFullName').value;
+                const email = document.getElementById('signupEmail').value;
+                const pass = document.getElementById('signupPassword').value;
+                if(!name || !email || !pass) return showToast("Please fill all fields");
+                auth.createUserWithEmailAndPassword(email, pass)
+                    .then(cred => cred.user.updateProfile({displayName: name}))
+                    .catch(e => showToast(e.message));
+            });
+            
             document.getElementById('closeAdBtn').addEventListener('click', () => {
-                if(document.getElementById('closeAdBtn').classList.contains('enabled')) {
+                 if(document.getElementById('closeAdBtn').classList.contains('enabled')) {
                     clearInterval(adTimerInterval);
                     document.getElementById('adModal').style.display = 'none';
                 }
             });
             
-            document.getElementById('submitReferralBtn').addEventListener('click', () => {
+            document.getElementById('submitReferralBtn').addEventListener('click', async () => {
                 const code = document.getElementById('referralCodeInput').value;
-                if(referralCodeUsed) return showToast('You have already used a referral code.');
-                if(code === userReferralCode) return showToast('You cannot use your own referral code.');
-                if(code.trim() !== "") {
-                    currentBalance += 0.20;
-                    referralCodeUsed = true;
-                    updateBalanceDisplay();
-                    addHistory('Referral Bonus', '+$0.20 for applying code.');
+                const userRef = db.collection('users').doc(currentUser.uid);
+                const userDoc = await userRef.get();
+                const userData = userDoc.data();
+
+                if(userData.referralUsed) return showToast('You have already used a referral code.');
+                if(code === userData.referralCode) return showToast('You cannot use your own referral code.');
+
+                // Simple check for now. In production, you'd query for the code.
+                if(code.startsWith("REF")) {
+                    await userRef.update({
+                        balance: firebase.firestore.FieldValue.increment(0.20),
+                        referralUsed: true
+                    });
+                     await db.collection('users').doc(currentUser.uid).collection('history').add({
+                        type: 'Referral Bonus', detail: '+$0.20 for applying code.', date: firebase.firestore.FieldValue.serverTimestamp()
+                    });
                     addNotification('+$0.20 Referral Bonus added!');
                     showToast('Referral bonus added!');
-                    document.getElementById('referralCodeInput').value = '';
                 } else {
-                    showToast('Please enter a valid code.');
+                    showToast('Invalid referral code.');
                 }
             });
 
-            document.getElementById('convertPointsBtn').addEventListener('click', () => {
-                if(userPoints >= 1000) {
-                    const dollarsToAdd = Math.floor(userPoints / 1000);
-                    const pointsToRemove = dollarsToAdd * 1000;
-                    userPoints -= pointsToRemove;
-                    currentBalance += dollarsToAdd;
-                    updatePointsDisplay(); updateBalanceDisplay();
-                    addHistory('Points Conversion', `-${pointsToRemove} Pts, +$${dollarsToAdd}.00 to balance.`);
-                    addNotification(`+$${dollarsToAdd}.00 added from points!`);
-                    showToast(`${pointsToRemove} points converted to $${dollarsToAdd}.00!`);
+            document.getElementById('convertPointsBtn').addEventListener('click', async () => {
+                const userRef = db.collection('users').doc(currentUser.uid);
+                const userDoc = await userRef.get();
+                const currentPoints = userDoc.data().points || 0;
+
+                if (currentPoints >= 1000) {
+                    const dollars = Math.floor(currentPoints / 1000);
+                    
+                    await userRef.update({
+                        points: firebase.firestore.FieldValue.increment(-dollars * 1000),
+                        balance: firebase.firestore.FieldValue.increment(dollars)
+                    });
+
+                    await db.collection('users').doc(currentUser.uid).collection('history').add({
+                        type: 'Points Conversion',
+                        detail: `-${dollars*1000} Pts, +$${dollars}.00 to balance.`,
+                        date: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showToast('Points converted!');
                 } else {
-                    showToast('Minimum 1,000 points required to convert.');
+                    showToast('Not enough points.');
                 }
             });
-            
-            document.querySelectorAll('.notification-list').forEach(list => {
-                list.addEventListener('click', (e) => {
-                    const targetLi = e.target.closest('li');
-                    if(targetLi && targetLi.dataset.link){
-                        showPage(targetLi.dataset.link);
-                        hideNotificationPanel();
-                    }
+
+            document.querySelectorAll('.withdraw-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const method = btn.dataset.method;
+                    const amount = parseFloat(document.getElementById(`${method.toLowerCase()}Amount`).value);
+                    const account = document.getElementById( method === 'USDT' ? 'usdtAddress' : `${method.toLowerCase()}Number`).value;
+                    const userRef = db.collection('users').doc(currentUser.uid);
+                    const userDoc = await userRef.get();
+                    const currentBalance = userDoc.data().balance;
+
+                    if (!account || isNaN(amount) || amount <= 0) return showToast('Invalid details.');
+                    if (amount < settings.minWithdrawal) return showToast(`Minimum withdrawal is $${settings.minWithdrawal}.`);
+                    if (amount > currentBalance) return showToast('Insufficient balance.');
+                    
+                    await userRef.update({ balance: firebase.firestore.FieldValue.increment(-amount) });
+                    await db.collection('withdrawals').add({
+                        userId: currentUser.uid, email: currentUser.email,
+                        amount: amount, method: method, account: account,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showToast('Withdrawal request sent!');
                 });
             });
 
-            document.getElementById('youtubeCard').addEventListener('click', () => window.open('https://www.youtube.com', '_blank'));
-            document.getElementById('historyBtn').addEventListener('click', () => showPage('history'));
-            document.getElementById('loginBtn').addEventListener('click', () => auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value).catch(e => showToast(e.message)));
-            document.getElementById('signupBtn').addEventListener('click', () => {
-                const name = document.getElementById('signupFullName').value, email = document.getElementById('signupEmail').value, pass = document.getElementById('signupPassword').value;
-                if(!name || !email || !pass) return showToast("Please fill all fields");
-                auth.createUserWithEmailAndPassword(email, pass).then(c=>c.user.updateProfile({displayName: name})).catch(e => showToast(e.message))
-            });
             document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
             document.getElementById('navHome').addEventListener('click', () => showPage('home'));
             document.getElementById('navWork').addEventListener('click', () => showPage('work'));
             document.getElementById('navWithdraw').addEventListener('click', () => showPage('withdraw'));
             document.getElementById('profileButton').addEventListener('click', () => showPage('profile'));
-            
+            document.getElementById('historyBtn').addEventListener('click', () => showPage('history'));
+            document.getElementById('youtubeCard').addEventListener('click', () => window.open('https://www.youtube.com', '_blank'));
+            document.getElementById('copyReferralBtn').addEventListener('click', () => navigator.clipboard.writeText(document.getElementById('userReferralCode').innerText).then(() => showToast('Referral Code copied!')));
+        
             const notificationButton = document.getElementById('notificationButton'), closeNotificationBtn = document.getElementById('closeNotificationBtn'), notificationOverlay = document.getElementById('notificationOverlay');
             const showNotificationPanel = () => { document.getElementById('notificationPanel').classList.add('show'); notificationOverlay.classList.add('show'); };
             const hideNotificationPanel = () => { document.getElementById('notificationPanel').classList.remove('show'); notificationOverlay.classList.remove('show'); };
@@ -536,33 +653,6 @@
                 document.getElementById('searchBar').style.display = isSearchActive ? 'flex' : 'none';
                 document.getElementById('searchButton').innerHTML = isSearchActive ? `<i class="material-icons">close</i>` : `<i class="material-icons">search</i>`;
                 if (isSearchActive) document.getElementById('searchInput').focus();
-            });
-
-            document.getElementById('copyReferralBtn').addEventListener('click', () => navigator.clipboard.writeText(userReferralCode).then(() => showToast('Referral Code copied!')));
-        
-            document.querySelectorAll('.withdraw-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const method = btn.dataset.method;
-                    const amountElId = `${method.toLowerCase()}Amount`;
-                    const accountElId = method === 'USDT' ? 'usdtAddress' : `${method.toLowerCase()}Number`;
-                    
-                    const amountEl = document.getElementById(amountElId);
-                    const accountEl = document.getElementById(accountElId);
-                    
-                    const amount = parseFloat(amountEl.value);
-                    const account = accountEl.value.trim();
-
-                    if (!account || isNaN(amount) || amount <= 0) return showToast('Please provide valid amount and account details.');
-                    if (amount < 5) return showToast('Minimum withdrawal amount is $5.00.');
-                    if (amount > currentBalance) return showToast('Insufficient balance.');
-                    
-                    currentBalance -= amount;
-                    updateBalanceDisplay();
-                    addHistory('Withdrawal', `-$${amount.toFixed(2)} to ${method}.`);
-                    addNotification(`Your withdrawal request of $${amount.toFixed(2)} is being processed.`);
-                    showToast(`Withdrawal request for $${amount.toFixed(2)} successful!`);
-                    amountEl.value = ''; accountEl.value = '';
-                });
             });
         });
     </script>
