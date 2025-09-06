@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Income Hobei</title>
     
-    <!-- Aapka Naya Ad Code -->
+    <!-- Ad Code (Unchanged) -->
     <script src='//libtl.com/sdk.js' data-zone='9829935' data-sdk='show_9829935'></script>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -40,6 +40,14 @@
     <!-- App Loader -->
     <div id="loader" class="hidden fixed inset-0 dark-bg bg-opacity-75 flex items-center justify-center z-50">
         <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-accent"></div>
+    </div>
+
+    <!-- Custom Alert Modal -->
+    <div id="custom-alert" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-sm text-center">
+            <p id="alert-message" class="mb-4"></p>
+            <button id="alert-ok-btn" class="btn-accent px-6 py-2 rounded-lg">ঠিক আছে</button>
+        </div>
     </div>
 
     <!-- Authentication Section -->
@@ -82,7 +90,7 @@
                 <div class="card-bg p-4 rounded-lg flex items-center justify-between">
                     <div>
                         <p class="text-gray-400 text-sm">আপনার ব্যালেন্স</p>
-                        <p class="text-3xl font-bold"><span id="coin-balance">0</span> কয়েন</p>
+                        <p class="text-3xl font-bold"><span id="coin-balance">0</span> কয়েন</p>
                     </div>
                     <button id="home-withdraw-btn" class="bg-white text-black font-semibold px-6 py-2 rounded-lg">উইথড্র করুন</button>
                 </div>
@@ -103,7 +111,7 @@
                             <div class="flex items-center space-x-3"><span class="text-3xl">😎</span><div><h3 class="font-semibold">রিওয়ার্ডের জন্য ক্লিক করুন</h3><p class="text-xs text-gray-400">রিওয়ার্ডেড পপআপ</p></div></div>
                             <button class="bg-white text-black font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('popup')">ক্লেইম করুন</button>
                         </div>
-                         <div class="card-bg p-3 rounded-lg flex items-center justify-between">
+                        <div class="card-bg p-3 rounded-lg flex items-center justify-between">
                             <div class="flex items-center space-x-3"><span class="text-3xl">👀</span><div><h3 class="font-semibold">ভিডিও দেখুন</h3><p class="text-xs text-gray-400">ইন-অ্যাপ ইন্টারস্টিশিয়াল</p></div></div>
                             <button class="bg-gray-700 text-white font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('inApp')">শুরু করুন</button>
                         </div>
@@ -117,16 +125,16 @@
 
             <!-- Wallet Page -->
             <div id="wallet-page" class="p-4 space-y-6 sub-page">
-                <h2 class="text-xl font-bold text-center">আমার ওয়ালেট</h2>
+                <h2 class="text-xl font-bold text-center">আমার ওয়ালেট</h2>
                 <div class="card-bg p-4 rounded-lg">
                     <h3 class="font-semibold mb-3">আয় উইথড্র করুন</h3>
-                    <p class="text-sm text-gray-400 mb-1">বর্তমান ব্যালেন্স: <span class="font-bold text-accent"><span id="wallet-coin-balance">0</span> কয়েন</span></p>
-                    <p class="text-sm text-gray-400 mb-2">সর্বনিম্ন উইথড্র: <span id="min-withdrawal-info">...</span> কয়েন</p>
+                    <p class="text-sm text-gray-400 mb-1">বর্তমান ব্যালেন্স: <span class="font-bold text-accent"><span id="wallet-coin-balance">0</span> কয়েন</span></p>
+                    <p class="text-sm text-gray-400 mb-2">সর্বনিম্ন উইথড্র: <span id="min-withdrawal-info">...</span> কয়েন</p>
                     <p class="text-sm text-gray-400 mb-4 font-semibold" id="coin-value-info">...</p>
-                    <input id="withdraw-amount" type="number" placeholder="কত কয়েন তুলবেন লিখুন" class="w-full p-3 rounded-lg input-field mb-3">
+                    <input id="withdraw-amount" type="number" placeholder="কত কয়েন তুলবেন লিখুন" class="w-full p-3 rounded-lg input-field mb-3">
                     <select id="withdraw-method" class="w-full p-3 rounded-lg input-field mb-3"></select>
                     <div id="payment-details-container"></div>
-                    <button id="withdraw-btn" class="w-full p-3 rounded-lg btn-accent mt-3">উইথড্রল রিকোয়েস্ট করুন</button>
+                    <button id="withdraw-btn" class="w-full p-3 rounded-lg btn-accent mt-3">উইথড্রল রিকোয়েস্ট করুন</button>
                 </div>
                 <div>
                     <h3 class="text-lg font-semibold mb-3">উইথড্রল হিস্ট্রি</h3>
@@ -136,21 +144,21 @@
 
             <!-- Refer Page -->
             <div id="refer-page" class="p-4 space-y-6 sub-page">
-                 <h2 class="text-xl font-bold text-center">রেফার করে আয়</h2>
-                 <div class="card-bg p-6 rounded-lg text-center">
-                     <p class="text-gray-400 mb-2">আপনার রেফারেল কোড</p>
-                     <div class="bg-gray-800 p-3 rounded-lg flex items-center justify-center mb-4">
-                         <span id="referral-code" class="text-২xl font-bold tracking-widest">লোডিং...</span>
-                         <button id="copy-code-btn" class="ml-4"><i data-lucide="copy" class="w-6 h-6 text-gray-400"></i></button>
-                     </div>
-                     <p class="text-sm text-gray-300">বন্ধুদের সাথে কোডটি শেয়ার করুন।</p>
-                 </div>
-                 <button id="share-btn" class="w-full p-3 rounded-lg btn-accent">আপনার কোড শেয়ার করুন</button>
-                 <div class="card-bg p-4 rounded-lg mt-6">
+                <h2 class="text-xl font-bold text-center">রেফার করে আয়</h2>
+                <div class="card-bg p-6 rounded-lg text-center">
+                    <p class="text-gray-400 mb-2">আপনার রেফারেল কোড</p>
+                    <div class="bg-gray-800 p-3 rounded-lg flex items-center justify-center mb-4">
+                        <span id="referral-code" class="text-2xl font-bold tracking-widest">লোডিং...</span>
+                        <button id="copy-code-btn" class="ml-4"><i data-lucide="copy" class="w-6 h-6 text-gray-400"></i></button>
+                    </div>
+                    <p class="text-sm text-gray-300">বন্ধুদের সাথে কোডটি শেয়ার করুন।</p>
+                </div>
+                <button id="share-btn" class="w-full p-3 rounded-lg btn-accent">আপনার কোড শেয়ার করুন</button>
+                <div class="card-bg p-4 rounded-lg mt-6">
                     <h3 class="font-semibold mb-3 text-center">কোনো রেফারেল কোড আছে?</h3>
                     <input id="enter-referral-code" type="text" placeholder="এখানে কোড লিখুন" class="w-full p-3 rounded-lg input-field mb-3">
                     <button id="apply-referral-btn" class="w-full p-3 rounded-lg btn-outline-accent">কোড অ্যাপ্লাই করুন</button>
-                 </div>
+                </div>
             </div>
 
             <!-- Profile Page -->
@@ -160,6 +168,7 @@
                     <img src="https://placehold.co/100x100/1e1e1e/ff8c00?text=U" class="rounded-full mb-2">
                     <h2 id="profile-name" class="text-xl font-bold">ইউজার নেম</h2>
                     <p id="profile-email" class="text-gray-400">user@email.com</p>
+                    <p id="profile-userid" class="text-gray-500 text-sm mt-2 font-mono break-all">UserID: ...</p>
                 </div>
                 <button id="logout-btn" class="w-full mt-6 p-3 rounded-lg bg-red-600 text-white font-bold">লগআউট</button>
             </div>
@@ -173,47 +182,43 @@
 
         <nav class="bottom-nav sticky bottom-0 grid grid-cols-4 items-center text-center py-2 card-bg">
             <a href="#" class="nav-link" data-page="home-page"><i data-lucide="home" class="mx-auto w-6 h-6"></i><span class="text-xs">হোম</span></a>
-            <a href="#" class="nav-link" data-page="wallet-page"><i data-lucide="wallet" class="mx-auto w-6 h-6"></i><span class="text-xs">ওয়ালেট</span></a>
+            <a href="#" class="nav-link" data-page="wallet-page"><i data-lucide="wallet" class="mx-auto w-6 h-6"></i><span class="text-xs">ওয়ালেট</span></a>
             <a href="#" class="nav-link" data-page="refer-page"><i data-lucide="users" class="mx-auto w-6 h-6"></i><span class="text-xs">রেফার</span></a>
             <a href="#" class="nav-link" data-page="profile-page"><i data-lucide="user" class="mx-auto w-6 h-6"></i><span class="text-xs">প্রোফাইল</span></a>
         </nav>
     </div>
     
-    <div id="custom-alert" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-sm text-center">
-            <p id="alert-message" class="mb-4"></p>
-            <button id="alert-ok-btn" class="btn-accent px-6 py-2 rounded-lg">ঠিক আছে</button>
-        </div>
-    </div>
-
     <script type="module">
-         const firebaseConfig = {
-             apiKey: "AIzaSyCtFNGqxHYRIlGFggwiyIUvs2EGv_CtWXQ",
-             authDomain: "come-hobei.firebaseapp.com",
-             databaseURL: "https://come-hobei-default-rtdb.firebaseio.com",
-             projectId: "come-hobei",
-             storageBucket: "come-hobei.firebasestorage.app",
-             messagingSenderId: "635487421984",
-             appId: "1:635487421984:web:288b97a2efea9068b05e45"
-         };
-        
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, serverTimestamp, query, where, onSnapshot, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        // IMPORTANT: The Firebase configuration is now hardcoded as requested.
+        const firebaseConfig = {
+            apiKey: "AIzaSyCtFNGqxHYRIlGFggwiyIUvs2EGv_CtWXQ",
+            authDomain: "come-hobei.firebaseapp.com",
+            databaseURL: "https://come-hobei-default-rtdb.firebaseio.com",
+            projectId: "come-hobei",
+            storageBucket: "come-hobei.firebasestorage.app",
+            messagingSenderId: "635487421984",
+            appId: "1:635487421984:web:288b97a2efea9068b05e45"
+        };
+        const appId = firebaseConfig.projectId;
 
-        let currentUser = null;
-        let userData = null;
+        let app;
+        let auth;
+        let db;
+        let currentUser;
+        let userData;
         let appConfig = {};
+        let isAuthReady = false;
 
         const loader = document.getElementById('loader');
         const coinBalanceEl = document.getElementById('coin-balance');
         const walletCoinBalanceEl = document.getElementById('wallet-coin-balance');
         const profileNameEl = document.getElementById('profile-name');
         const profileEmailEl = document.getElementById('profile-email');
+        const profileUserIdEl = document.getElementById('profile-userid');
         const referralCodeEl = document.getElementById('referral-code');
         const minWithdrawalInfoEl = document.getElementById('min-withdrawal-info');
         const coinValueInfoEl = document.getElementById('coin-value-info');
@@ -221,100 +226,131 @@
         const notificationDot = document.getElementById('notification-dot');
         const adsLeftCountEl = document.getElementById('ads-left-count');
         const paymentDetailsContainer = document.getElementById('payment-details-container');
+        const alertModal = document.getElementById('custom-alert');
+        const alertMessageEl = document.getElementById('alert-message');
+        const alertOkBtn = document.getElementById('alert-ok-btn');
 
-        const handleAuthStateChange = async (user) => {
-      if (user) {
-        try {
-          loader.style.display = 'flex';
-          userData = await fetchUserData(user.uid);
-          currentUser = { ...user, ...userData };
-          updateDashboardUI(userData);
-          showMainPage('dashboard');
-        } catch (error) {
-          console.error("❌ Error fetching user data:", error);
-          showAlert("ইউজার লোড করতে সমস্যা হচ্ছে। আবার চেষ্টা করুন।");
-          showMainPage('auth-section');
-        } finally {
-          loader.style.display = 'none';
+        function showAlert(message) {
+            alertMessageEl.textContent = message;
+            alertModal.classList.remove('hidden');
         }
-      } else {
-        currentUser = null;
-        userData = null;
-        showMainPage('auth-section');
-        loader.style.display = 'none';
-      }
-    };
 
+        alertOkBtn.addEventListener('click', () => {
+            alertModal.classList.add('hidden');
+        });
 
-        async function handleAuthStateChange(user) {
-            if (user) {
-                loader.style.display = 'flex';
-                currentUser = user;
-                await fetchUserData();
-                if (userData.isBlocked) {
-                    showAlert("আপনার অ্যাকাউন্ট ব্লক করা হয়েছে।");
-                    await signOut(auth);
-                    loader.style.display = 'none';
-                    return;
+        async function initFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        currentUser = user;
+                        isAuthReady = true;
+                        // Start real-time listeners only after auth is ready
+                        setupRealtimeListeners();
+                        // This will handle the initial UI setup
+                        showMainPage('app-container');
+                        navigateTo('home-page');
+                        loader.style.display = 'none';
+                    } else {
+                        isAuthReady = true;
+                        currentUser = null;
+                        userData = null;
+                        showMainPage('auth-section');
+                        loader.style.display = 'none';
+                    }
+                });
+                
+                // Sign in anonymously as a fallback if no user is signed in
+                if (!auth.currentUser) {
+                    await signInAnonymously(auth);
                 }
-                await fetchAppConfig();
-                await checkNewNotifications();
-                updateUI();
-                showMainPage('app-container');
-                navigateTo('home-page');
-                loader.style.display = 'none';
-            } else {
-                currentUser = null;
-                userData = null;
-                showMainPage('auth-section');
+
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                showAlert("অ্যাপ লোড করতে সমস্যা হচ্ছে।");
             }
         }
 
-        async function fetchUserData() {
-            if (!currentUser) return;
-            const userRef = doc(db, "users", currentUser.uid);
-            try {
-                const userSnap = await getDoc(userRef);
-                if (userSnap.exists()) {
-                    userData = userSnap.data();
+        function setupRealtimeListeners() {
+            if (!currentUser || !isAuthReady) return;
+
+            const userDocRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}`, 'profile');
+            onSnapshot(userDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    userData = docSnap.data();
+                    if (userData.isBlocked) {
+                        showAlert("আপনার অ্যাকাউন্ট ব্লক করা হয়েছে।");
+                        signOut(auth);
+                        return;
+                    }
+                    updateUI();
                 } else {
-                    const ownReferralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-                    const defaultUserData = {
-                        uid: currentUser.uid, name: currentUser.email.split('@')[0], email: currentUser.email,
-                        balance: 50, referralCode: ownReferralCode, referredBy: null,
-                        lastNotificationCheck: new Date(),
-                        createdAt: serverTimestamp(),
-                        dailyAdCount: 0, lastAdWatchDate: new Date().toISOString().split('T')[0], isBlocked: false
-                    };
-                    await setDoc(userRef, defaultUserData);
-                    userData = defaultUserData;
+                    initializeNewUser();
                 }
-            } catch (error) {
-                console.error("Error fetching user data:", error);
-                showAlert("ইউজার ডাটা লোড করতে সমস্যা হয়েছে।");
-            }
-        }
+            }, (error) => {
+                console.error("Error listening to user data:", error);
+                showAlert("ব্যবহারকারীর ডেটা লোড করতে সমস্যা হয়েছে।");
+            });
 
-        async function fetchAppConfig() {
-            const configRef = doc(db, "config", "main");
-            try {
-                const configSnap = await getDoc(configRef);
-                appConfig = configSnap.exists() ? configSnap.data() : { minWithdrawal: 5000, paymentMethods: ["UPI", "Paytm"], dailyAdLimit: 10, coinValueCoins: 1000, coinValueInr: 10 };
-            } catch (error) {
-                console.error("Error fetching app config:", error);
-            }
+            const configDocRef = doc(db, `artifacts/${appId}/public/data`, 'config');
+            onSnapshot(configDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    appConfig = docSnap.data();
+                    updateUI();
+                } else {
+                    appConfig = { minWithdrawal: 5000, paymentMethods: ["UPI", "Paytm"], dailyAdLimit: 10, coinValueCoins: 1000, coinValueInr: 10 };
+                    showAlert("অ্যাপ কনফিগারেশন লোড করা যায়নি। ডিফল্ট ব্যবহার করা হচ্ছে।");
+                }
+            }, (error) => {
+                console.error("Error listening to app config:", error);
+            });
+
+            onSnapshot(query(collection(db, `artifacts/${appId}/public/data`, "notifications"), limit(10)), (querySnapshot) => {
+                const notifications = querySnapshot.docs.map(doc => doc.data());
+                updateNotificationDot(notifications);
+            });
         }
         
+        async function initializeNewUser() {
+            try {
+                const ownReferralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                const defaultUserData = {
+                    uid: currentUser.uid,
+                    name: currentUser.email ? currentUser.email.split('@')[0] : 'Guest',
+                    email: currentUser.email,
+                    balance: 50,
+                    referralCode: ownReferralCode,
+                    referredBy: null,
+                    lastNotificationCheck: serverTimestamp(),
+                    createdAt: serverTimestamp(),
+                    dailyAdCount: 0,
+                    lastAdWatchDate: new Date().toISOString().split('T')[0],
+                    isBlocked: false
+                };
+                await setDoc(doc(db, `artifacts/${appId}/users/${currentUser.uid}`, 'profile'), defaultUserData);
+                userData = defaultUserData;
+                updateUI();
+            } catch (error) {
+                console.error("Error initializing new user:", error);
+                showAlert("নতুন ব্যবহারকারীর ডেটা তৈরি করতে সমস্যা হয়েছে।");
+            }
+        }
+
         function updateUI() {
-            if (!userData) return;
+            if (!userData || !appConfig) return;
             const balance = userData.balance || 0;
             coinBalanceEl.textContent = balance;
             walletCoinBalanceEl.textContent = balance;
             profileNameEl.textContent = userData.name || 'নাম নেই';
             profileEmailEl.textContent = userData.email || 'ইমেইল নেই';
+            profileUserIdEl.textContent = `UserID: ${currentUser.uid}`;
             referralCodeEl.textContent = userData.referralCode || '...';
-            minWithdrawalInfoEl.textContent = `${appConfig.minWithdrawal || 5000} কয়েন`;
-            coinValueInfoEl.textContent = `${appConfig.coinValueCoins || 1000} কয়েন = ₹${appConfig.coinValueInr || 10}`;
+            minWithdrawalInfoEl.textContent = `${appConfig.minWithdrawal || 5000} কয়েন`;
+            coinValueInfoEl.textContent = `${appConfig.coinValueCoins || 1000} কয়েন = ₹${appConfig.coinValueInr || 10}`;
             withdrawMethodSelect.innerHTML = '';
             (appConfig.paymentMethods || []).forEach(method => {
                 const option = document.createElement('option');
@@ -338,9 +374,15 @@
         function updateDynamicPaymentFields() {
             const selectedMethod = withdrawMethodSelect.value.toLowerCase();
             let placeholder = "নম্বর লিখুন";
-            if (selectedMethod.includes('Bkash')) placeholder = "আপনার Bkash নম্বর লিখুন";
-            if (selectedMethod.includes('Nagad')) placeholder = "আপনার Nagad নম্বর লিখুন";
+            if (selectedMethod.includes('bkash')) placeholder = "আপনার Bkash নম্বর লিখুন";
+            if (selectedMethod.includes('nagad')) placeholder = "আপনার Nagad নম্বর লিখুন";
             paymentDetailsContainer.innerHTML = `<input id="payment-detail-input" type="text" placeholder="${placeholder}" class="w-full p-3 rounded-lg input-field">`;
+        }
+
+        function updateNotificationDot(notifications) {
+            const lastCheckTimestamp = userData.lastNotificationCheck?.seconds || 0;
+            const hasNew = notifications.some(n => n.createdAt?.seconds > lastCheckTimestamp);
+            notificationDot.style.display = hasNew ? 'block' : 'none';
         }
 
         function showMainPage(pageId) {
@@ -355,6 +397,7 @@
                 link.classList.remove('active', 'text-accent');
                 if (link.dataset.page === pageId) link.classList.add('active', 'text-accent');
             });
+            lucide.createIcons();
         }
         window.navigateTo = navigateTo;
 
@@ -369,6 +412,7 @@
                     e.preventDefault();
                     const pageId = link.dataset.page;
                     if (pageId === 'wallet-page') loadWithdrawalHistory();
+                    if (pageId === 'notifications-page') loadNotifications();
                     navigateTo(pageId);
                 });
             });
@@ -388,9 +432,28 @@
             if (!name || !email || !password) return showAlert("দয়া করে সব ঘর পূরণ করুন।");
             loader.style.display = 'flex';
             try {
-                await createUserWithEmailAndPassword(auth, email, password);
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}`, 'profile');
+                await setDoc(userDocRef, {
+                    uid: user.uid,
+                    name: name,
+                    email: email,
+                    balance: 50,
+                    referralCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
+                    referredBy: null,
+                    lastNotificationCheck: serverTimestamp(),
+                    createdAt: serverTimestamp(),
+                    dailyAdCount: 0,
+                    lastAdWatchDate: new Date().toISOString().split('T')[0],
+                    isBlocked: false
+                });
+                await initializeNewUser(); // To ensure data is in sync
+                showAlert("সাইন আপ সফল হয়েছে! লগইন করুন।");
+                navigateTo('login-view');
             } catch (error) {
                 showAlert(error.message);
+            } finally {
                 loader.style.display = 'none';
             }
         }
@@ -404,29 +467,26 @@
                 await signInWithEmailAndPassword(auth, email, password);
             } catch (error) {
                 showAlert(error.message);
+            } finally {
                 loader.style.display = 'none';
             }
         }
 
-        async function handleLogout() { await signOut(auth); }
-        
-        async function checkNewNotifications() {
-            const lastCheck = userData.lastNotificationCheck;
-            if (!lastCheck || typeof lastCheck.seconds === 'undefined') {
-                console.log("lastNotificationCheck is not a valid timestamp yet. Skipping check.");
-                return;
+        async function handleLogout() { 
+            try {
+                await signOut(auth);
+            } catch(error) {
+                console.error("Logout error:", error);
+                showAlert("লগআউট করতে সমস্যা হয়েছে।");
             }
-            const q = query(collection(db, "notifications"), where("createdAt", ">", lastCheck), limit(1));
-            const querySnapshot = await getDocs(q);
-            notificationDot.style.display = querySnapshot.empty ? 'none' : 'block';
         }
-
+        
         async function loadNotifications() {
             const listEl = document.getElementById('notifications-list');
             listEl.innerHTML = '<p class="text-gray-400">লোড হচ্ছে...</p>';
             notificationDot.style.display = 'none';
-            const q = query(collection(db, "notifications"), orderBy("createdAt", "desc"));
             try {
+                const q = query(collection(db, `artifacts/${appId}/public/data`, "notifications"), limit(20)); // Limit for performance
                 const querySnapshot = await getDocs(q);
                 if (querySnapshot.empty) {
                     listEl.innerHTML = '<p class="text-gray-400 text-center">কোনো নোটিফিকেশন নেই।</p>';
@@ -435,10 +495,10 @@
                 listEl.innerHTML = '';
                 querySnapshot.forEach(doc => {
                     const msg = doc.data();
-                    const date = msg.createdAt ? msg.createdAt.toDate().toLocaleDateString() : 'N/A';
+                    const date = msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
                     listEl.innerHTML += `<div class="card-bg p-4 rounded-lg"><div class="flex justify-between items-center mb-1"><h3 class="font-bold">${msg.title}</h3><p class="text-xs text-gray-400">${date}</p></div><p class="text-sm text-gray-300">${msg.message}</p></div>`;
                 });
-                await updateDoc(doc(db, "users", currentUser.uid), { lastNotificationCheck: serverTimestamp() });
+                await updateDoc(doc(db, `artifacts/${appId}/users/${currentUser.uid}`, 'profile'), { lastNotificationCheck: serverTimestamp() });
             } catch (error) {
                 console.error("Error loading notifications:", error);
                 listEl.innerHTML = '<p class="text-red-400">নোটিফিকেশন লোড করতে সমস্যা হয়েছে।</p>';
@@ -448,8 +508,8 @@
         async function loadWithdrawalHistory() {
             const historyList = document.getElementById('withdrawal-history-list');
             historyList.innerHTML = '<p class="text-gray-400">হিস্ট্রি লোড হচ্ছে...</p>';
-            const q = query(collection(db, "withdrawals"), where("userId", "==", currentUser.uid));
             try {
+                const q = query(collection(db, `artifacts/${appId}/users/${currentUser.uid}`, "withdrawals"));
                 const querySnapshot = await getDocs(q);
                 if (querySnapshot.empty) {
                     historyList.innerHTML = '<p class="text-gray-400">এখনও কোনো উইথড্র করেননি।</p>';
@@ -464,8 +524,8 @@
                     let statusColor = 'text-yellow-400';
                     if (status === 'approved') statusColor = 'text-green-400';
                     else if (status === 'rejected') statusColor = 'text-red-400';
-                    const date = request.requestedAt ? request.requestedAt.toDate().toLocaleDateString() : 'N/A';
-                    historyList.innerHTML += `<div class="card-bg p-3 rounded-lg flex items-center justify-between"><div><p class="font-semibold">${request.amount} কয়েন - ${request.method}</p><p class="text-xs text-gray-400">${date}</p></div><p class="font-bold ${statusColor} capitalize">${status}</p></div>`;
+                    const date = request.requestedAt ? new Date(request.requestedAt.seconds * 1000).toLocaleDateString() : 'N/A';
+                    historyList.innerHTML += `<div class="card-bg p-3 rounded-lg flex items-center justify-between"><div><p class="font-semibold">${request.amount} কয়েন - ${request.method}</p><p class="text-xs text-gray-400">${date}</p></div><p class="font-bold ${statusColor} capitalize">${status}</p></div>`;
                 });
             } catch (error) {
                 console.error("Error fetching withdrawal history: ", error);
@@ -486,20 +546,20 @@
         }
 
         async function applyReferralBonus(referrerCode, isManualApply = false) {
-            const usersRef = collection(db, "users");
-            const q = query(usersRef, where("referralCode", "==", referrerCode));
+            const usersRef = collection(db, `artifacts/${appId}/users`);
+            const q = query(usersRef, where("profile.referralCode", "==", referrerCode));
             try {
                 const querySnapshot = await getDocs(q);
                 if (!querySnapshot.empty) {
                     const referrerDoc = querySnapshot.docs[0];
-                    const referrerRef = doc(db, "users", referrerDoc.id);
-                    const referrerData = referrerDoc.data();
-                    await updateDoc(referrerRef, { balance: (referrerData.balance || 0) + 100 });
-                    const newUserRef = doc(db, "users", currentUser.uid);
-                    await updateDoc(newUserRef, { balance: (userData.balance || 0) + 100, referredBy: referrerCode });
+                    const referrerProfileDocRef = doc(db, `artifacts/${appId}/users/${referrerDoc.id}`, 'profile');
+                    const referrerData = referrerDoc.data().profile;
+                    await updateDoc(referrerProfileDocRef, { balance: (referrerData.balance || 0) + 100 });
+                    const newUserProfileDocRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}`, 'profile');
+                    await updateDoc(newUserProfileDocRef, { balance: (userData.balance || 0) + 100, referredBy: referrerCode });
                     userData.balance += 100; userData.referredBy = referrerCode;
                     updateUI();
-                    if(isManualApply) showAlert("কোড সফলভাবে প্রয়োগ হয়েছে! আপনি ১০০ কয়েন পেয়েছেন।");
+                    if(isManualApply) showAlert("কোড সফলভাবে প্রয়োগ হয়েছে! আপনি ১০০ কয়েন পেয়েছেন।");
                 } else {
                     if(isManualApply) showAlert("ভুল রেফারেল কোড।");
                 }
@@ -510,12 +570,17 @@
         }
 
         async function updateBalance(amount) {
-            if (!currentUser) return;
-            const newBalance = (userData.balance || 0) + amount;
-            const userRef = doc(db, "users", currentUser.uid);
-            await updateDoc(userRef, { balance: newBalance });
-            userData.balance = newBalance;
-            updateUI();
+            if (!currentUser || !userData) return;
+            try {
+                const newBalance = Math.max(0, (userData.balance || 0) + amount);
+                const userRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}`, 'profile');
+                await updateDoc(userRef, { balance: newBalance });
+                userData.balance = newBalance;
+                updateUI();
+            } catch(error) {
+                console.error("Error updating balance:", error);
+                showAlert("ব্যালেন্স আপডেট করতে সমস্যা হয়েছে।");
+            }
         }
 
         async function handleWithdrawal() {
@@ -526,120 +591,88 @@
             const minWithdrawal = appConfig.minWithdrawal || 5000;
 
             if (!amount || amount <= 0) return showAlert("দয়া করে সঠিক এমাউন্ট দিন।");
-            if (amount < minWithdrawal) return showAlert(`সর্বনিম্ন উইথড্র ${minWithdrawal} কয়েন।`);
+            if (amount < minWithdrawal) return showAlert(`সর্বনিম্ন উইথড্র ${minWithdrawal} কয়েন।`);
             if (amount > userData.balance) return showAlert("পর্যাপ্ত ব্যালেন্স নেই।");
             if (!paymentDetail) return showAlert("দয়া করে পেমেন্ট ডিটেইল দিন (UPI আইডি বা Paytm নম্বর)।");
 
             try {
                 await updateBalance(-amount);
-                await addDoc(collection(db, "withdrawals"), {
+                await addDoc(collection(db, `artifacts/${appId}/users/${currentUser.uid}`, "withdrawals"), {
                     userId: currentUser.uid, userName: userData.name, userEmail: userData.email,
                     amount: amount, method: method, paymentDetail: paymentDetail, status: "pending", requestedAt: serverTimestamp()
                 });
-                showAlert("উইথড্রল রিকোয়েস্ট সফলভাবে সাবমিট হয়েছে!");
+                showAlert("উইথড্রল রিকোয়েস্ট সফলভাবে সাবমিট হয়েছে!");
                 document.getElementById('withdraw-amount').value = '';
                 paymentDetailInput.value = '';
             } catch (error) {
-                showAlert("রিকোয়েস্ট সাবমিট করতে সমস্যা হয়েছে: " + error.message);
+                showAlert("রিকোয়েস্ট সাবমিট করতে সমস্যা হয়েছে: " + error.message);
                 await updateBalance(amount);
             }
         }
 
         function copyReferralCode() {
-            const textToCopy = referralCodeEl.textContent;
-            const textArea = document.createElement("textarea");
-            textArea.style.position = 'fixed'; textArea.style.top = '-100px';
-            textArea.value = textToCopy;
-            document.body.appendChild(textArea);
-            textArea.focus(); textArea.select();
-            try {
-                document.execCommand('copy');
-                showAlert("রেফারেল কোড কপি হয়েছে!");
-            } catch (err) {
-                showAlert("কোড কপি করতে ব্যর্থ।");
+            const code = referralCodeEl.textContent;
+            if (code && code !== '...') {
+                try {
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = code;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    showAlert("রেফারেল কোড কপি করা হয়েছে!");
+                } catch (err) {
+                    showAlert("কপি করতে সমস্যা হয়েছে।");
+                }
             }
-            document.body.removeChild(textArea);
         }
-        
+
         function shareReferralCode() {
-            const text = `Income Hobei এ যোগ দিন এবং আয় করুন! বোনাস পেতে আমার রেফারেল কোড ব্যবহার করুন: ${userData.referralCode}`;
-            if (navigator.share) {
-                navigator.share({ title: 'Income Hobei এ যোগ দিন!', text: text, url: window.location.href })
-                    .catch((error) => console.error("Share failed:", error));
+            const code = referralCodeEl.textContent;
+            if (navigator.share && code && code !== '...') {
+                navigator.share({
+                    title: 'আমার ইনকাম হবেই রেফারেল কোড',
+                    text: `ইনকাম হবেই অ্যাপে যোগ দিতে আমার রেফারেল কোড ব্যবহার করুন: ${code}`,
+                }).catch(error => console.log('Error sharing', error));
             } else {
-                copyReferralCode();
-                showAlert("শেয়ার ফিচার উপলব্ধ নয়। পরিবর্তে রেফারেল কোড কপি করা হয়েছে!");
+                showAlert("আপনার ডিভাইসে শেয়ার অপশন নেই।");
             }
         }
 
-        window.claimReward = async function(taskType) {
+        function claimReward(type) {
+            if (!userData || !appConfig) return showAlert("অ্যাপ কনফিগারেশন লোড হচ্ছে, দয়া করে অপেক্ষা করুন।");
+
             const today = new Date().toISOString().split('T')[0];
-            const userRef = doc(db, "users", currentUser.uid);
-
             if (userData.lastAdWatchDate !== today) {
-                await updateDoc(userRef, { dailyAdCount: 0, lastAdWatchDate: today });
                 userData.dailyAdCount = 0;
-                userData.lastAdWatchDate = today;
             }
 
-            if (userData.dailyAdCount >= (appConfig.dailyAdLimit || 10)) {
-                return showAlert("আজকের বিজ্ঞাপন দেখার সীমা পূর্ণ হয়েছে।");
+            const adsLeft = Math.max(0, (appConfig.dailyAdLimit || 10) - userData.dailyAdCount);
+            if (adsLeft <= 0) {
+                return showAlert("আজকের জন্য আপনার সমস্ত কাজ শেষ হয়েছে। আগামীকাল আবার চেষ্টা করুন।");
             }
+
+            const reward = 50;
+            updateBalance(reward);
+            updateDoc(doc(db, `artifacts/${appId}/users/${currentUser.uid}`, 'profile'), {
+                dailyAdCount: (userData.dailyAdCount || 0) + 1,
+                lastAdWatchDate: today
+            }).catch(error => console.error("Error updating ad count:", error));
             
-            if (typeof window.show_9829935 !== 'function') {
-                return showAlert("এখন বিজ্ঞাপন সার্ভিস উপলব্ধ নয়। অনুগ্রহ করে পরে চেষ্টা করুন।");
-            }
-            
-            let adPromise;
-            switch(taskType) {
-                case 'interstitial':
-                    adPromise = window.show_9829935();
-                    break;
-                case 'popup':
-                    adPromise = window.show_9829935('pop');
-                    break;
-                case 'inApp':
-                    adPromise = window.show_9829935({ type: 'inApp', inAppSettings: { frequency: 2, capping: 0.1, interval: 30, timeout: 5, everyPage: false } });
-                    break;
-                case 'miniApp':
-                    adPromise = window.show_9829935();
-                    break;
-                default:
-                    return;
-            }
-
-            adPromise.then(async () => {
-                const newCount = (userData.dailyAdCount || 0) + 1;
-                await updateDoc(userRef, { dailyAdCount: newCount });
-                userData.dailyAdCount = newCount;
-                
-                let rewardAmount = 0;
-                if (taskType === 'miniApp') {
-                    rewardAmount = 100; // Mini App ka zyada reward
-                } else if (taskType !== 'inApp') {
-                    rewardAmount = 50;
-                }
-
-                if (rewardAmount > 0) {
-                    updateBalance(rewardAmount);
-                    showAlert(`অভিনন্দন! আপনি ${rewardAmount} কয়েন পেয়েছেন।`);
-                }
-                updateAdsLeftCount();
-            }).catch(e => {
-                console.error("Ad error:", e);
-                showAlert('বিজ্ঞাপন দেখানো যায়নি। পরে চেষ্টা করুন।');
-            });
+            showAlert(`আপনি ${reward} কয়েন পেয়েছেন!`);
         }
+        window.claimReward = claimReward;
+        
+        // Initial setup
+        window.onload = () => {
+            initFirebase();
+            setupEventListeners();
+        };
 
-        function showAlert(message) {
-            document.getElementById('alert-message').textContent = message;
-            document.getElementById('custom-alert').classList.remove('hidden');
-            document.getElementById('alert-ok-btn').onclick = () => {
-                document.getElementById('custom-alert').classList.add('hidden');
-            };
-        }
-        window.showAlert = showAlert;
-
+        // Create lucide icons after a page change
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
     </script>
 </body>
 </html>
