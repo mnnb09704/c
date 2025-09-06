@@ -12,7 +12,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #121212; color: #ffffff; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #121212; 
+            color: #ffffff; 
+        }
         .dark-bg { background-color: #121212; }
         .card-bg { background-color: #1e1e1e; }
         .border-accent { border-color: #ff8c00; }
@@ -34,6 +38,22 @@
             background-color: #ef4444; border-radius: 50%; border: 2px solid #121212; display: none;
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Custom mobile-first styles */
+        body { font-size: 14px; }
+        h1.text-4xl { font-size: 2.25rem; }
+        .text-3xl { font-size: 1.875rem; }
+        .text-xl { font-size: 1.25rem; }
+        .text-lg { font-size: 1.125rem; }
+
+        /* Adjustments for larger screens */
+        @media (min-width: 640px) {
+            body { font-size: 16px; }
+            h1.text-4xl { font-size: 3rem; }
+            .text-3xl { font-size: 2rem; }
+            .text-xl { font-size: 1.5rem; }
+            .text-lg { font-size: 1.25rem; }
+        }
     </style>
 </head>
 <body class="max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto">
@@ -53,20 +73,20 @@
     <!-- Authentication Section -->
     <div id="auth-section" class="min-h-screen p-6 flex-col justify-center main-page">
         <h1 class="text-4xl font-bold text-center mb-2 text-accent">Income Hobei</h1>
-        <p class="text-center text-gray-400 mb-8">চালিয়ে যেতে লগইন বা সাইন আপ করুন</p>
+        <p class="text-center text-gray-400 mb-8 text-sm">চালিয়ে যেতে লগইন বা সাইন আপ করুন</p>
         <div id="auth-container">
             <div id="login-view">
                 <input id="login-email" type="email" placeholder="ইমেইল" class="w-full p-3 rounded-lg input-field mb-4">
                 <input id="login-password" type="password" placeholder="পাসওয়ার্ড" class="w-full p-3 rounded-lg input-field mb-4">
                 <button id="login-btn" class="w-full p-3 rounded-lg btn-accent mb-4">লগইন</button>
-                <p class="text-center text-gray-400">অ্যাকাউন্ট নেই? <a href="#" id="show-signup" class="font-semibold text-accent">সাইন আপ</a></p>
+                <p class="text-center text-gray-400 text-sm">অ্যাকাউন্ট নেই? <a href="#" id="show-signup" class="font-semibold text-accent">সাইন আপ</a></p>
             </div>
             <div id="signup-view" class="hidden">
                  <input id="signup-name" type="text" placeholder="পূর্ণ নাম" class="w-full p-3 rounded-lg input-field mb-4">
                 <input id="signup-email" type="email" placeholder="ইমেইল" class="w-full p-3 rounded-lg input-field mb-4">
                 <input id="signup-password" type="password" placeholder="পাসওয়ার্ড" class="w-full p-3 rounded-lg input-field mb-4">
                 <button id="signup-btn" class="w-full p-3 rounded-lg btn-accent mb-4">সাইন আপ</button>
-                <p class="text-center text-gray-400">আগেই অ্যাকাউন্ট আছে? <a href="#" id="show-login" class="font-semibold text-accent">লগইন</a></p>
+                <p class="text-center text-gray-400 text-sm">আগেই অ্যাকাউন্ট আছে? <a href="#" id="show-login" class="font-semibold text-accent">লগইন</a></p>
             </div>
         </div>
     </div>
@@ -87,12 +107,12 @@
         <main class="flex-grow">
             <!-- Home Page -->
             <div id="home-page" class="p-4 space-y-6 sub-page">
-                <div class="card-bg p-4 rounded-lg flex items-center justify-between">
+                <div class="card-bg p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
                     <div>
                         <p class="text-gray-400 text-sm">আপনার ব্যালেন্স</p>
                         <p class="text-3xl font-bold"><span id="coin-balance">0</span> কয়েন</p>
                     </div>
-                    <button id="home-withdraw-btn" class="bg-white text-black font-semibold px-6 py-2 rounded-lg">উইথড্র করুন</button>
+                    <button id="home-withdraw-btn" class="bg-white text-black font-semibold px-6 py-2 rounded-lg w-full sm:w-auto mt-2 sm:mt-0">উইথড্র করুন</button>
                 </div>
                 <section>
                     <div class="flex justify-between items-center">
@@ -105,19 +125,19 @@
                     <div class="space-y-3">
                         <div class="bg-orange-500 p-3 rounded-lg flex items-center justify-between text-black">
                             <div class="flex items-center space-x-3"><span class="text-3xl">🤩</span><div><h3 class="font-bold">শর্ট বিজ্ঞাপন দেখুন</h3><p class="text-xs font-medium">রিওয়ার্ডেড ইন্টারস্টিশিয়াল</p></div></div>
-                            <button class="bg-white text-orange-500 font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('interstitial')">ক্লেইম করুন</button>
+                            <button class="bg-white text-orange-500 font-bold px-4 py-2 rounded-lg text-sm btn">ক্লেইম করুন</button>
                         </div>
                         <div class="card-bg p-3 rounded-lg flex items-center justify-between">
                             <div class="flex items-center space-x-3"><span class="text-3xl">😎</span><div><h3 class="font-semibold">রিওয়ার্ডের জন্য ক্লিক করুন</h3><p class="text-xs text-gray-400">রিওয়ার্ডেড পপআপ</p></div></div>
-                            <button class="bg-white text-black font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('popup')">ক্লেইম করুন</button>
+                            <button class="bg-white text-black font-bold px-4 py-2 rounded-lg text-sm btn" onclick="claimReward('popup')">ক্লেইম করুন</button>
                         </div>
                         <div class="card-bg p-3 rounded-lg flex items-center justify-between">
                             <div class="flex items-center space-x-3"><span class="text-3xl">👀</span><div><h3 class="font-semibold">ভিডিও দেখুন</h3><p class="text-xs text-gray-400">ইন-অ্যাপ ইন্টারস্টিশিয়াল</p></div></div>
-                            <button class="bg-gray-700 text-white font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('inApp')">শুরু করুন</button>
+                            <button class="bg-gray-700 text-white font-bold px-4 py-2 rounded-lg text-sm btn" onclick="claimReward('inApp')">শুরু করুন</button>
                         </div>
                         <div class="card-bg p-3 rounded-lg flex items-center justify-between">
                             <div class="flex items-center space-x-3"><span class="text-3xl">🎮</span><div><h3 class="font-semibold">মিনি অ্যাপ খেলুন</h3><p class="text-xs text-gray-400">বড় রিওয়ার্ড পান!</p></div></div>
-                            <button class="bg-blue-500 text-white font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('miniApp')">খেলুন</button>
+                            <button class="bg-blue-500 text-white font-bold px-4 py-2 rounded-lg text-sm btn" onclick="claimReward('miniApp')">খেলুন</button>
                         </div>
                     </div>
                 </section>
@@ -146,9 +166,9 @@
             <div id="refer-page" class="p-4 space-y-6 sub-page">
                 <h2 class="text-xl font-bold text-center">রেফার করে আয়</h2>
                 <div class="card-bg p-6 rounded-lg text-center">
-                    <p class="text-gray-400 mb-2">আপনার রেফারেল কোড</p>
+                    <p class="text-gray-400 mb-2 text-sm">আপনার রেফারেল কোড</p>
                     <div class="bg-gray-800 p-3 rounded-lg flex items-center justify-center mb-4">
-                        <span id="referral-code" class="text-2xl font-bold tracking-widest">লোডিং...</span>
+                        <span id="referral-code" class="text-xl sm:text-2xl font-bold tracking-widest">লোডিং...</span>
                         <button id="copy-code-btn" class="ml-4"><i data-lucide="copy" class="w-6 h-6 text-gray-400"></i></button>
                     </div>
                     <p class="text-sm text-gray-300">বন্ধুদের সাথে কোডটি শেয়ার করুন।</p>
@@ -167,8 +187,8 @@
                 <div class="flex flex-col items-center">
                     <img src="https://placehold.co/100x100/1e1e1e/ff8c00?text=U" class="rounded-full mb-2">
                     <h2 id="profile-name" class="text-xl font-bold">ইউজার নেম</h2>
-                    <p id="profile-email" class="text-gray-400">user@email.com</p>
-                    <p id="profile-userid" class="text-gray-500 text-sm mt-2 font-mono break-all">UserID: ...</p>
+                    <p id="profile-email" class="text-gray-400 text-sm">user@email.com</p>
+                    <p id="profile-userid" class="text-gray-500 text-xs sm:text-sm mt-2 font-mono break-all">UserID: ...</p>
                 </div>
                 <button id="logout-btn" class="w-full mt-6 p-3 rounded-lg bg-red-600 text-white font-bold">লগআউট</button>
             </div>
@@ -190,10 +210,11 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, serverTimestamp, query, where, onSnapshot, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
-        // IMPORTANT: The Firebase configuration is now hardcoded as requested.
+        // Firebase configuration and authentication token are provided by the environment.
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = {
             apiKey: "AIzaSyCtFNGqxHYRIlGFggwiyIUvs2EGv_CtWXQ",
             authDomain: "come-hobei.firebaseapp.com",
@@ -203,8 +224,8 @@
             messagingSenderId: "635487421984",
             appId: "1:635487421984:web:288b97a2efea9068b05e45"
         };
-        const appId = firebaseConfig.projectId;
-
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
         let app;
         let auth;
         let db;
@@ -254,24 +275,26 @@
                         // This will handle the initial UI setup
                         showMainPage('app-container');
                         navigateTo('home-page');
-                        loader.style.display = 'none';
                     } else {
                         isAuthReady = true;
                         currentUser = null;
                         userData = null;
                         showMainPage('auth-section');
-                        loader.style.display = 'none';
+                        
+                        // New robust sign-in flow
+                        if (initialAuthToken) {
+                           await signInWithCustomToken(auth, initialAuthToken);
+                        } else {
+                           await signInAnonymously(auth);
+                        }
                     }
+                    loader.style.display = 'none';
                 });
-                
-                // Sign in anonymously as a fallback if no user is signed in
-                if (!auth.currentUser) {
-                    await signInAnonymously(auth);
-                }
 
             } catch (error) {
                 console.error("Firebase initialization failed:", error);
                 showAlert("অ্যাপ লোড করতে সমস্যা হচ্ছে।");
+                loader.style.display = 'none';
             }
         }
 
