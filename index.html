@@ -4,21 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Work & Earn</title>
-    <!-- Telegram Mini App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
-    <!-- Material Design Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
     <style>
         /* CSS কোডে কোনো পরিবর্তন নেই, এটি আগের মতোই থাকবে */
-        /* ==================== GENERAL STYLES ==================== */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background-color: #f0f2f5; color: #333; -webkit-user-select: none; user-select: none; overflow-x: hidden; }
         .container { max-width: 500px; margin: 0 auto; padding-bottom: 70px; }
         .page { display: none; padding: 70px 15px 15px; }
         .page.active { display: block; }
         .card { background-color: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        /* ... বাকি সব CSS আগের মতোই থাকবে ... */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background-color: #0088cc; color: white; position: fixed; top: 0; width: 100%; max-width: 500px; box-sizing: border-box; z-index: 100; }
         .header .logo { font-weight: bold; font-size: 1.2em; }
         .header .icons button { background: none; border: none; color: white; font-size: 24px; margin-left: 15px; cursor: pointer; padding: 5px; }
@@ -84,9 +78,8 @@
     </style>
 </head>
 <body>
-    <!-- HTML কোডে কোনো পরিবর্তন নেই, এটি আগের মতোই থাকবে -->
     <div id="appContainer">
-        <!-- Header -->
+        <!-- HTML কোডে কোনো পরিবর্তন নেই -->
         <div class="header" style="display: none;">
             <span class="logo">Work & Earn</span>
             <div id="searchBar"><input type="text" id="searchInput" placeholder="Search tasks..."></div>
@@ -99,9 +92,7 @@
                 <button id="profileButton"><i class="material-icons">person</i></button>
             </div>
         </div>
-        <!-- Main Content Area -->
         <div class="container">
-            <!-- Auth Page -->
             <div id="authPage" class="page">
                 <div class="card" style="margin-top: 30px;">
                     <h2 id="authTitle" style="text-align: center;">Welcome Back!</h2>
@@ -120,18 +111,14 @@
                     </div>
                 </div>
             </div>
-            <!-- Home Page -->
             <div id="homePage" class="page">
                 <div class="welcome-banner"><h2 id="welcomeMessage">Hello, User!</h2></div>
                 <div class="card"><h3><i class="material-icons" style="vertical-align: middle;">group</i> Users Working Now</h3><p class="counter" id="workingUsersCount">0</p></div>
                 <div class="card"><h3><i class="material-icons" style="vertical-align: middle;">paid</i> Users Withdrawing Now</h3><p class="counter" id="withdrawingUsersCount">0</p></div>
                 <div class="card"><h3><i class="material-icons" style="vertical-align: middle;">show_chart</i> Total Earnings</h3><p class="counter" id="totalEarnings">$0.00</p></div>
             </div>
-            <!-- Work Page -->
             <div id="workPage" class="page"><h2>Task Board</h2><div class="card">Task content will go here...</div></div>
-            <!-- Withdraw Page -->
             <div id="withdrawPage" class="page"><h2>Withdraw Funds</h2><div class="card">Withdrawal options will go here...</div></div>
-            <!-- Profile Page -->
             <div id="profilePage" class="page">
                 <div class="card profile-header">
                     <div class="profile-pic-container" onclick="document.getElementById('profilePicUpload').click()">
@@ -152,13 +139,11 @@
                 <button class="logout-button" onclick="handleLogout()">Logout</button>
             </div>
         </div>
-        <!-- Bottom Navigation -->
         <div class="nav-bottom" style="display: none;">
             <button id="navHome" onclick="showPage('home')"><i class="material-icons">home</i>Home</button>
             <button id="navWork" onclick="showPage('work')"><i class="material-icons">work</i>Work</button>
             <button id="navWithdraw" onclick="showPage('withdraw')"><i class="material-icons">account_balance_wallet</i>Withdraw</button>
         </div>
-        <!-- Notification Panel -->
         <div id="notificationOverlay"></div>
         <div id="notificationPanel">
             <div class="notification-header"><h3>Notifications</h3><button id="closeNotificationBtn" style="background:none;border:none;cursor:pointer;font-size:24px;"><i class="material-icons">close</i></button></div>
@@ -171,181 +156,174 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // ===============================================
-            // =========== START OF THE FIX ============
-            // ===============================================
-
-            // --- TELEGRAM APP INITIALIZATION (SAFE CHECK) ---
-            // This checks if the Telegram object exists before trying to use it.
-            const Telegram = window.Telegram ? window.Telegram.WebApp : null;
-
-            if (Telegram) {
-                Telegram.ready();
-                Telegram.expand();
-            }
-
-            // ===============================================
-            // ============ END OF THE FIX =============
-            // ===============================================
-
-            // --- UI ELEMENT REFERENCES ---
-            const header = document.querySelector('.header');
-            const navBottom = document.querySelector('.nav-bottom');
-            const logo = document.querySelector('.logo');
-            // Search
-            const searchButton = document.getElementById('searchButton');
-            const searchBar = document.getElementById('searchBar');
-            const searchInput = document.getElementById('searchInput');
-            // Notifications
-            const notificationButton = document.getElementById('notificationButton');
-            const notificationPanel = document.getElementById('notificationPanel');
-            const notificationOverlay = document.getElementById('notificationOverlay');
-            const closeNotificationBtn = document.getElementById('closeNotificationBtn');
-            const notificationBadge = document.getElementById('notificationBadge');
-            // Dark Mode
-            const darkModeToggle = document.getElementById('darkModeToggle');
-
-            // --- STATE MANAGEMENT (DEMO) ---
-            let isAuthenticated = false; 
-            let currentUser = { fullName: "John Doe", email: "john.doe@example.com", profilePic: "https://via.placeholder.com/100", referralCode: "REF12345" };
-            let isSearchActive = false;
-
-            // --- CORE FUNCTIONS ---
-            window.showPage = (pageId, isProfile = false) => {
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                document.getElementById(pageId + 'Page').classList.add('active');
-
-                document.querySelectorAll('.nav-bottom button').forEach(b => b.classList.remove('active'));
-                if (!isProfile) {
-                   const activeNavBtn = document.getElementById('nav' + pageId.charAt(0).toUpperCase() + pageId.slice(1));
-                   if(activeNavBtn) activeNavBtn.classList.add('active');
+        // ===============================================
+        // =========== NEW, MORE ROBUST SCRIPT ============
+        // ===============================================
+        try {
+            document.addEventListener('DOMContentLoaded', function() {
+                // --- TELEGRAM APP INITIALIZATION (SAFE CHECK) ---
+                const Telegram = window.Telegram ? window.Telegram.WebApp : null;
+                if (Telegram) {
+                    Telegram.ready();
+                    Telegram.expand();
                 }
-            };
-            const initAppAfterAuth = () => {
-                if (isAuthenticated) {
-                    header.style.display = 'flex';
-                    navBottom.style.display = 'flex';
-                    updateProfileUI();
-                    showPage('home');
-                    startRealtimeCounters();
-                }
-            };
-            const updateProfileUI = () => {
-                document.getElementById('welcomeMessage').innerText = `Hello, ${currentUser.fullName}!`;
-                document.getElementById('profileName').innerText = currentUser.fullName;
-                document.getElementById('profileEmail').innerText = currentUser.email;
-                document.getElementById('profileImage').src = currentUser.profilePic;
-                document.getElementById('referralCode').innerText = currentUser.referralCode;
-            };
 
-            // --- AUTHENTICATION ---
-            window.showLogin = () => {
-                document.getElementById('authTitle').innerText = 'Welcome Back!';
-                document.getElementById('loginForm').style.display = 'block';
-                document.getElementById('signupForm').style.display = 'none';
-            };
-            window.showSignup = () => {
-                document.getElementById('authTitle').innerText = 'Create Your Account';
-                document.getElementById('loginForm').style.display = 'none';
-                document.getElementById('signupForm').style.display = 'block';
-            };
-            window.handleLogin = () => {
-                if (document.getElementById('loginEmail').value) {
-                    alert('Login successful! (Demo)');
+                // --- UI ELEMENT REFERENCES ---
+                const header = document.querySelector('.header');
+                const navBottom = document.querySelector('.nav-bottom');
+                const logo = document.querySelector('.logo');
+                const searchButton = document.getElementById('searchButton');
+                const searchBar = document.getElementById('searchBar');
+                const searchInput = document.getElementById('searchInput');
+                const notificationButton = document.getElementById('notificationButton');
+                const notificationPanel = document.getElementById('notificationPanel');
+                const notificationOverlay = document.getElementById('notificationOverlay');
+                const closeNotificationBtn = document.getElementById('closeNotificationBtn');
+                const notificationBadge = document.getElementById('notificationBadge');
+                const darkModeToggle = document.getElementById('darkModeToggle');
+
+                // --- STATE MANAGEMENT (DEMO) ---
+                let isAuthenticated = false; 
+                let currentUser = { fullName: "John Doe", email: "john.doe@example.com", profilePic: "https://via.placeholder.com/100", referralCode: "REF12345" };
+                let isSearchActive = false;
+
+                // --- CORE FUNCTIONS ---
+                window.showPage = (pageId, isProfile = false) => {
+                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                    const pageElement = document.getElementById(pageId + 'Page');
+                    if (pageElement) pageElement.classList.add('active');
+
+                    document.querySelectorAll('.nav-bottom button').forEach(b => b.classList.remove('active'));
+                    if (!isProfile) {
+                       const activeNavBtn = document.getElementById('nav' + pageId.charAt(0).toUpperCase() + pageId.slice(1));
+                       if(activeNavBtn) activeNavBtn.classList.add('active');
+                    }
+                };
+                const initAppAfterAuth = () => {
+                    if (isAuthenticated) {
+                        header.style.display = 'flex';
+                        navBottom.style.display = 'flex';
+                        updateProfileUI();
+                        showPage('home');
+                        startRealtimeCounters();
+                    }
+                };
+                const updateProfileUI = () => {
+                    document.getElementById('welcomeMessage').innerText = `Hello, ${currentUser.fullName}!`;
+                    document.getElementById('profileName').innerText = currentUser.fullName;
+                    document.getElementById('profileEmail').innerText = currentUser.email;
+                    document.getElementById('profileImage').src = currentUser.profilePic;
+                    document.getElementById('referralCode').innerText = currentUser.referralCode;
+                };
+
+                // --- AUTHENTICATION ---
+                window.showLogin = () => {
+                    document.getElementById('authTitle').innerText = 'Welcome Back!';
+                    document.getElementById('loginForm').style.display = 'block';
+                    document.getElementById('signupForm').style.display = 'none';
+                };
+                window.showSignup = () => {
+                    document.getElementById('authTitle').innerText = 'Create Your Account';
+                    document.getElementById('loginForm').style.display = 'none';
+                    document.getElementById('signupForm').style.display = 'block';
+                };
+                window.handleLogin = () => {
+                    if (document.getElementById('loginEmail').value) {
+                        alert('Login successful! (Demo)');
+                        isAuthenticated = true;
+                        initAppAfterAuth();
+                    } else { alert('Please enter your email.'); }
+                };
+                window.handleSignup = () => {
+                    alert('Signup successful! (Demo)');
                     isAuthenticated = true;
                     initAppAfterAuth();
-                } else { alert('Please enter your email.'); }
-            };
-            window.handleSignup = () => {
-                alert('Signup successful! (Demo)');
-                isAuthenticated = true;
-                initAppAfterAuth();
-            };
-            window.handleLogout = () => {
-                isAuthenticated = false;
-                header.style.display = 'none';
-                navBottom.style.display = 'none';
+                };
+                window.handleLogout = () => {
+                    isAuthenticated = false;
+                    header.style.display = 'none';
+                    navBottom.style.display = 'none';
+                    showPage('auth');
+                    alert('You have been logged out.');
+                };
+
+                // --- HEADER BUTTONS (SEARCH & NOTIFICATION) ---
+                searchButton.addEventListener('click', () => {
+                    isSearchActive = !isSearchActive;
+                    logo.style.display = isSearchActive ? 'none' : 'block';
+                    searchBar.style.display = isSearchActive ? 'flex' : 'none';
+                    searchButton.innerHTML = isSearchActive ? '<i class="material-icons">close</i>' : '<i class="material-icons">search</i>';
+                    if(isSearchActive) searchInput.focus();
+                });
+                searchInput.addEventListener('keyup', e => { if (e.key === 'Enter') alert(`Searching for: "${searchInput.value}"`); });
+                
+                const showNotificationPanel = () => {
+                    notificationPanel.classList.add('show');
+                    notificationOverlay.style.display = 'block';
+                    notificationBadge.style.display = 'none';
+                };
+                const hideNotificationPanel = () => {
+                    notificationPanel.classList.remove('show');
+                    notificationOverlay.style.display = 'none';
+                };
+                notificationButton.addEventListener('click', showNotificationPanel);
+                closeNotificationBtn.addEventListener('click', hideNotificationPanel);
+                notificationOverlay.addEventListener('click', hideNotificationPanel);
+                document.getElementById('profileButton').addEventListener('click', () => showPage('profile', true));
+
+                // --- HELPER & OTHER FUNCTIONS ---
+                window.togglePasswordVisibility = id => {
+                    const input = document.getElementById(id); const icon = input.nextElementSibling.querySelector('i');
+                    if (input.type === "password") { input.type = "text"; icon.innerText = "visibility_off"; } 
+                    else { input.type = "password"; icon.innerText = "visibility"; }
+                };
+                window.previewProfilePic = event => {
+                    const reader = new FileReader();
+                    reader.onload = () => { document.getElementById('profileImage').src = reader.result; };
+                    reader.readAsDataURL(event.target.files[0]);
+                    alert('Profile picture preview updated. A backend is needed to save the image.');
+                };
+                window.copyReferralCode = () => navigator.clipboard.writeText(currentUser.referralCode).then(() => alert('Referral Code copied!'));
+                window.openSupport = () => {
+                    if (Telegram) Telegram.openTelegramLink('https://t.me/telegram');
+                    else alert("This would open a Telegram link. Only works inside the Telegram app.");
+                };
+                
+                // Real-time counter simulation
+                const startRealtimeCounters = () => {
+                    setInterval(() => {
+                        let working = parseInt(document.getElementById('workingUsersCount').innerText.replace(',', '')) || 1245;
+                        document.getElementById('workingUsersCount').innerText = (working + Math.floor(Math.random() * 5) - 2).toLocaleString();
+                        let withdrawing = parseInt(document.getElementById('withdrawingUsersCount').innerText) || 24;
+                        document.getElementById('withdrawingUsersCount').innerText = Math.max(0, withdrawing + (Math.random() > 0.8 ? (Math.random() > 0.5 ? 1 : -1) : 0));
+                    }, 2000);
+                };
+
+                // --- DARK MODE ---
+                const applyTheme = isDark => {
+                    document.body.classList.toggle('-mode', isDark);
+                    if (Telegram) {
+                        const themeParams = isDark ? { bg_color: '#1e2a36', header_bg_color: '#2c3e50' } : { bg_color: '#f0f2f5', header_bg_color: '#0088cc' };
+                        Telegram.setThemeParams(themeParams);
+                    }
+                };
+                darkModeToggle.addEventListener('change', () => {
+                    const isChecked = darkModeToggle.checked;
+                    localStorage.setItem('darkMode', isChecked);
+                    applyTheme(isChecked);
+                });
+
+                // --- INITIAL LOAD ---
+                const savedTheme = localStorage.getItem('darkMode') === 'true';
+                darkModeToggle.checked = savedTheme;
+                applyTheme(savedTheme);
                 showPage('auth');
-                alert('You have been logged out.');
-            };
-
-            // --- HEADER BUTTONS (SEARCH & NOTIFICATION) ---
-            searchButton.addEventListener('click', () => {
-                isSearchActive = !isSearchActive;
-                logo.style.display = isSearchActive ? 'none' : 'block';
-                searchBar.style.display = isSearchActive ? 'flex' : 'none';
-                searchButton.innerHTML = isSearchActive ? '<i class="material-icons">close</i>' : '<i class="material-icons">search</i>';
-                if(isSearchActive) searchInput.focus();
             });
-            searchInput.addEventListener('keyup', e => { if (e.key === 'Enter') alert(`Searching for: "${searchInput.value}"`); });
-            
-            const showNotificationPanel = () => {
-                notificationPanel.classList.add('show');
-                notificationOverlay.style.display = 'block';
-                notificationBadge.style.display = 'none';
-            };
-            const hideNotificationPanel = () => {
-                notificationPanel.classList.remove('show');
-                notificationOverlay.style.display = 'none';
-            };
-            notificationButton.addEventListener('click', showNotificationPanel);
-            closeNotificationBtn.addEventListener('click', hideNotificationPanel);
-            notificationOverlay.addEventListener('click', hideNotificationPanel);
-            document.getElementById('profileButton').addEventListener('click', () => showPage('profile', true));
-
-            // --- HELPER & OTHER FUNCTIONS ---
-            window.togglePasswordVisibility = id => {
-                const input = document.getElementById(id); const icon = input.nextElementSibling.querySelector('i');
-                if (input.type === "password") { input.type = "text"; icon.innerText = "visibility_off"; } 
-                else { input.type = "password"; icon.innerText = "visibility"; }
-            };
-            window.previewProfilePic = event => {
-                const reader = new FileReader();
-                reader.onload = () => { document.getElementById('profileImage').src = reader.result; };
-                reader.readAsDataURL(event.target.files[0]);
-                alert('Profile picture preview updated. A backend is needed to save the image.');
-            };
-            window.copyReferralCode = () => navigator.clipboard.writeText(currentUser.referralCode).then(() => alert('Referral Code copied!'));
-            
-            window.openSupport = () => {
-                if (Telegram) {
-                    Telegram.openTelegramLink('https://t.me/telegram');
-                } else {
-                    alert("This would open a Telegram link. Only works inside the Telegram app.");
-                }
-            };
-            
-            // Real-time counter simulation
-            const startRealtimeCounters = () => {
-                setInterval(() => {
-                    let working = parseInt(document.getElementById('workingUsersCount').innerText.replace(',', '')) || 1245;
-                    document.getElementById('workingUsersCount').innerText = (working + Math.floor(Math.random() * 5) - 2).toLocaleString();
-                    let withdrawing = parseInt(document.getElementById('withdrawingUsersCount').innerText) || 24;
-                    document.getElementById('withdrawingUsersCount').innerText = Math.max(0, withdrawing + (Math.random() > 0.8 ? (Math.random() > 0.5 ? 1 : -1) : 0));
-                }, 2000);
-            };
-
-            // --- DARK MODE ---
-            const applyTheme = isDark => {
-                document.body.classList.toggle('dark-mode', isDark);
-                if (Telegram) {
-                    const themeParams = isDark ? { bg_color: '#1e2a36', header_bg_color: '#2c3e50' } : { bg_color: '#f0f2f5', header_bg_color: '#0088cc' };
-                    Telegram.setThemeParams(themeParams);
-                }
-            };
-            darkModeToggle.addEventListener('change', () => {
-                const isChecked = darkModeToggle.checked;
-                localStorage.setItem('darkMode', isChecked);
-                applyTheme(isChecked);
-            });
-
-            // --- INITIAL LOAD ---
-            const savedTheme = localStorage.getItem('darkMode') === 'true';
-            darkModeToggle.checked = savedTheme;
-            applyTheme(savedTheme);
-            showPage('auth');
-        });
+        } catch (e) {
+            // If any error happens, display it on the screen
+            document.body.innerHTML = `<div style="font-family: monospace; padding: 20px;"><h1>An error occurred:</h1><p>${e.message}</p><p>Please check the console (F12) for more details.</p></div>`;
+            console.error(e);
+        }
     </script>
 </body>
 </html>
