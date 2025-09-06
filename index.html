@@ -456,6 +456,8 @@
             const setupUserNotificationListener = (userId) => {
                 if (userWithdrawalListener) userWithdrawalListener();
 
+                // GURU: এই কোয়েরিটির জন্য Firestore-এ একটি কম্পোজিট ইনডেক্স তৈরি করতে হবে।
+                // ইনডেক্স: collection=withdrawals, fields: userId ASC, notified ASC
                 userWithdrawalListener = db.collection('withdrawals')
                   .where('userId', '==', userId)
                   .where('notified', '==', false)
@@ -463,13 +465,27 @@
                       snapshot.docChanges().forEach(async (change) => {
                           if (change.type === 'modified') {
                               const data = change.doc.data();
+                              const userRef = db.collection('users').doc(userId);
+
+                              // WARNING: ক্লায়েন্ট-সাইড কোড ব্যবহার করে ব্যালেন্স কমানো নিরাপদ নয়।
+                              // এটি Firebase Cloud Functions ব্যবহার করে করা উচিত।
+                              
                               if (data.status === 'approved') {
-                                  addNotification(`Your withdrawal of $${data.amount.toFixed(2)} has been approved!`);
-                                  showToast('Withdrawal approved!');
-                                  await db.collection('withdrawals').doc(change.doc.id).update({ notified: true });
+                                  try {
+                                      // অ্যাডমিন অ্যাপ্রুভ করলে টাকা কমানো হবে
+                                      await userRef.update({ balance: firebase.firestore.FieldValue.increment(-data.amount) });
+                                      addNotification(`Your withdrawal of $${data.amount.toFixed(2)} has been approved!`);
+                                      showToast('Withdrawal approved!');
+                                      await db.collection('withdrawals').doc(change.doc.id).update({ notified: true });
+                                  } catch (error) {
+                                      console.error("Error processing approved withdrawal:", error);
+                                      showToast("Error updating balance for approved withdrawal.");
+                                  }
                               } else if (data.status === 'rejected') {
                                    addNotification(`Your withdrawal of $${data.amount.toFixed(2)} was rejected. Contact support.`);
                                    showToast('Withdrawal rejected.');
+                                   // টাকা ফেরত দেওয়া হবে কারণ অ্যাডমিন রিজেক্ট করেছেন
+                                   await userRef.update({ balance: firebase.firestore.FieldValue.increment(data.amount) });
                                    await db.collection('withdrawals').doc(change.doc.id).update({ notified: true });
                               }
                           }
@@ -746,7 +762,7 @@
                     if (amount > currentBalance) return showToast('Insufficient balance for this withdrawal.');
                     
                     try {
-                        await userRef.update({ balance: firebase.firestore.FieldValue.increment(-amount) });
+                        // টাকা কাটার লজিকটি এখন নোটিফিকেশন লিসেনারে রয়েছে।
                         await db.collection('withdrawals').add({
                             userId: currentUser.uid, email: currentUser.email,
                             userName: currentUser.displayName || 'A User',
@@ -763,8 +779,7 @@
                         accountInput.value = '';
                     } catch (error) {
                         console.error("Withdrawal error:", error);
-                        showToast("Failed to process withdrawal. Please try again.");
-                        await userRef.update({ balance: firebase.firestore.FieldValue.increment(amount) });
+                        showToast("Failed to send withdrawal request. Please try again.");
                     }
                 });
             });
