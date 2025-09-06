@@ -89,7 +89,6 @@
             padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow);
         }
         
-        /* New 3D Auth Page Styles */
         #authPage {
             padding: 0;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -157,7 +156,6 @@
         }
         .submit-btn:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(0, 136, 204, 0.4); }
         
-        /* Other existing styles */
         .youtube-card { display: flex; align-items: center; justify-content: space-between; background: linear-gradient(45deg, #ff0000, #ff5c5c); color: white; cursor: pointer; }
         .youtube-card h3 { margin: 0; }
         .youtube-card .material-icons { font-size: 40px; }
@@ -178,11 +176,7 @@
         .payment-logo { width: 30px; height: 30px; margin-right: 10px; border-radius: 5px; }
         .balance-amount { font-size: 2.5em; font-weight: bold; margin: 10px 0 0 0; }
         .setting-item { cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        #adModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; display: none; justify-content: center; align-items: center;}
-        .ad-modal-content { background: white; padding: 30px; border-radius: var(--border-radius); text-align: center; color: #333;}
-        #adTimer { font-size: 2em; font-weight: bold; margin: 15px 0; }
-        #closeAdBtn { background-color: #ccc; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: not-allowed;}
-        #closeAdBtn.enabled { background-color: var(--primary-color); cursor: pointer; }
+        
         #notificationPanel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 300px; height: 100%; background-color: var(--card-light); box-shadow: -5px 0 15px rgba(0,0,0,0.1); z-index: 1001; transition: right 0.3s ease-in-out; display: flex; flex-direction: column;}
         #notificationPanel.show { right: 0; }
         .notification-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
@@ -321,14 +315,6 @@
             </div>
         </div>
 
-        <div id="adModal" style="display:none;">
-             <div class="ad-modal-content">
-                <h4>Watching Ad...</h4>
-                <p>Please wait for the timer to finish.</p>
-                <div id="adTimer">10</div>
-                <button id="closeAdBtn">Close</button>
-            </div>
-        </div>
         <div class="nav-bottom" style="display: none;">
             <button id="navHome"><i class="material-icons">home</i>Home</button>
             <button id="navWork"><i class="material-icons">work</i>Work</button>
@@ -370,6 +356,7 @@
             let currentUser = null;
             let userUnsubscribe; 
             let settings = { minWithdrawal: 5, themeColor: '#0088cc' };
+            let appConfig = { dailyAdLimit: 10 }; // Default config
 
             // --- UI ELEMENTS ---
             const loader = document.getElementById('loader');
@@ -407,10 +394,10 @@
             const updateHistoryPage = (history) => {
                 const historyList = document.getElementById('historyList');
                 if(!history || history.length === 0) { historyList.innerHTML = '<p>No activity yet.</p>'; return; }
-                historyList.innerHTML = history.sort((a, b) => b.date - a.date).map(item => 
+                historyList.innerHTML = history.sort((a, b) => b.date.seconds - a.date.seconds).map(item => 
                     `<div class="task-item" style="padding: 10px; border-bottom: 1px solid #eee;">
                         <div class="task-details">
-                            <h4>${item.type}</h4> <p>${item.detail}</p> <small>${new Date(item.date.seconds * 1000).toLocaleTimeString()}</small>
+                            <h4>${item.type}</h4> <p>${item.detail}</p> <small>${new Date(item.date.seconds * 1000).toLocaleString()}</small>
                         </div>
                     </div>`
                 ).join('');
@@ -419,7 +406,9 @@
             // --- Firestore Listeners ---
             db.collection('config').doc('settings').onSnapshot(doc => {
                 if (doc.exists) {
-                    settings = doc.data();
+                    const data = doc.data();
+                    settings = data;
+                    appConfig = { ...appConfig, ...data }; // Merge settings into appConfig
                     document.documentElement.style.setProperty('--primary-color', settings.themeColor || '#0088cc');
                 }
             });
@@ -458,11 +447,13 @@
                         const newUser = {
                             email: user.email, name: user.displayName, balance: 0.50,
                             points: 0, status: 'active', referralUsed: false,
-                            referralCode: `REF${user.uid.substring(0, 6).toUpperCase()}`
+                            referralCode: `REF${user.uid.substring(0, 6).toUpperCase()}`,
+                            dailyAdCount: 0,
+                            lastAdWatchDate: new Date(0).toISOString().split('T')[0] // A date in the past
                         };
-                        await userRef.set(newUser);
+                        await userRef.set(newUser, { merge: true });
                         await db.collection('users').doc(user.uid).collection('history').add({
-                             type: 'Welcome Bonus', detail: '+$0.50 for creating account', date: firebase.firestore.FieldValue.serverTimestamp()
+                            type: 'Welcome Bonus', detail: '+$0.50 for creating account', date: firebase.firestore.FieldValue.serverTimestamp()
                         });
                         addNotification('Welcome! You received a $0.50 bonus.');
                     }
@@ -481,55 +472,140 @@
                 }
             });
 
-            // --- TASK & AD LOGIC ---
+            // --- NEW REWARD FUNCTION ---
+            window.claimReward = async function(taskType) {
+                if (!currentUser) return showToast("Please login first.");
+                const today = new Date().toISOString().split('T')[0];
+                const userRef = db.collection("users").doc(currentUser.uid);
+
+                try {
+                    const userDoc = await userRef.get();
+                    let currentData = userDoc.data();
+
+                    if (currentData.lastAdWatchDate !== today) {
+                        await userRef.update({ dailyAdCount: 0, lastAdWatchDate: today });
+                        currentData.dailyAdCount = 0;
+                    }
+
+                    if (currentData.dailyAdCount >= (appConfig.dailyAdLimit || 10)) {
+                        return showToast("আজকের বিজ্ঞাপন দেখার সীমা পূর্ণ হয়েছে।");
+                    }
+                    
+                    if (typeof window.show_9829935 !== 'function') {
+                        return showToast("এখন বিজ্ঞাপন সার্ভিস উপলব্ধ নয়। অনুগ্রহ করে পরে চেষ্টা করুন।");
+                    }
+                    
+                    showToast("Loading ad...");
+
+                    let adPromise;
+                    switch(taskType) {
+                        case 'interstitial': adPromise = window.show_9829935(); break;
+                        case 'popup': adPromise = window.show_9829935('pop'); break;
+                        case 'inApp': adPromise = window.show_9829935({ type: 'inApp' }); break;
+                        case 'miniApp': adPromise = window.show_9829935(); break;
+                        default: return;
+                    }
+
+                    adPromise.then(async () => {
+                        let rewardAmount = (taskType === 'miniApp') ? 100 : 50;
+                        
+                        await userRef.update({ 
+                            dailyAdCount: firebase.firestore.FieldValue.increment(1),
+                            points: firebase.firestore.FieldValue.increment(rewardAmount)
+                        });
+
+                        await db.collection('users').doc(currentUser.uid).collection('history').add({
+                            type: 'Task Reward', detail: `+${rewardAmount} Coins for watching ad.`, date: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        
+                        showToast(`অভিনন্দন! আপনি ${rewardAmount} কয়েন পেয়েছেন।`);
+                    }).catch(error => {
+                        console.error("Ad error:", error);
+                        showToast("Failed to show ad. Please try again.");
+                    });
+                } catch (error) {
+                    console.error("Error claiming reward:", error);
+                    showToast("An error occurred. Please try again.");
+                }
+            };
+            
+            // --- TASK LOGIC ---
              const generateTasks = () => {
                 const taskList = document.querySelector('.task-list');
+                
+                // Add a static task for testing and to ensure there's always an option
+                const staticTaskHTML = `
+                    <div class="task-item" data-task-type="interstitial">
+                        <i class="material-icons task-icon">ads_click</i>
+                        <div class="task-details">
+                            <h4>Watch Ad 1</h4>
+                            <p>Click here to earn points by watching a short ad.</p>
+                        </div>
+                        <span class="task-reward">+50 Pts</span>
+                    </div>
+                     <div class="task-item" data-task-type="popup">
+                        <i class="material-icons task-icon">open_in_new</i>
+                        <div class="task-details">
+                            <h4>Watch Ad 2</h4>
+                            <p>Watch a short ad to complete the survey and earn rewards.</p>
+                        </div>
+                        <span class="task-reward">+50 Pts</span>
+                    </div>
+                     <div class="task-item" data-task-type="inApp">
+                        <i class="material-icons task-icon">slideshow</i>
+                        <div class="task-details">
+                            <h4>Watch Ad 3</h4>
+                            <p>Watch a video from our sponsors to get your points.</p>
+                        </div>
+                        <span class="task-reward">+50 Pts</span>
+                    </div>
+                    <div class="task-item" data-task-type="miniApp">
+                        <i class="material-icons task-icon">videogame_asset</i>
+                        <div class="task-details">
+                            <h4>Watch Ad 4</h4>
+                            <p>Engage with this special ad to earn a bigger reward.</p>
+                        </div>
+                        <span class="task-reward">+100 Pts</span>
+                    </div>
+                    <div class="task-item" data-task-type="interstitial">
+                        <i class="material-icons task-icon">card_giftcard</i>
+                        <div class="task-details">
+                            <h4>Watch Ad 5</h4>
+                            <p>Watch this ad to claim your special daily bonus points.</p>
+                        </div>
+                        <span class="task-reward">+50 Pts</span>
+                    </div>
+                `;
+
                 db.collection('tasks').onSnapshot(snapshot => {
-                    taskList.innerHTML = snapshot.docs.map(doc => {
-                        const task = doc.data();
-                        return `
-                        <div class="task-item" data-points="${task.points}" data-title="${task.title}">
-                            <i class="material-icons task-icon">play_circle_filled</i>
-                            <div class="task-details"> <h4>${task.title}</h4> <p>${task.desc}</p> </div>
-                            <span class="task-reward">+${task.points} Pts</span>
-                        </div>`
-                    }).join('');
-                     document.querySelectorAll('.task-list .task-item').forEach(item => item.addEventListener('click', () => handleTaskClick(item)));
+                    let firestoreTasksHTML = "";
+                    if (!snapshot.empty) {
+                        firestoreTasksHTML = snapshot.docs.map(doc => {
+                            const task = doc.data();
+                            return `
+                            <div class="task-item" data-task-type="${task.type || 'interstitial'}">
+                                <i class="material-icons task-icon">play_circle_filled</i>
+                                <div class="task-details"> <h4>${task.title}</h4> <p>${task.desc}</p> </div>
+                                <span class="task-reward">+${task.points} Pts</span>
+                            </div>`;
+                        }).join('');
+                    }
+                    
+                    taskList.innerHTML = staticTaskHTML + firestoreTasksHTML;
+                    
+                    document.querySelectorAll('.task-list .task-item').forEach(item => {
+                         item.addEventListener('click', () => window.claimReward(item.dataset.taskType));
+                    });
+                }, error => {
+                    console.error("Error fetching tasks from Firestore:", error);
+                    // If Firestore fails, still show the static task
+                    taskList.innerHTML = "<p>Could not load tasks. Please check your connection.</p>" + staticTaskHTML;
+                    document.querySelectorAll('.task-list .task-item').forEach(item => {
+                         item.addEventListener('click', () => window.claimReward(item.dataset.taskType));
+                    });
                 });
             };
 
-            let adTimerInterval;
-            const handleTaskClick = (taskElement) => {
-                const points = parseInt(taskElement.dataset.points);
-                const taskName = taskElement.dataset.title;
-                const adModal = document.getElementById('adModal');
-                const adTimer = document.getElementById('adTimer');
-                const closeAdBtn = document.getElementById('closeAdBtn');
-                
-                let timeLeft = 10;
-                adTimer.innerText = timeLeft;
-                closeAdBtn.classList.remove('enabled'); closeAdBtn.disabled = true;
-                adModal.style.display = 'flex';
-                
-                adTimerInterval = setInterval(() => {
-                    timeLeft--;
-                    adTimer.innerText = timeLeft;
-                    if (timeLeft <= 0) {
-                        clearInterval(adTimerInterval);
-                        adTimer.innerText = 'Done!';
-                        closeAdBtn.classList.add('enabled'); closeAdBtn.disabled = false;
-                        
-                        const userRef = db.collection('users').doc(currentUser.uid);
-                        userRef.update({ points: firebase.firestore.FieldValue.increment(points) });
-                        db.collection('users').doc(currentUser.uid).collection('history').add({
-                            type: 'Task Reward', detail: `+${points} Pts for ${taskName}`, date: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                        addNotification(`+${points} points earned!`, 'work');
-                        showToast(`+${points} points earned!`);
-                    }
-                }, 1000);
-            };
-            
             // --- EVENT LISTENERS ---
             const flipper = document.querySelector('.auth-flipper');
             document.getElementById('showSignupLink').addEventListener('click', e => { e.preventDefault(); flipper.classList.add('flipped'); });
@@ -551,15 +627,9 @@
                     .catch(e => showToast(e.message));
             });
             
-            document.getElementById('closeAdBtn').addEventListener('click', () => {
-                 if(document.getElementById('closeAdBtn').classList.contains('enabled')) {
-                    clearInterval(adTimerInterval);
-                    document.getElementById('adModal').style.display = 'none';
-                }
-            });
-            
             document.getElementById('submitReferralBtn').addEventListener('click', async () => {
-                const code = document.getElementById('referralCodeInput').value;
+                const code = document.getElementById('referralCodeInput').value.trim();
+                if (!code) return showToast("Please enter a code.");
                 const userRef = db.collection('users').doc(currentUser.uid);
                 const userDoc = await userRef.get();
                 const userData = userDoc.data();
@@ -567,20 +637,21 @@
                 if(userData.referralUsed) return showToast('You have already used a referral code.');
                 if(code === userData.referralCode) return showToast('You cannot use your own referral code.');
 
-                // Simple check for now. In production, you'd query for the code.
-                if(code.startsWith("REF")) {
-                    await userRef.update({
-                        balance: firebase.firestore.FieldValue.increment(0.20),
-                        referralUsed: true
-                    });
-                     await db.collection('users').doc(currentUser.uid).collection('history').add({
-                        type: 'Referral Bonus', detail: '+$0.20 for applying code.', date: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    addNotification('+$0.20 Referral Bonus added!');
-                    showToast('Referral bonus added!');
-                } else {
-                    showToast('Invalid referral code.');
+                // Securely query to find if the referral code exists and belongs to another user
+                const referrerQuery = await db.collection('users').where('referralCode', '==', code).limit(1).get();
+                if (referrerQuery.empty) {
+                    return showToast('Invalid referral code.');
                 }
+                
+                await userRef.update({
+                    balance: firebase.firestore.FieldValue.increment(0.20),
+                    referralUsed: true
+                });
+                await db.collection('users').doc(currentUser.uid).collection('history').add({
+                    type: 'Referral Bonus', detail: '+$0.20 for applying code.', date: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                addNotification('+$0.20 Referral Bonus added!');
+                showToast('Referral bonus added!');
             });
 
             document.getElementById('convertPointsBtn').addEventListener('click', async () => {
@@ -601,32 +672,48 @@
                         detail: `-${dollars*1000} Pts, +$${dollars}.00 to balance.`,
                         date: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                    showToast('Points converted!');
+                    showToast('Points converted successfully!');
                 } else {
-                    showToast('Not enough points.');
+                    showToast('Not enough points (minimum 1000).');
                 }
             });
 
             document.querySelectorAll('.withdraw-btn').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const method = btn.dataset.method;
-                    const amount = parseFloat(document.getElementById(`${method.toLowerCase()}Amount`).value);
-                    const account = document.getElementById( method === 'USDT' ? 'usdtAddress' : `${method.toLowerCase()}Number`).value;
+                    const amountInput = document.getElementById(`${method.toLowerCase()}Amount`);
+                    const accountInput = document.getElementById( method === 'USDT' ? 'usdtAddress' : `${method.toLowerCase()}Number`);
+                    
+                    const amount = parseFloat(amountInput.value);
+                    const account = accountInput.value.trim();
+                    
                     const userRef = db.collection('users').doc(currentUser.uid);
                     const userDoc = await userRef.get();
                     const currentBalance = userDoc.data().balance;
 
-                    if (!account || isNaN(amount) || amount <= 0) return showToast('Invalid details.');
+                    if (!account || isNaN(amount) || amount <= 0) return showToast('Invalid amount or account details.');
                     if (amount < settings.minWithdrawal) return showToast(`Minimum withdrawal is $${settings.minWithdrawal}.`);
-                    if (amount > currentBalance) return showToast('Insufficient balance.');
+                    if (amount > currentBalance) return showToast('Insufficient balance for this withdrawal.');
                     
-                    await userRef.update({ balance: firebase.firestore.FieldValue.increment(-amount) });
-                    await db.collection('withdrawals').add({
-                        userId: currentUser.uid, email: currentUser.email,
-                        amount: amount, method: method, account: account,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    showToast('Withdrawal request sent!');
+                    try {
+                        await userRef.update({ balance: firebase.firestore.FieldValue.increment(-amount) });
+                        await db.collection('withdrawals').add({
+                            userId: currentUser.uid, email: currentUser.email,
+                            amount: amount, method: method, account: account, status: 'pending',
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        await db.collection('users').doc(currentUser.uid).collection('history').add({
+                            type: 'Withdrawal Request', detail: `-$${amount.toFixed(2)} via ${method}.`, date: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        showToast('Withdrawal request has been sent successfully!');
+                        amountInput.value = '';
+                        accountInput.value = '';
+                    } catch (error) {
+                        console.error("Withdrawal error:", error);
+                        showToast("Failed to process withdrawal. Please try again.");
+                        // Optional: Revert balance if withdrawal fails at a later step
+                        await userRef.update({ balance: firebase.firestore.FieldValue.increment(amount) });
+                    }
                 });
             });
 
@@ -637,7 +724,11 @@
             document.getElementById('profileButton').addEventListener('click', () => showPage('profile'));
             document.getElementById('historyBtn').addEventListener('click', () => showPage('history'));
             document.getElementById('youtubeCard').addEventListener('click', () => window.open('https://www.youtube.com', '_blank'));
-            document.getElementById('copyReferralBtn').addEventListener('click', () => navigator.clipboard.writeText(document.getElementById('userReferralCode').innerText).then(() => showToast('Referral Code copied!')));
+            document.getElementById('copyReferralBtn').addEventListener('click', () => {
+                navigator.clipboard.writeText(document.getElementById('userReferralCode').innerText)
+                    .then(() => showToast('Referral Code copied!'))
+                    .catch(() => showToast('Failed to copy code.'));
+            });
         
             const notificationButton = document.getElementById('notificationButton'), closeNotificationBtn = document.getElementById('closeNotificationBtn'), notificationOverlay = document.getElementById('notificationOverlay');
             const showNotificationPanel = () => { document.getElementById('notificationPanel').classList.add('show'); notificationOverlay.classList.add('show'); };
