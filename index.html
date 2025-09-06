@@ -28,8 +28,8 @@
         .btn-outline-accent { border: 1px solid #ff8c00; color: #ff8c00; }
         .btn-outline-accent:hover { background-color: #ff8c00; color: #121212; }
         .input-field { background-color: #2c2c2c; border: 1px solid #444; }
-        .main-page { display: none; }
-        .main-page.active { display: flex; animation: fadeIn 0.5s ease-in-out; }
+        /* এখানে পরিবর্তন করা হয়েছে: .main-page আর শুরুতে 'display: none' থাকবে না। */
+        .main-page { display: flex; animation: fadeIn 0.5s ease-in-out; }
         .sub-page { display: none; }
         .sub-page.active { display: block; animation: fadeIn 0.3s ease-in-out; }
         .bottom-nav a.active { color: #ff8c00; }
@@ -70,7 +70,7 @@
         </div>
     </div>
 
-    <!-- Authentication Section -->
+    <!-- Authentication Section (শুরুতে দৃশ্যমান থাকবে) -->
     <div id="auth-section" class="min-h-screen p-6 flex-col justify-center main-page">
         <h1 class="text-4xl font-bold text-center mb-2 text-accent">Income Hobei</h1>
         <p class="text-center text-gray-400 mb-8 text-sm">চালিয়ে যেতে লগইন বা সাইন আপ করুন</p>
@@ -91,8 +91,8 @@
         </div>
     </div>
 
-    <!-- Main App Container -->
-    <div id="app-container" class="min-h-screen flex-col main-page">
+    <!-- Main App Container (শুরুতে লুকানো থাকবে) -->
+    <div id="app-container" class="min-h-screen flex-col main-page hidden">
         <header class="flex items-center justify-between p-4 sticky top-0 bg-opacity-80 backdrop-blur-md z-10 dark-bg">
             <h1 class="text-xl font-bold">Income Hobei</h1>
             <div class="flex items-center space-x-4">
@@ -235,6 +235,9 @@
         let isAuthReady = false;
 
         const loader = document.getElementById('loader');
+        const authSection = document.getElementById('auth-section');
+        const appContainer = document.getElementById('app-container');
+
         const coinBalanceEl = document.getElementById('coin-balance');
         const walletCoinBalanceEl = document.getElementById('wallet-coin-balance');
         const profileNameEl = document.getElementById('profile-name');
@@ -262,39 +265,44 @@
 
         async function initFirebase() {
             try {
+                // Firebase অ্যাপ ইনিশিয়ালাইজ করা হচ্ছে
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
                 
+                // অথেন্টিকেশন স্ট্যাটাস পরিবর্তন হলে UI আপডেট হবে
                 onAuthStateChanged(auth, async (user) => {
+                    loader.classList.add('hidden'); // লোডার লুকানো হলো
                     if (user) {
                         currentUser = user;
                         isAuthReady = true;
-                        // Start real-time listeners only after auth is ready
+                        // অথেন্টিকেশন সফল হলে মূল অ্যাপটি দেখানো হচ্ছে
+                        appContainer.classList.remove('hidden');
+                        authSection.classList.add('hidden');
                         setupRealtimeListeners();
-                        // This will handle the initial UI setup
-                        showMainPage('app-container');
                         navigateTo('home-page');
                     } else {
                         isAuthReady = true;
                         currentUser = null;
                         userData = null;
-                        showMainPage('auth-section');
+                        // অথেন্টিকেশন না হলে লগইন/সাইনআপ স্ক্রিন দেখানো হচ্ছে
+                        authSection.classList.remove('hidden');
+                        appContainer.classList.add('hidden');
                         
-                        // New robust sign-in flow
+                        // নতুন ব্যবহারকারীর জন্য স্বতঃপ্রণোদিত লগইন ব্যবস্থা
                         if (initialAuthToken) {
                            await signInWithCustomToken(auth, initialAuthToken);
                         } else {
                            await signInAnonymously(auth);
                         }
                     }
-                    loader.style.display = 'none';
                 });
 
             } catch (error) {
                 console.error("Firebase initialization failed:", error);
                 showAlert("অ্যাপ লোড করতে সমস্যা হচ্ছে।");
-                loader.style.display = 'none';
+                loader.classList.add('hidden');
+                authSection.classList.remove('hidden'); // কোনো সমস্যা হলে অথ স্ক্রিন দেখাও
             }
         }
 
@@ -408,10 +416,11 @@
             notificationDot.style.display = hasNew ? 'block' : 'none';
         }
 
-        function showMainPage(pageId) {
-            document.querySelectorAll('.main-page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-        }
+        // এই ফাংশনগুলি আর প্রয়োজন নেই, কারণ আমরা CSS দিয়ে শুরুতেই ঠিক করে নিয়েছি।
+        // function showMainPage(pageId) {
+        //     document.querySelectorAll('.main-page').forEach(p => p.classList.remove('active'));
+        //     document.getElementById(pageId).classList.add('active');
+        // }
 
         function navigateTo(pageId) {
             document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
@@ -453,7 +462,7 @@
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
             if (!name || !email || !password) return showAlert("দয়া করে সব ঘর পূরণ করুন।");
-            loader.style.display = 'flex';
+            loader.classList.remove('hidden');
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
@@ -473,11 +482,12 @@
                 });
                 await initializeNewUser(); // To ensure data is in sync
                 showAlert("সাইন আপ সফল হয়েছে! লগইন করুন।");
-                navigateTo('login-view');
+                document.getElementById('signup-view').classList.add('hidden');
+                document.getElementById('login-view').classList.remove('hidden');
             } catch (error) {
                 showAlert(error.message);
             } finally {
-                loader.style.display = 'none';
+                loader.classList.add('hidden');
             }
         }
 
@@ -485,13 +495,13 @@
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             if (!email || !password) return showAlert("দয়া করে ইমেইল এবং পাসওয়ার্ড লিখুন।");
-            loader.style.display = 'flex';
+            loader.classList.remove('hidden');
             try {
                 await signInWithEmailAndPassword(auth, email, password);
             } catch (error) {
                 showAlert(error.message);
             } finally {
-                loader.style.display = 'none';
+                loader.classList.add('hidden');
             }
         }
 
@@ -562,10 +572,10 @@
             const code = codeInput.value.trim().toUpperCase();
             if (!code) return showAlert("দয়া করে একটি কোড লিখুন।");
             if (code === userData.referralCode) return showAlert("নিজের রেফারেল কোড ব্যবহার করা যাবে না।");
-            loader.style.display = 'flex';
+            loader.classList.remove('hidden');
             await applyReferralBonus(code, true);
             codeInput.value = '';
-            loader.style.display = 'none';
+            loader.classList.add('hidden');
         }
 
         async function applyReferralBonus(referrerCode, isManualApply = false) {
@@ -688,6 +698,7 @@
         
         // Initial setup
         window.onload = () => {
+            loader.classList.remove('hidden'); // লোডারটি দেখাও
             initFirebase();
             setupEventListeners();
         };
