@@ -64,14 +64,14 @@
                     <h2 id="authTitle" style="text-align: center;">Welcome Back!</h2>
                     <div id="loginForm">
                         <div class="input-group"><label for="loginEmail">Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div>
-                        <div class="input-group"><label for="loginPassword">Password</label><div class="password-container"><input type="password" id="loginPassword" placeholder="••••••••"><button class="password-toggle" type="button" onclick="window.togglePasswordVisibility('loginPassword')"><i class="material-icons">visibility</i></button></div></div>
+                        <div class="input-group"><label for="loginPassword">Password</label><div class="password-container"><input type="password" id="loginPassword" placeholder="••••••••"><button class="password-toggle" type="button"><i class="material-icons">visibility</i></button></div></div>
                         <button class="submit-btn" id="loginBtn">Log In</button>
                         <p>Don't have an account? <a href="#" id="showSignupLink">Signup here</a></p>
                     </div>
                     <div id="signupForm" style="display: none;">
                         <div class="input-group"><label for="signupFullName">Full Name</label><input type="text" id="signupFullName" placeholder="John Doe"></div>
                         <div class="input-group"><label for="signupEmail">Email</label><input type="email" id="signupEmail" placeholder="your@email.com"></div>
-                        <div class="input-group"><label for="signupPassword">Password</label><div class="password-container"><input type="password" id="signupPassword" placeholder="••••••••"><button class="password-toggle" type="button" onclick="window.togglePasswordVisibility('signupPassword')"><i class="material-icons">visibility</i></button></div></div>
+                        <div class="input-group"><label for="signupPassword">Password</label><div class="password-container"><input type="password" id="signupPassword" placeholder="••••••••"><button class="password-toggle" type="button"><i class="material-icons">visibility</i></button></div></div>
                         <button class="submit-btn" id="signupBtn">Sign Up</button>
                         <p>Already have an account? <a href="#" id="showLoginLink">Login here</a></p>
                     </div>
@@ -135,7 +135,7 @@
         const navBottom = document.querySelector('.nav-bottom');
         let currentUser = null;
         let currentUserData = null;
-        let unsubscribeUser; // To stop listener on logout
+        let unsubscribeUser;
 
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -144,7 +144,7 @@
         };
 
         onAuthStateChanged(auth, async (user) => {
-            if (unsubscribeUser) unsubscribeUser(); // Stop previous listener
+            if (unsubscribeUser) unsubscribeUser();
             
             if (user) {
                 const userDocRef = doc(db, "users", user.uid);
@@ -152,8 +152,7 @@
 
                 if (userDoc.exists() && userDoc.data().isBlocked === true) {
                     alert('Your account has been blocked.');
-                    await signOut(auth);
-                    return;
+                    await signOut(auth); return;
                 }
 
                 if (!userDoc.exists()) {
@@ -220,23 +219,28 @@
             const q = query(collection(db, "tasks"), where("isActive", "==", true));
             onSnapshot(q, (snapshot) => {
                 if (snapshot.empty) {
-                    taskBoard.innerHTML = '<p>No tasks available right now.</p>';
-                    return;
+                    taskBoard.innerHTML = '<p>No tasks available right now.</p>'; return;
                 }
                 taskBoard.innerHTML = '';
                 snapshot.forEach(doc => {
                     const task = doc.data();
                     taskBoard.innerHTML += `<div class="task-card">
                         <h3 class="task-title">${task.title}</h3><p class="task-desc">${task.description}</p>
-                        <div class="task-footer">
-                            <span class="task-reward">Reward: ${task.reward} Coins</span>
-                            <button onclick="window.completeTask('${doc.id}', ${task.reward})" class="task-button">Complete</button>
-                        </div></div>`;
+                        <div class="task-footer"><span class="task-reward">Reward: ${task.reward} Coins</span>
+                        <button class="task-button" data-task-id="${doc.id}" data-reward="${task.reward}">Complete</button></div></div>`;
                 });
             });
         }
 
-        window.completeTask = async (taskId, reward) => {
+        document.getElementById('task-board-container').addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('task-button')) {
+                const taskId = e.target.dataset.taskId;
+                const reward = parseInt(e.target.dataset.reward);
+                completeTask(taskId, reward);
+            }
+        });
+        
+        async function completeTask(taskId, reward) {
             if (!currentUser) return alert("Please log in.");
             const userRef = doc(db, "users", currentUser.uid);
             try {
@@ -251,8 +255,7 @@
             navBottom.style.display = 'flex';
             updateProfileUI(user);
             loadTasksForUser();
-            showPage('home');
-            document.querySelector('.nav-btn[data-page="home"]').classList.add('active');
+            document.querySelector('.nav-btn[data-page="home"]').click(); // Navigate to home
         }
         
         function updateProfileUI(user) {
@@ -267,6 +270,7 @@
             }
         }
         
+        // --- Setup Event Listeners ---
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const pageId = e.currentTarget.dataset.page;
@@ -285,25 +289,25 @@
         document.getElementById('signupBtn').addEventListener('click', handleSignup);
         document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
         
-        const showSignupLink = document.getElementById('showSignupLink');
-        const showLoginLink = document.getElementById('showLoginLink');
-        showSignupLink.addEventListener('click', () => { 
+        document.getElementById('showSignupLink').addEventListener('click', () => { 
             document.getElementById('loginForm').style.display = 'none'; 
             document.getElementById('signupForm').style.display = 'block'; 
             document.getElementById('authTitle').innerText = 'Create Your Account'; 
         });
-        showLoginLink.addEventListener('click', () => { 
+        document.getElementById('showLoginLink').addEventListener('click', () => { 
             document.getElementById('loginForm').style.display = 'block'; 
             document.getElementById('signupForm').style.display = 'none'; 
             document.getElementById('authTitle').innerText = 'Welcome Back!'; 
         });
 
-        window.togglePasswordVisibility = (id) => { 
-            const el = document.getElementById(id); 
-            const icon = el.parentElement.querySelector('i'); 
-            el.type = el.type === 'password' ? 'text' : 'password'; 
-            icon.innerText = el.type === 'password' ? 'visibility' : 'visibility_off'; 
-        };
+        document.querySelectorAll('.password-toggle').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const input = e.currentTarget.previousElementSibling;
+                const icon = e.currentTarget.querySelector('i');
+                input.type = input.type === 'password' ? 'text' : 'password';
+                icon.innerText = input.type === 'password' ? 'visibility' : 'visibility_off';
+            });
+        });
         
         showPage('auth');
     </script>
