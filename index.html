@@ -161,29 +161,32 @@
             cursor: pointer;
             margin-top: 20px;
         }
-        .reward-cards-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-        .reward-card {
-            background: rgba(255,255,255,0.9);
+       
+        /* Notice Slider Styles */
+        .notice-slider-container {
+            margin: 20px 0;
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(5px);
-            padding: 15px;
-            text-align: center;
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            padding: 0;
         }
-        .reward-card h4 { margin: 0 0 10px; font-size: 0.9em; }
-        .reward-card p { margin: 0 0 10px; font-weight: bold;}
-        .reward-card button {
-            background: var(--primary-light);
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 20px;
-            cursor: pointer;
+        .notice-slider-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            transition: top 0.5s ease-in-out;
+        }
+        .notice-slide {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 15px;
+            font-weight: 500;
         }
 
         /* Digital Products Section Styles */
@@ -191,6 +194,7 @@
             font-size: 1.5em;
             font-weight: bold;
             margin: 20px 15px 10px;
+            color: #333;
         }
         .product-grid {
             display: grid;
@@ -204,6 +208,10 @@
             overflow: hidden;
             box-shadow: var(--shadow);
             text-align: center;
+            transition: transform 0.2s ease-in-out;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
         }
         .product-card img {
             width: 100%;
@@ -213,7 +221,7 @@
         .product-info {
             padding: 15px;
         }
-        .product-info h4 { margin: 0 0 5px; }
+        .product-info h4 { margin: 0 0 5px; font-size: 0.9em; }
         .product-info .price { font-weight: bold; color: var(--primary-color); margin-bottom: 10px;}
         .buy-now-btn {
             background: var(--orange-gradient);
@@ -332,7 +340,7 @@
     <div id="loader"><div class="spinner"></div></div>
 
     <div id="appContainer" style="visibility: hidden;">
-        <div id="toast" style="position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background-color: rgba(30,30,30,0.9); color: white; padding: 12px 25px; border-radius: 25px; z-index: 2000; transition: bottom 0.5s ease-in-out; font-size: 0.9em; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"></div>
+        <div id="toast" style="position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background-color: rgba(30,30,0,0.9); color: white; padding: 12px 25px; border-radius: 25px; z-index: 2000; transition: bottom 0.5s ease-in-out; font-size: 0.9em; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"></div>
         
         <div class="header" style="display: none;">
              <span class="logo">Work & Earn</span>
@@ -394,28 +402,16 @@
                         <button class="claim-button" id="claimTasksButton">Continue to claim</button>
                     </div>
                 </div>
-
-                <div class="reward-cards-container">
-                    <div class="reward-card">
-                        <h4>Countdown</h4>
-                        <p>🎁 1/3</p>
-                        <button>Claim</button>
-                    </div>
-                    <div class="reward-card">
-                        <h4>Daily Reward</h4>
-                        <p>💰 150 max</p>
-                        <button>Claim</button>
-                    </div>
-                    <div class="reward-card">
-                        <h4>Daily Check-in</h4>
-                        <p>💎 800 max</p>
-                        <button>Claim</button>
+                
+                <div class="notice-slider-container">
+                    <div class="notice-slider-wrapper" id="noticeSliderWrapper">
+                        <!-- Notices will be loaded here -->
                     </div>
                 </div>
 
-                <div id="homeProductsLink" class="card" style="margin-top: 20px; background: var(--orange-gradient); color: white; cursor: pointer;">
-                    <h3>More Earning</h3>
-                    <p>Check out our digital products!</p>
+                <h3 class="section-title" style="padding: 0 15px;">Recent Products</h3>
+                <div class="product-grid" id="homeProductGrid">
+                    <!-- Recent products will be loaded here -->
                 </div>
             </div>
 
@@ -540,6 +536,7 @@
             let currentUser = null;
             let userUnsubscribe; 
             let userNotificationListener = null; 
+            let noticeInterval = null;
             let settings = { minWithdrawal: 5, themeColor: '#8A2BE2' };
             let appConfig = { dailyAdLimit: 10 }; 
 
@@ -565,6 +562,7 @@
             const updateDailyProgress = (count, limit) => {
                 const progressCircleFg = document.getElementById('progressCircleFg');
                 const dailyProgressValue = document.getElementById('dailyProgressValue');
+                if (!progressCircleFg || !dailyProgressValue) return;
                 const radius = progressCircleFg.r.baseVal.value;
                 const circumference = 2 * Math.PI * radius;
                 const offset = circumference - (count / limit) * circumference;
@@ -617,10 +615,6 @@
                     document.documentElement.style.setProperty('--primary-color', settings.themeColor || '#8A2BE2');
                 }
             });
-
-            const setupWithdrawalFeedListener = () => {
-                // This is now removed from the home page design, but kept for potential future use.
-            };
 
             const setupUserNotificationListener = (userId) => {
                 if (userNotificationListener) userNotificationListener();
@@ -708,11 +702,14 @@
                     
                     generateTasks();
                     generateProducts();
+                    generateHomeProducts();
+                    generateNotices();
                     setupUserNotificationListener(user.uid);
                     showPage('home');
                 } else {
                     if(userUnsubscribe) userUnsubscribe();
                     if(userNotificationListener) userNotificationListener();
+                    if(noticeInterval) clearInterval(noticeInterval);
                     currentUser = null;
                     document.querySelector('.header').style.display = 'none';
                     document.querySelector('.nav-bottom').style.display = 'none';
@@ -747,13 +744,22 @@
                         showToast("Loading ad...");
                         
                         await new Promise((resolve, reject) => {
-                             window.show_9829935().then(resolve).catch(reject);
+                            try {
+                                const adPromise = window.show_9829935();
+                                if (adPromise && typeof adPromise.then === 'function') {
+                                    adPromise.then(resolve).catch(reject);
+                                } else {
+                                    setTimeout(resolve, 1500); 
+                                }
+                            } catch(e) {
+                                reject(e);
+                            }
                         });
 
                         let rewardAmount = (taskType === 'miniApp') ? 100 : 50;
                         
                         transaction.update(userRef, { 
-                            dailyAdCount: firebase.firestore.FieldValue.increment(1),
+                            dailyAdCount: dailyCount + 1,
                             points: firebase.firestore.FieldValue.increment(rewardAmount),
                             lastAdWatchDate: today
                         });
@@ -771,7 +777,7 @@
                 }
             };
             
-             const generateTasks = () => {
+            const generateTasks = () => {
                 const taskList = document.querySelector('.task-list');
                 taskList.innerHTML = '<p style="text-align:center; color: #7f8c8d;">Loading tasks...</p>';
                 
@@ -790,7 +796,7 @@
                             const task = doc.data();
                             return `
                             <div class="task-item" data-task-type="${task.type || 'interstitial'}">
-                                <i class="material-icons task-icon">play_circle_filled</i>
+                                <i class="material-icons task-icon">${task.icon || 'play_circle_filled'}</i>
                                 <div class="task-details"> <h4>${task.title}</h4> <p>${task.desc}</p> </div>
                                 <span class="task-reward">+${task.points} Pts</span>
                             </div>`;
@@ -810,12 +816,75 @@
                     });
                 });
             };
+            
+            const generateNotices = () => {
+                const wrapper = document.getElementById('noticeSliderWrapper');
+                if (noticeInterval) clearInterval(noticeInterval);
+
+                db.collection('notices').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+                    if (snapshot.empty) {
+                        wrapper.innerHTML = '<div class="notice-slide">Welcome to our app!</div>';
+                        return;
+                    }
+
+                    let noticesHTML = "";
+                    snapshot.forEach(doc => {
+                        noticesHTML += `<div class="notice-slide">${doc.data().text}</div>`;
+                    });
+                    wrapper.innerHTML = noticesHTML;
+
+                    const slides = wrapper.children;
+                    const slideHeight = 50;
+                    let currentIndex = 0;
+
+                    if (slides.length > 1) {
+                        noticeInterval = setInterval(() => {
+                            currentIndex = (currentIndex + 1) % slides.length;
+                            wrapper.style.top = `-${currentIndex * slideHeight}px`;
+                        }, 3000); // Change slide every 3 seconds
+                    }
+                }, error => {
+                    console.error("Error fetching notices:", error);
+                    wrapper.innerHTML = '<div class="notice-slide">Could not load notices.</div>';
+                });
+            };
+
+            const generateHomeProducts = () => {
+                const productGrid = document.getElementById('homeProductGrid');
+                productGrid.innerHTML = '<p style="text-align:center; color: #7f8c8d;">Loading...</p>';
+                
+                db.collection('products').orderBy('timestamp', 'desc').limit(4).onSnapshot(snapshot => {
+                    if (snapshot.empty) {
+                        productGrid.innerHTML = "<p>No recent products available.</p>";
+                        return;
+                    }
+                    let productsHTML = "";
+                    snapshot.forEach(doc => {
+                        const product = doc.data();
+                        productsHTML += `
+                            <div class="product-card" style="cursor: pointer;">
+                                <img src="${product.imageUrl || 'https://via.placeholder.com/150'}" alt="${product.name}">
+                                <div class="product-info">
+                                    <h4>${product.name}</h4>
+                                    <p class="price">$${product.price.toFixed(2)}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    productGrid.innerHTML = productsHTML;
+                    document.querySelectorAll('#homeProductGrid .product-card').forEach(card => {
+                        card.addEventListener('click', () => {
+                            showPage('products');
+                        });
+                    });
+                });
+            };
 
             const generateProducts = () => {
                 const productList = document.getElementById('productList');
                 productList.innerHTML = '<p style="text-align:center; color: #7f8c8d;">Loading products...</p>';
                 
-                db.collection('products').onSnapshot(snapshot => {
+                db.collection('products').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
                     if (snapshot.empty) {
                         productList.innerHTML = "<p>No digital products available right now.</p>";
                         return;
@@ -837,7 +906,7 @@
                     });
 
                     productList.innerHTML = productsHTML;
-                    document.querySelectorAll('.buy-now-btn').forEach(btn => {
+                    document.querySelectorAll('#productsPage .buy-now-btn').forEach(btn => {
                         btn.addEventListener('click', () => {
                             showToast("Purchase feature is coming soon!");
                         });
@@ -859,6 +928,7 @@
                 if(!email || !password) return showToast("Please fill all fields", true);
                 auth.signInWithEmailAndPassword(email, password).catch(e => showToast(e.message, true));
             });
+
             document.getElementById('signupBtn').addEventListener('click', () => {
                 const name = document.getElementById('signupFullName').value;
                 const email = document.getElementById('signupEmail').value;
@@ -971,7 +1041,6 @@
                 });
             });
 
-
             document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
             document.getElementById('navHome').addEventListener('click', () => showPage('home'));
             document.getElementById('navWork').addEventListener('click', () => showPage('work'));
@@ -980,8 +1049,7 @@
             document.getElementById('profileButton').addEventListener('click', () => showPage('profile'));
             document.getElementById('historyBtn').addEventListener('click', () => showPage('history'));
             document.getElementById('claimTasksButton').addEventListener('click', () => showPage('work'));
-            document.getElementById('homeProductsLink').addEventListener('click', () => showPage('products'));
-
+            
             document.getElementById('copyReferralBtn').addEventListener('click', () => {
                 const codeToCopy = document.getElementById('userReferralCode').innerText;
                 if(navigator.clipboard && window.isSecureContext) {
