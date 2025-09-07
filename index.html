@@ -222,6 +222,7 @@
         }
         .product-info h4 { margin: 0 0 5px; font-size: 0.9em; }
         .product-info .price { font-weight: bold; color: var(--primary-color); margin-bottom: 10px;}
+        .product-info .description { font-size: 0.8em; color: var(--text-light-secondary); margin-bottom: 10px; height: 3em; overflow: hidden; }
         .buy-now-btn {
             background: var(--orange-gradient);
             color: white;
@@ -292,9 +293,24 @@
         .payment-option { border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.2s, background-color 0.2s; }
         .payment-option.selected { border-color: var(--primary-color); background-color: #f0e6ff; border-width: 2px;}
         .payment-details { display: none; margin-top: 15px; padding: 10px; background-color: #f7f7f7; border-radius: 8px;}
-        .payment-method-buttons { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 15px; }
-        .payment-btn { padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9; cursor: pointer; font-weight: 500; transition: all 0.2s; }
-        .payment-btn.selected { border-color: var(--primary-color); background-color: var(--primary-light); color: white; border-width: 2px; }
+        .payment-method-buttons { display: flex; flex-wrap: nowrap; gap: 8px; justify-content: center; margin-top: 15px; }
+        .payment-btn {
+            flex: 1;
+            padding: 12px 8px;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-size: 0.9em;
+        }
+        .payment-btn.selected {
+            background-color: var(--primary-light);
+            transform: translateY(2px);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
         .no-methods-message { text-align: center; color: var(--text-light-secondary); padding: 20px 0;}
 
     </style>
@@ -307,7 +323,7 @@
         
         <div class="header" style="display: none;">
              <span class="logo">Work & Earn</span>
-            <div id="searchBar" style="display:none;"> <input type="text" id="searchInput" placeholder="Search tasks..."> </div>
+            <div id="searchBar" style="display:none; flex-grow: 1; padding: 0 10px;"> <input type="text" id="searchInput" placeholder="Search tasks..." style="width: 100%; padding: 8px; border-radius: 20px; border: none; outline: none;"> </div>
             <div class="icons">
                 <button id="searchButton"><i class="material-icons">search</i></button>
                 <button id="notificationButton" style="position: relative;">
@@ -402,10 +418,10 @@
             <!-- Withdraw Page -->
             <div id="withdrawPage" class="page">
                 <h2>Withdraw & Convert</h2>
-                  <div class="card balance-card">
-                    <h4>Your Current Balance</h4>
-                    <p id="balanceAmount" class="balance-amount">$0.00</p>
-                </div>
+                    <div class="card balance-card">
+                        <h4>Your Current Balance</h4>
+                        <p id="balanceAmount" class="balance-amount">$0.00</p>
+                    </div>
                 <div class="card">
                     <h4>Points Wallet</h4>
                     <p>Current Points: <b id="pointsAmount">0</b></p>
@@ -498,32 +514,32 @@
                         </div>
                     </div>
                 </div>
-                <button id="confirmPurchaseBtn" class="btn btn-primary" style="width: 100%;">Place Order</button>
+                <button id="confirmPurchaseBtn" class="btn btn-primary" style="width: 100%;">Order Place</button>
             </div>
         </div>
     </div>
 
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
-    <script>
-        const firebaseConfig = {
-          apiKey: "AIzaSyAQG6aZY3kaleNFi2vdR5_FPk8fHnI8kRk",
-          authDomain: "income-hobei.firebaseapp.com",
-          projectId: "income-hobei",
-          storageBucket: "income-hobei.appspot.com",
-          messagingSenderId: "87846212742",
-          appId: "1:87846212742:web:6b5961db7f2a7df3932d07"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const storage = firebase.storage();
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, onSnapshot, getDoc, getDocs, addDoc, updateDoc, setDoc, serverTimestamp, increment, query, where, orderBy, limit, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async () => {
+            // --- FIREBASE SETUP ---
+            // Use the globally provided Firebase config if available, with a fallback
+            const firebaseConfig = JSON.parse(
+                typeof __firebase_config !== 'undefined' ?
+                __firebase_config :
+                '{"apiKey":"AIzaSyAQG6aZY3kaleNFi2vdR5_FPk8fHnI8kRk","authDomain":"income-hobei.firebaseapp.com","projectId":"income-hobei","storageBucket":"income-hobei.appspot.com","messagingSenderId":"87846212742","appId":"1:87846212742:web:6b5961db7f2a7df3932d07"}'
+            );
+
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            const storage = getStorage(app);
+
             const Telegram = window.Telegram ? window.Telegram.WebApp : null;
             if (Telegram) Telegram.ready();
 
@@ -603,8 +619,8 @@
             };
 
             // --- Firestore Listeners ---
-            db.collection('config').doc('settings').onSnapshot(doc => {
-                if (doc.exists) {
+            onSnapshot(doc(db, 'config', 'settings'), (doc) => {
+                if (doc.exists()) {
                     const data = doc.data();
                     settings = { ...settings, ...data };
                     appConfig = { ...appConfig, ...data };
@@ -614,44 +630,46 @@
 
             const setupUserNotificationListener = (userId) => {
                 if (userNotificationListener) userNotificationListener();
-                userNotificationListener = db.collection('withdrawals')
-                    .where('userId', '==', userId)
-                    .where('notified', '==', false)
-                    .onSnapshot(snapshot => {
-                        snapshot.docChanges().forEach(async (change) => {
-                            if (change.type === 'added' || change.type === 'modified') {
-                                const data = change.doc.data();
-                                const withdrawalDocRef = db.collection('withdrawals').doc(change.doc.id);
-                                
-                                if (data.status === 'approved') {
-                                    addNotification(`Your withdrawal of $${data.amount.toFixed(2)} has been approved!`);
-                                    showToast('Withdrawal approved!');
-                                    await withdrawalDocRef.update({ notified: true });
-                                } else if (data.status === 'rejected') {
-                                    addNotification(`Your withdrawal of $${data.amount.toFixed(2)} was rejected.`);
-                                    showToast('Withdrawal rejected.', true);
-                                    await withdrawalDocRef.update({ notified: true });
-                                }
+                const q = query(
+                    collection(db, 'withdrawals'),
+                    where('userId', '==', userId),
+                    where('notified', '==', false)
+                );
+                userNotificationListener = onSnapshot(q, (snapshot) => {
+                    snapshot.docChanges().forEach(async (change) => {
+                        if (change.type === 'added' || change.type === 'modified') {
+                            const data = change.doc.data();
+                            const withdrawalDocRef = doc(db, 'withdrawals', change.doc.id);
+                            
+                            if (data.status === 'approved') {
+                                addNotification(`Your withdrawal of $${data.amount.toFixed(2)} has been approved!`);
+                                showToast('Withdrawal successful!');
+                                await updateDoc(withdrawalDocRef, { notified: true });
+                            } else if (data.status === 'rejected') {
+                                addNotification(`Your withdrawal of $${data.amount.toFixed(2)} was rejected.`);
+                                showToast('Withdrawal rejected.', true);
+                                await updateDoc(withdrawalDocRef, { notified: true });
                             }
-                        });
-                    }, error => console.error("Error setting up user notification listener: ", error));
+                        }
+                    });
+                }, error => console.error("Error setting up user notification listener: ", error));
             };
-
+            
             // --- AUTHENTICATION ---
-            auth.onAuthStateChanged(async (user) => {
+            onAuthStateChanged(auth, async (user) => {
                 loader.style.opacity = '0';
                 loader.style.visibility = 'hidden';
                 appContainer.style.visibility = 'visible';
 
                 if (user) {
                     currentUser = user;
-                    const userRef = db.collection('users').doc(user.uid);
+                    const userRef = doc(db, 'users', user.uid);
                     
                     if (userUnsubscribe) userUnsubscribe(); 
 
-                    userUnsubscribe = userRef.onSnapshot(doc => {
-                        if (doc.exists) {
-                            const data = doc.data();
+                    userUnsubscribe = onSnapshot(userRef, async (docSnap) => {
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
                              if (data.status === 'blocked') {
                                 document.body.innerHTML = '<h1 style="text-align:center; padding-top: 50px;">Your account has been blocked.</h1>';
                                 if(userUnsubscribe) userUnsubscribe();
@@ -666,25 +684,23 @@
                             document.getElementById('profileEmail').innerText = data.email;
                             document.getElementById('profileImage').src = data.profileImageUrl || 'https://placehold.co/100x100/EFEFEF/31343C?text=User';
                              document.getElementById('welcomeMessage').innerText = `Hello, ${data.name || 'User'}!`;
-                            db.collection('users').doc(user.uid).collection('history').orderBy('date', 'desc').onSnapshot(snap => updateHistoryPage(snap.docs.map(d => d.data())));
+                            const historyQuery = query(collection(userRef, 'history'), orderBy('date', 'desc'));
+                            onSnapshot(historyQuery, snap => updateHistoryPage(snap.docs.map(d => d.data())));
+                        } else {
+                             const newUser = {
+                                email: user.email, name: user.displayName, balance: 0.50,
+                                points: 0, status: 'active', referralUsed: false,
+                                referralCode: `REF${user.uid.substring(0, 6).toUpperCase()}`,
+                                dailyAdCount: 0,
+                                lastAdWatchDate: new Date(0).toISOString().split('T')[0]
+                            };
+                            await setDoc(userRef, newUser, { merge: true });
+                            await addDoc(collection(userRef, 'history'), {
+                                type: 'Welcome Bonus', detail: '+$0.50 for creating account', date: serverTimestamp()
+                            });
+                            addNotification('Welcome! You received a $0.50 bonus.');
                         }
                     });
-
-                    const userDoc = await userRef.get();
-                    if (!userDoc.exists) {
-                        const newUser = {
-                            email: user.email, name: user.displayName, balance: 0.50,
-                            points: 0, status: 'active', referralUsed: false,
-                            referralCode: `REF${user.uid.substring(0, 6).toUpperCase()}`,
-                            dailyAdCount: 0,
-                            lastAdWatchDate: new Date(0).toISOString().split('T')[0]
-                        };
-                        await userRef.set(newUser, { merge: true });
-                        await db.collection('users').doc(user.uid).collection('history').add({
-                            type: 'Welcome Bonus', detail: '+$0.50 for creating account', date: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                        addNotification('Welcome! You received a $0.50 bonus.');
-                    }
                     
                     document.querySelector('.header').style.display = 'flex';
                     document.querySelector('.nav-bottom').style.display = 'flex';
@@ -707,6 +723,23 @@
                     showPage('auth');
                 }
             });
+
+            // Handle initial auth
+             try {
+                const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                if (token) {
+                    await signInWithCustomToken(auth, token);
+                } else if (!auth.currentUser) { 
+                    // Fallback for environments without the token, only if no user is signed in
+                    // This prevents re-triggering anonymous sign-in on hot reloads
+                    // console.log("No token found, attempting anonymous sign-in.");
+                    // await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth Error:", error);
+                showToast("Authentication failed. Please refresh.", true);
+            }
+
 
             const generateTasks = () => {
                 const taskList = document.querySelector('.task-list');
@@ -735,12 +768,12 @@
             window.claimReward = async function(taskType, rewardAmount) {
                 if (!currentUser) return showToast("Please login first.", true);
                 const today = new Date().toISOString().split('T')[0];
-                const userRef = db.collection("users").doc(currentUser.uid);
+                const userRef = doc(db, "users", currentUser.uid);
 
                 try {
-                    await db.runTransaction(async (transaction) => {
+                    await runTransaction(db, async (transaction) => {
                         const userDoc = await transaction.get(userRef);
-                        if (!userDoc.exists) throw "User document does not exist!";
+                        if (!userDoc.exists()) throw "User document does not exist!";
                         
                         let currentData = userDoc.data();
                         let dailyCount = currentData.dailyAdCount || 0;
@@ -767,13 +800,13 @@
                         
                         transaction.update(userRef, { 
                             dailyAdCount: dailyCount + 1,
-                            points: firebase.firestore.FieldValue.increment(rewardAmount),
+                            points: increment(rewardAmount),
                             lastAdWatchDate: today
                         });
 
-                        const historyRef = userRef.collection('history').doc();
+                        const historyRef = doc(collection(userRef, 'history'));
                         transaction.set(historyRef, {
-                            type: 'Task Reward', detail: `+${rewardAmount} Points for watching ad.`, date: firebase.firestore.FieldValue.serverTimestamp()
+                            type: 'Task Reward', detail: `+${rewardAmount} Points for watching ad.`, date: serverTimestamp()
                         });
                         
                         showToast(`Congratulations! You earned ${rewardAmount} points.`);
@@ -787,8 +820,8 @@
             const generateNotices = () => {
                 const wrapper = document.getElementById('noticeSliderWrapper');
                 if (noticeInterval) clearInterval(noticeInterval);
-
-                db.collection('notices').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+                const q = query(collection(db, 'notices'), orderBy('timestamp', 'desc'));
+                onSnapshot(q, (snapshot) => {
                     if (snapshot.empty) {
                         wrapper.innerHTML = '<div class="notice-slide">Welcome to our app!</div>';
                         return;
@@ -816,17 +849,17 @@
             const generateHomeProducts = () => {
                 const productGrid = document.getElementById('homeProductGrid');
                 productGrid.innerHTML = '<p style="text-align:center; color: #7f8c8d;">Loading...</p>';
-                
-                db.collection('products').orderBy('timestamp', 'desc').limit(4).onSnapshot(snapshot => {
+                const q = query(collection(db, 'products'), orderBy('timestamp', 'desc'), limit(4));
+                onSnapshot(q, (snapshot) => {
                     if (snapshot.empty) {
                         productGrid.innerHTML = "<p>No recent products available.</p>";
                         return;
                     }
-                    let productsHTML = "";
+                    productGrid.innerHTML = ''; // Notun data ashar shathe shathe purono list clear kore din
                     snapshot.forEach(doc => {
                         const product = doc.data();
-                        productsHTML += `
-                            <div class="product-card" data-product-id="${doc.id}" data-product-name="${product.name}" data-product-price="${product.price}">
+                        const productCardHTML = `
+                            <div class="product-card" data-product-id="${doc.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-description="${product.description || ''}">
                                 <img src="${product.imageUrl || 'https://via.placeholder.com/150'}" alt="${product.name}">
                                 <div class="product-info">
                                     <h4>${product.name}</h4>
@@ -834,47 +867,48 @@
                                 </div>
                             </div>
                         `;
+                        productGrid.innerHTML += productCardHTML;
                     });
-                    productGrid.innerHTML = productsHTML;
                     document.querySelectorAll('#homeProductGrid .product-card').forEach(card => {
                         card.addEventListener('click', (e) => {
                             const data = e.currentTarget.dataset;
-                            openPurchaseModal(data.productId, data.productName, parseFloat(data.productPrice));
+                            openPurchaseModal(data.productId, data.productName, parseFloat(data.productPrice), data.productDescription);
                         });
                     });
                 });
             };
 
             const generateProducts = () => {
-                const productList = document.getElementById('productList');
-                productList.innerHTML = '<p style="text-align:center; color: #7f8c8d;">Loading products...</p>';
-                
-                db.collection('products').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+                const productContainer = document.getElementById('productList');
+                productContainer.innerHTML = '<p style="text-align:center; color: #7f8c8d;">Loading products...</p>';
+                const q = query(collection(db, "products"), orderBy("timestamp", "desc"));
+                onSnapshot(q, snapshot => {
                     if (snapshot.empty) {
-                        productList.innerHTML = "<p>No digital products available right now.</p>";
+                        productContainer.innerHTML = "<p>No digital products available right now.</p>";
                         return;
                     }
-
-                    let productsHTML = "";
+                    // Protibar notun data ashar shathe shathe purono list clear kore din
+                    productContainer.innerHTML = '';
                     snapshot.forEach(doc => {
-                        const product = doc.data();
-                        productsHTML += `
-                            <div class="product-card" data-product-id="${doc.id}" data-product-name="${product.name}" data-product-price="${product.price}">
+                        const product = { id: doc.id, ...doc.data() };
+                        // Ekhane prottek'ta product'er jonno apnar design onujayi HTML toiri korun
+                        const productCardHTML = `
+                            <div class="product-card" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-description="${product.description || ''}">
                                 <img src="${product.imageUrl || 'https://via.placeholder.com/150'}" alt="${product.name}">
                                 <div class="product-info">
                                     <h4>${product.name}</h4>
+                                    <p class="description">${product.description || ''}</p>
                                     <p class="price">$${(product.price || 0).toFixed(2)}</p>
                                     <button class="buy-now-btn">Buy Now</button>
                                 </div>
                             </div>
                         `;
+                        productContainer.innerHTML += productCardHTML;
                     });
-
-                    productList.innerHTML = productsHTML;
                     document.querySelectorAll('#productsPage .product-card').forEach(btn => {
                         btn.addEventListener('click', (e) => {
                             const data = e.currentTarget.dataset;
-                            openPurchaseModal(data.productId, data.productName, parseFloat(data.productPrice));
+                            openPurchaseModal(data.productId, data.productName, parseFloat(data.productPrice), data.productDescription);
                         });
                     });
                 }, error => console.error("Error fetching products:", error));
@@ -885,7 +919,8 @@
                 if (!currentUser) return;
                 productList.innerHTML = '<p style="text-align:center; color: #7f8c8d;">Loading your products...</p>';
 
-                db.collection('users').doc(currentUser.uid).collection('my_products').orderBy('purchaseDate', 'desc').onSnapshot(snapshot => {
+                const q = query(collection(db, 'users', currentUser.uid, 'my_products'), orderBy('purchaseDate', 'desc'));
+                onSnapshot(q, (snapshot) => {
                     if (snapshot.empty) {
                         productList.innerHTML = "<p>You haven't purchased any products yet.</p>";
                         return;
@@ -898,6 +933,7 @@
                                 <img src="${product.imageUrl || 'https://via.placeholder.com/150'}" alt="${product.name}">
                                 <div class="product-info">
                                     <h4>${product.name}</h4>
+                                    <p class="description">${product.description || ''}</p>
                                     <p class="price">Purchased</p>
                                 </div>
                             </div>
@@ -909,18 +945,30 @@
             
             const generatePaymentMethods = () => {
                 const container = document.getElementById('paymentMethodsContainer');
-                db.collection('config').doc('paymentMethods').onSnapshot(doc => {
-                    if(doc.exists && doc.data().methods) {
-                        const methods = doc.data().methods;
+                const docRef = doc(db, 'config', 'paymentMethods');
+                onSnapshot(docRef, (doc) => {
+                    let methods = [];
+                    if(doc.exists() && doc.data().methods && doc.data().methods.length > 0) {
+                         methods = doc.data().methods;
+                    } else {
+                        // Fallback to default Bangladeshi methods if Firestore is not configured
+                        methods = [
+                            { name: "bKash", logoUrl: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='15' fill='%23e2136e'/%3E%3Ctext x='50' y='60' font-size='30' fill='white' text-anchor='middle' font-family='Arial' font-weight='bold'%3EbKash%3C/text%3E%3C/svg%3E`, details: "01xxxxxxxxx (Personal)" },
+                            { name: "Nagad", logoUrl: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='15' fill='%23f58220'/%3E%3Ctext x='50' y='60' font-size='30' fill='white' text-anchor='middle' font-family='Arial' font-weight='bold'%3ENagad%3C/text%3E%3C/svg%3E`, details: "01xxxxxxxxx (Personal)" },
+                            { name: "Rocket", logoUrl: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='15' fill='%235c2d91'/%3E%3Ctext x='50' y='60' font-size='30' fill='white' text-anchor='middle' font-family='Arial' font-weight='bold'%3ERocket%3C/text%3E%3C/svg%3E`, details: "01xxxxxxxxx (Personal)" }
+                        ];
+                    }
+
+                    if (methods.length > 0) {
                         container.innerHTML = methods.map(method => `
                              <div class="card">
-                                <div style="display:flex; align-items:center;"> 
-                                    <img src="${method.logoUrl}" alt="${method.name}" class="payment-logo"> 
-                                    <h3>Withdraw via ${method.name}</h3> 
-                                </div>
-                                <input type="number" class="withdraw-input" id="${method.name.toLowerCase()}Amount" placeholder="Amount (USD)">
-                                <input type="text" class="withdraw-input" id="${method.name.toLowerCase()}Account" placeholder="Your ${method.name} Details">
-                                <button class="withdraw-btn" data-method="${method.name}">Request Withdrawal</button>
+                                 <div style="display:flex; align-items:center;"> 
+                                     <img src="${method.logoUrl}" alt="${method.name}" class="payment-logo"> 
+                                     <h3>Withdraw via ${method.name}</h3> 
+                                 </div>
+                                 <input type="number" class="withdraw-input" id="${method.name.toLowerCase()}Amount" placeholder="Amount (USD)">
+                                 <input type="text" class="withdraw-input" id="${method.name.toLowerCase()}Account" placeholder="Your ${method.name} Details (e.g. Number)">
+                                 <button class="withdraw-btn" data-method="${method.name}">Request Withdrawal</button>
                             </div>
                         `).join('');
 
@@ -942,8 +990,8 @@
                 const amount = parseFloat(amountInput.value);
                 const account = accountInput.value.trim();
                 
-                const userRef = db.collection('users').doc(currentUser.uid);
-                const userDoc = await userRef.get();
+                const userRef = doc(db, 'users', currentUser.uid);
+                const userDoc = await getDoc(userRef);
                 const currentBalance = userDoc.data().balance;
 
                 if (!account || isNaN(amount) || amount <= 0) return showToast('Invalid amount or account details.', true);
@@ -954,7 +1002,7 @@
                 btn.innerText = "Processing...";
 
                 try {
-                    await db.collection('withdrawals').add({
+                     await addDoc(collection(db, 'withdrawals'), {
                         userId: currentUser.uid, 
                         email: currentUser.email,
                         userName: currentUser.displayName || 'A User',
@@ -963,10 +1011,10 @@
                         account: account, 
                         status: 'pending',
                         notified: false,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        timestamp: serverTimestamp()
                     });
                     
-                    showToast('Withdrawal request sent successfully!');
+                    showToast('Withdrawal request successful! It is now pending review.');
                     amountInput.value = '';
                     accountInput.value = '';
                 } catch (error) {
@@ -982,26 +1030,25 @@
                 const file = event.target.files[0];
                 if (!file || !currentUser) return;
 
-                const storageRef = storage.ref(`profileImages/${currentUser.uid}`);
-                const uploadTask = storageRef.put(file);
+                const storageRef = ref(storage, `profileImages/${currentUser.uid}`);
+                const uploadTask = uploadBytesResumable(storageRef, file);
 
                 showToast('Uploading image...');
 
                 uploadTask.on('state_changed', 
                     (snapshot) => {}, 
                     (error) => { showToast('Upload failed: ' + error.message, true); }, 
-                    () => {
-                        uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                            db.collection('users').doc(currentUser.uid).update({ profileImageUrl: downloadURL });
-                            document.getElementById('profileImage').src = downloadURL;
-                            showToast('Profile picture updated!');
-                        });
+                    async () => {
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        await updateDoc(doc(db, 'users', currentUser.uid), { profileImageUrl: downloadURL });
+                        document.getElementById('profileImage').src = downloadURL;
+                        showToast('Profile picture updated!');
                     }
                 );
             };
 
-            const openPurchaseModal = async (productId, productName, productPrice) => {
-                const userDoc = await db.collection('users').doc(currentUser.uid).get();
+            const openPurchaseModal = async (productId, productName, productPrice, productDescription) => {
+                const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
                 const userBalance = userDoc.data().balance || 0;
 
                 document.getElementById('modalProductName').innerText = productName;
@@ -1026,14 +1073,25 @@
                 paymentOptionsDiv.querySelectorAll('.payment-option, .payment-btn').forEach(el => el.classList.remove('selected'));
 
                 // Generate external payment buttons
-                const methodsDoc = await db.collection('config').doc('paymentMethods').get();
-                if (methodsDoc.exists && methodsDoc.data().methods && methodsDoc.data().methods.length > 0) {
-                    const methods = methodsDoc.data().methods;
+                const methodsDoc = await getDoc(doc(db, 'config', 'paymentMethods'));
+                let methods = [];
+                 if (methodsDoc.exists() && methodsDoc.data().methods && methodsDoc.data().methods.length > 0) {
+                     methods = methodsDoc.data().methods;
+                } else {
+                     methods = [
+                         { name: "bKash", details: "01xxxxxxxxx (Personal)" },
+                         { name: "Nagad", details: "01xxxxxxxxx (Personal)" },
+                         { name: "Rocket", details: "01xxxxxxxxx (Personal)" }
+                     ];
+                }
+
+                if (methods.length > 0) {
                     orText.style.display = 'block';
                     methods.forEach(method => {
                         const btn = document.createElement('button');
                         btn.className = 'payment-btn';
                         btn.dataset.method = method.name.toLowerCase();
+                        btn.dataset.details = method.details; // Store details
                         btn.innerText = method.name;
                         externalButtonsDiv.appendChild(btn);
                     });
@@ -1043,6 +1101,7 @@
                 
                 // Add click listener to options
                 let selectedMethod = null;
+                let selectedMethodDetails = null;
                 const allOptions = paymentOptionsDiv.querySelectorAll('.payment-option, .payment-btn');
 
                 allOptions.forEach(opt => {
@@ -1051,13 +1110,14 @@
                         const currentOpt = e.currentTarget;
                         currentOpt.classList.add('selected');
                         selectedMethod = currentOpt.dataset.method;
+                        selectedMethodDetails = currentOpt.dataset.details;
 
                         if (selectedMethod === 'balance') {
                             externalDetailsDiv.style.display = 'none';
                             confirmBtn.disabled = userBalance < productPrice;
                         } else {
                             externalDetailsDiv.style.display = 'block';
-                            externalInstructionP.innerText = `Please send $${productPrice.toFixed(2)} to our ${selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1)} account and enter the Transaction ID below.`;
+                            externalInstructionP.innerText = `Please send $${productPrice.toFixed(2)} to our ${selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1)} account (${selectedMethodDetails}) and enter the Transaction ID below.`;
                             confirmBtn.disabled = false;
                         }
                     });
@@ -1072,28 +1132,29 @@
             const confirmPurchase = async (productId, productName, productPrice, method) => {
                 if (!method) return showToast('Please select a payment method.', true);
 
-                const userRef = db.collection('users').doc(currentUser.uid);
+                const userRef = doc(db, 'users', currentUser.uid);
                 
                 if (method === 'balance') {
                      try {
-                        await db.runTransaction(async (transaction) => {
+                        await runTransaction(db, async (transaction) => {
                             const userDoc = await transaction.get(userRef);
-                            if (!userDoc.exists) throw "User not found";
+                            if (!userDoc.exists()) throw "User not found";
                             
                             const newBalance = (userDoc.data().balance || 0) - productPrice;
                             if (newBalance < 0) throw "Insufficient funds";
 
                             transaction.update(userRef, { balance: newBalance });
                             
-                            const productData = (await db.collection('products').doc(productId).get()).data();
-                            const purchaseRef = userRef.collection('my_products').doc(productId);
-                            transaction.set(purchaseRef, { ...productData, purchaseDate: firebase.firestore.FieldValue.serverTimestamp() });
+                            const productDoc = await getDoc(doc(db, 'products', productId));
+                            const productData = productDoc.data();
+                            const purchaseRef = doc(collection(userRef, 'my_products'), productId);
+                            transaction.set(purchaseRef, { ...productData, purchaseDate: serverTimestamp() });
 
-                            const historyRef = userRef.collection('history').doc();
+                            const historyRef = doc(collection(userRef, 'history'));
                             transaction.set(historyRef, {
                                 type: 'Product Purchase',
                                 detail: `Purchased '${productName}' for $${productPrice.toFixed(2)}`,
-                                date: firebase.firestore.FieldValue.serverTimestamp()
+                                date: serverTimestamp()
                             });
                         });
                         showToast('Purchase successful!');
@@ -1102,7 +1163,7 @@
                         showToast('Purchase failed: ' + error, true);
                     }
                 } else {
-                    // Handle external payment methods (Bkash, Nagad, etc.)
+                    // Handle external payment methods
                     const trxId = document.getElementById('trxIdInput').value.trim();
                     if (!trxId) return showToast('Please enter the Transaction ID.', true);
 
@@ -1115,11 +1176,11 @@
                         paymentMethod: method,
                         transactionId: trxId,
                         status: 'pending',
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        timestamp: serverTimestamp()
                     };
                     
                     try {
-                        await db.collection('orders').add(orderData);
+                        await addDoc(collection(db, 'orders'), orderData);
                         showToast('Order placed! It will be reviewed by an admin shortly.');
                         document.getElementById('purchaseModal').classList.remove('show');
                     } catch (error) {
@@ -1140,7 +1201,7 @@
                 const email = document.getElementById('loginEmail').value;
                 const password = document.getElementById('loginPassword').value;
                 if(!email || !password) return showToast("Please fill all fields", true);
-                auth.signInWithEmailAndPassword(email, password).catch(e => showToast(e.message, true));
+                signInWithEmailAndPassword(auth, email, password).catch(e => showToast(e.message, true));
             });
 
             document.getElementById('signupBtn').addEventListener('click', () => {
@@ -1148,50 +1209,51 @@
                 const email = document.getElementById('signupEmail').value;
                 const pass = document.getElementById('signupPassword').value;
                 if(!name || !email || !pass) return showToast("Please fill all fields", true);
-                auth.createUserWithEmailAndPassword(email, pass)
-                    .then(cred => cred.user.updateProfile({displayName: name}))
+                createUserWithEmailAndPassword(auth, email, pass)
+                    .then(cred => updateProfile(cred.user, {displayName: name}))
                     .catch(e => showToast(e.message, true));
             });
             
             document.getElementById('submitReferralBtn').addEventListener('click', async () => {
                 const code = document.getElementById('referralCodeInput').value.trim();
                 if (!code) return showToast("Please enter a code.", true);
-                const userRef = db.collection('users').doc(currentUser.uid);
-                const userDoc = await userRef.get();
+                const userRef = doc(db, 'users', currentUser.uid);
+                const userDoc = await getDoc(userRef);
                 const userData = userDoc.data();
 
                 if(userData.referralUsed) return showToast('You have already used a referral code.', true);
                 if(code === userData.referralCode) return showToast('You cannot use your own referral code.', true);
 
-                const referrerQuery = await db.collection('users').where('referralCode', '==', code).limit(1).get();
-                if (referrerQuery.empty) return showToast('Invalid referral code.', true);
+                const q = query(collection(db, 'users'), where('referralCode', '==', code), limit(1));
+                const referrerQuerySnapshot = await getDocs(q);
+                if (referrerQuerySnapshot.empty) return showToast('Invalid referral code.', true);
                 
-                await userRef.update({
-                    balance: firebase.firestore.FieldValue.increment(0.20),
+                await updateDoc(userRef, {
+                    balance: increment(0.20),
                     referralUsed: true
                 });
-                await db.collection('users').doc(currentUser.uid).collection('history').add({
-                    type: 'Referral Bonus', detail: '+$0.20 for applying code.', date: firebase.firestore.FieldValue.serverTimestamp()
+                await addDoc(collection(userRef, 'history'), {
+                    type: 'Referral Bonus', detail: '+$0.20 for applying code.', date: serverTimestamp()
                 });
                 addNotification('+$0.20 Referral Bonus added!');
                 showToast('Referral bonus added!');
             });
 
             document.getElementById('convertPointsBtn').addEventListener('click', async () => {
-                const userRef = db.collection('users').doc(currentUser.uid);
-                const userDoc = await userRef.get();
+                const userRef = doc(db, 'users', currentUser.uid);
+                const userDoc = await getDoc(userRef);
                 const currentPoints = userDoc.data().points || 0;
 
                 if (currentPoints >= 1000) {
                     const dollars = Math.floor(currentPoints / 1000);
-                    await userRef.update({
-                        points: firebase.firestore.FieldValue.increment(-dollars * 1000),
-                        balance: firebase.firestore.FieldValue.increment(dollars)
+                    await updateDoc(userRef, {
+                        points: increment(-dollars * 1000),
+                        balance: increment(dollars)
                     });
-                    await db.collection('users').doc(currentUser.uid).collection('history').add({
+                    await addDoc(collection(userRef, 'history'), {
                         type: 'Points Conversion',
                         detail: `-${dollars*1000} Pts, +$${dollars}.00 to balance.`,
-                        date: firebase.firestore.FieldValue.serverTimestamp()
+                        date: serverTimestamp()
                     });
                     showToast('Points converted successfully!');
                 } else {
@@ -1199,7 +1261,7 @@
                 }
             });
 
-            document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+            document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
             document.getElementById('navHome').addEventListener('click', () => showPage('home'));
             document.getElementById('navWork').addEventListener('click', () => showPage('work'));
             document.getElementById('navProducts').addEventListener('click', () => showPage('products'));
@@ -1211,11 +1273,11 @@
             
             document.getElementById('copyReferralBtn').addEventListener('click', () => {
                 const codeToCopy = document.getElementById('userReferralCode').innerText;
-                if(navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(codeToCopy)
-                        .then(() => showToast('Referral Code copied!'))
-                        .catch(() => showToast('Failed to copy code.', true));
-                } else {
+                try {
+                    navigator.clipboard.writeText(codeToCopy);
+                    showToast('Referral Code copied!');
+                } catch (err) {
+                     // Fallback for older browsers
                     const textArea = document.createElement("textarea");
                     textArea.value = codeToCopy;
                     document.body.appendChild(textArea);
