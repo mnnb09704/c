@@ -684,10 +684,9 @@
                 );
                 userNotificationListener = onSnapshot(q, (snapshot) => {
                     snapshot.docChanges().forEach(async (change) => {
-                        // Only process modified documents that haven't been notified yet
                         if (change.type === 'modified') {
                             const data = change.doc.data();
-                            if(data.notified === true) return; // FIX: Prevents re-notifying
+                            if(data.notified === true) return;
 
                             const withdrawalDocRef = doc(db, 'withdrawals', change.doc.id);
                             
@@ -811,60 +810,79 @@
                         <div class="task-details"><h4>${task.title}</h4><p>Watch a short ad to earn points.</p></div>
                         <span class="task-reward">+${task.points} Pts</span>
                     `;
-                    taskItem.addEventListener('click', () => window.claimReward(task.type, task.points));
+                    taskItem.addEventListener('click', () => window.claimReward(task.points, task.title));
                     taskList.appendChild(taskItem);
                 });
             };
 
-            window.claimReward = async function(taskType, rewardAmount) {
+            window.claimReward = async function(rewardAmount, taskTitle) {
                 if (!currentUser) return showToast("Please login first.", true);
-                const today = new Date().toISOString().split('T')[0];
                 const userRef = doc(db, "users", currentUser.uid);
 
                 try {
+                    // Step 1: Read the user's current ad count first.
+                    const userDoc = await getDoc(userRef);
+                    if (!userDoc.exists()) throw new Error("User document does not exist!");
+
+                    const today = new Date().toISOString().split('T')[0];
+                    let currentData = userDoc.data();
+                    let dailyCount = currentData.dailyAdCount || 0;
+                    let lastDate = currentData.lastAdWatchDate || new Date(0).toISOString().split('T')[0];
+
+                    if (lastDate !== today) {
+                        dailyCount = 0; // Reset count for the new day
+                    }
+
+                    if (dailyCount >= (appConfig.dailyAdLimit || 10)) {
+                        throw new Error("Daily ad limit reached.");
+                    }
+
+                    showToast("Loading ad...");
+                    
+                    // Step 2: Show the ad (asynchronous operation).
+                    await new Promise((resolve, reject) => {
+                        try {
+                            const adPromise = window.show_9829935();
+                            if (adPromise && typeof adPromise.then === 'function') {
+                                adPromise.then(resolve).catch(reject);
+                            } else {
+                                setTimeout(resolve, 1500); 
+                            }
+                        } catch(e) { reject(e); }
+                    });
+                    
+                    // Step 3: Once ad is successful, run a transaction to update points.
                     await runTransaction(db, async (transaction) => {
-                        const userDoc = await transaction.get(userRef);
-                        if (!userDoc.exists()) throw "User document does not exist!";
+                        // Re-read the document inside the transaction to ensure data consistency
+                        const freshUserDoc = await transaction.get(userRef);
+                        if (!freshUserDoc.exists()) throw "User not found during transaction.";
                         
-                        let currentData = userDoc.data();
-                        let dailyCount = currentData.dailyAdCount || 0;
-                        let lastDate = currentData.lastAdWatchDate || new Date(0).toISOString().split('T')[0];
-
-                        if (lastDate !== today) dailyCount = 0;
-
-                        if (dailyCount >= (appConfig.dailyAdLimit || 10)) {
-                            return Promise.reject("Daily ad limit reached.");
+                        const freshData = freshUserDoc.data();
+                        const freshDailyCount = (freshData.lastAdWatchDate === today) ? freshData.dailyAdCount : 0;
+                        
+                        if (freshDailyCount >= (appConfig.dailyAdLimit || 10)) {
+                            throw "Limit reached during transaction.";
                         }
 
-                        showToast("Loading ad...");
-                        
-                        await new Promise((resolve, reject) => {
-                            try {
-                                const adPromise = window.show_9829935();
-                                if (adPromise && typeof adPromise.then === 'function') {
-                                    adPromise.then(resolve).catch(reject);
-                                } else {
-                                    setTimeout(resolve, 1500); 
-                                }
-                            } catch(e) { reject(e); }
-                        });
-                        
                         transaction.update(userRef, { 
-                            dailyAdCount: dailyCount + 1,
+                            dailyAdCount: increment(1), // Use increment for safety
                             points: increment(rewardAmount),
                             lastAdWatchDate: today
                         });
 
                         const historyRef = doc(collection(userRef, 'history'));
                         transaction.set(historyRef, {
-                            type: 'Task Reward', detail: `+${rewardAmount} Points for watching ad.`, date: serverTimestamp()
+                            type: 'Task Reward', 
+                            detail: `+${rewardAmount} Points for '${taskTitle}'`, 
+                            date: serverTimestamp()
                         });
-                        
-                        showToast(`Congratulations! You earned ${rewardAmount} points.`);
                     });
+                    
+                    showToast(`Congratulations! You earned ${rewardAmount} points.`);
+
                 } catch (error) {
                     console.error("Error claiming reward:", error);
-                    showToast(typeof error === 'string' ? error : "An error occurred. Please try again.", true);
+                    showToast(error.message || "An error occurred. Please try again.", true);
                 }
             };
             
@@ -1028,12 +1046,6 @@
                 });
             };
 
-            /**
-             * NOTE: For this query to work, you need a composite index in Firestore.
-             * If it's not working, check your browser's console for an error message.
-             * It will contain a link to create the required index automatically.
-             * The index will be on the 'withdrawals' collection for fields 'userId' (ascending) and 'timestamp' (descending).
-             */
             const generateWithdrawHistory = () => {
                 const historyList = document.getElementById('withdrawHistoryList');
                 if (!currentUser) return;
