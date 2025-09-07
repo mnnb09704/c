@@ -58,6 +58,20 @@
         }
         .header .logo { font-weight: bold; font-size: 1.2em; }
         .header .icons button { background: none; border: none; color: white; cursor: pointer; padding: 5px; border-radius: 50%; }
+
+        .header-right-controls { display: flex; align-items: center; gap: 5px; }
+        .selectors-container { display: flex; gap: 5px; }
+        .header-selector {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white; border: none; border-radius: 8px;
+            padding: 6px 4px; font-size: 0.8em; font-weight: 500;
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-caret-down-fill' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 5px center;
+            padding-right: 20px;
+        }
+        .header-selector option { color: black; background-color: white; }
         
         .nav-bottom { 
             display: flex; justify-content: space-around; padding: 5px 0; 
@@ -361,15 +375,30 @@
         <div id="toast" style="position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background-color: rgba(30,30,30,0.9); color: white; padding: 12px 25px; border-radius: 25px; z-index: 2000; transition: bottom 0.5s ease-in-out; font-size: 0.9em; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"></div>
         
         <div class="header" style="display: none;">
-             <span class="logo">Income Hobei</span>
-            <div id="searchBar" style="display:none; flex-grow: 1; padding: 0 10px;"> <input type="text" id="searchInput" placeholder="Search tasks..." style="width: 100%; padding: 8px; border-radius: 20px; border: none; outline: none;"> </div>
-            <div class="icons">
-                <button id="searchButton"><i class="material-icons">search</i></button>
-                <button id="notificationButton" style="position: relative;">
-                    <i class="material-icons">notifications</i>
-                    <span id="notificationBadge" class="notification-badge" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; font-size: 10px; width: 16px; height: 16px; display: none; align-items: center; justify-content: center;">0</span>
-                </button>
-                <button id="profileButton"><i class="material-icons">person</i></button>
+            <span class="logo" data-lang-key="appName">Income Hobei</span>
+            <div id="searchBar" style="display:none; flex-grow: 1; padding: 0 10px;"> 
+                <input type="text" id="searchInput" data-lang-key-placeholder="searchPlaceholder" placeholder="Search tasks..." style="width: 100%; padding: 8px; border-radius: 20px; border: none; outline: none;"> 
+            </div>
+            <div class="header-right-controls">
+                <div class="selectors-container">
+                    <select id="currencySelector" class="header-selector">
+                        <option value="USD">$ USD</option>
+                        <option value="BDT">৳ BDT</option>
+                    </select>
+                    <select id="languageSelector" class="header-selector">
+                        <option value="en">EN</option>
+                        <option value="bn">BN</option>
+                        <option value="hi">HI</option>
+                    </select>
+                </div>
+                <div class="icons">
+                    <button id="searchButton"><i class="material-icons">search</i></button>
+                    <button id="notificationButton" style="position: relative;">
+                        <i class="material-icons">notifications</i>
+                        <span id="notificationBadge" class="notification-badge" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; font-size: 10px; width: 16px; height: 16px; display: none; align-items: center; justify-content: center;">0</span>
+                    </button>
+                    <button id="profileButton"><i class="material-icons">person</i></button>
+                </div>
             </div>
         </div>
 
@@ -380,19 +409,19 @@
                     <div class="card" id="authCard">
                         <div class="auth-flipper">
                             <div id="loginForm">
-                                <div class="auth-header"><h2>Welcome Back!</h2></div>
-                                <div class="input-group"> <i class="material-icons">email</i> <input type="email" id="loginEmail" placeholder="Email"> </div>
-                                <div class="input-group"> <i class="material-icons">lock</i> <input type="password" id="loginPassword" placeholder="Password"> </div>
-                                <button id="loginBtn" class="submit-btn">Log In</button>
-                                <p class="auth-switch">Don't have an account? <a href="#" id="showSignupLink">Signup</a></p>
+                                <div class="auth-header"><h2 data-lang-key="welcomeBack">Welcome Back!</h2></div>
+                                <div class="input-group"> <i class="material-icons">email</i> <input type="email" id="loginEmail" data-lang-key-placeholder="emailPlaceholder" placeholder="Email"> </div>
+                                <div class="input-group"> <i class="material-icons">lock</i> <input type="password" id="loginPassword" data-lang-key-placeholder="passwordPlaceholder" placeholder="Password"> </div>
+                                <button id="loginBtn" class="submit-btn" data-lang-key="loginBtn">Log In</button>
+                                <p class="auth-switch"><span data-lang-key="noAccount">Don't have an account?</span> <a href="#" id="showSignupLink" data-lang-key="signupLink">Signup</a></p>
                             </div>
                             <div id="signupForm">
-                                <div class="auth-header"><h2>Create Account</h2></div>
-                                <div class="input-group"> <i class="material-icons">person</i> <input type="text" id="signupFullName" placeholder="Full Name"> </div>
-                                <div class="input-group"> <i class="material-icons">email</i> <input type="email" id="signupEmail" placeholder="Email"> </div>
-                                <div class="input-group"> <i class="material-icons">lock</i> <input type="password" id="signupPassword" placeholder="Password"> </div>
-                                <button id="signupBtn" class="submit-btn">Create Account</button>
-                                <p class="auth-switch">Already have an account? <a href="#" id="showLoginLink">Login</a></p>
+                                <div class="auth-header"><h2 data-lang-key="createAccount">Create Account</h2></div>
+                                <div class="input-group"> <i class="material-icons">person</i> <input type="text" id="signupFullName" data-lang-key-placeholder="fullNamePlaceholder" placeholder="Full Name"> </div>
+                                <div class="input-group"> <i class="material-icons">email</i> <input type="email" id="signupEmail" data-lang-key-placeholder="emailPlaceholder" placeholder="Email"> </div>
+                                <div class="input-group"> <i class="material-icons">lock</i> <input type="password" id="signupPassword" data-lang-key-placeholder="passwordPlaceholder" placeholder="Password"> </div>
+                                <button id="signupBtn" class="submit-btn" data-lang-key="createAccountBtn">Create Account</button>
+                                <p class="auth-switch"><span data-lang-key="hasAccount">Already have an account?</span> <a href="#" id="showLoginLink" data-lang-key="loginLink">Login</a></p>
                             </div>
                         </div>
                     </div>
@@ -415,9 +444,9 @@
                         <circle class="progress-circle-fg" cx="100" cy="100" r="90" id="progressCircleFg" />
                     </svg>
                     <div class="progress-text">
-                        <span class="label">Today's Tasks</span>
+                        <span class="label" data-lang-key="todaysTasks">Today's Tasks</span>
                         <span class="value" id="dailyProgressValue">0/10</span>
-                        <button class="claim-button" id="claimTasksButton">Continue to claim</button>
+                        <button class="claim-button" id="claimTasksButton" data-lang-key="continueToClaim">Continue to claim</button>
                     </div>
                 </div>
                 
@@ -427,7 +456,7 @@
                     </div>
                 </div>
 
-                <h3 class="section-title" style="padding: 0 15px;">Recent Products</h3>
+                <h3 class="section-title" style="padding: 0 15px;" data-lang-key="recentProducts">Recent Products</h3>
                 <div class="product-grid" id="homeProductGrid">
                     <!-- Recent products will be loaded here -->
                 </div>
@@ -435,20 +464,20 @@
 
             <!-- Work Page -->
             <div id="workPage" class="page">
-                <h2>Task Board</h2>
+                <h2 data-lang-key="taskBoard">Task Board</h2>
                 <div class="card task-list"></div>
             </div>
             
             <!-- Digital Products Page -->
             <div id="productsPage" class="page">
-                <h2>Digital Products</h2>
+                <h2 data-lang-key="digitalProducts">Digital Products</h2>
                 <div class="product-grid" id="productList">
                     <!-- Products will be loaded here by JavaScript -->
                 </div>
             </div>
              <!-- My Products Page -->
             <div id="myProductsPage" class="page">
-                <h2>My Products</h2>
+                <h2 data-lang-key="myProducts">My Products</h2>
                 <div class="product-grid" id="myProductList">
                     <!-- Purchased products will be loaded here -->
                 </div>
@@ -456,16 +485,16 @@
 
             <!-- Withdraw Page -->
             <div id="withdrawPage" class="page">
-                <h2>Withdraw & Convert</h2>
+                <h2 data-lang-key="withdrawAndConvert">Withdraw & Convert</h2>
                     <div class="card balance-card">
-                        <h4>Your Current Balance</h4>
+                        <h4 data-lang-key="yourCurrentBalance">Your Current Balance</h4>
                         <p id="balanceAmount" class="balance-amount">$0.00</p>
                     </div>
                 <div class="card">
-                    <h4>Points Wallet</h4>
-                    <p>Current Points: <b id="pointsAmount">0</b></p>
-                    <p style="font-size: 0.8em; color: #666;">1,000 Points = $1.00 USD</p>
-                    <button id="convertPointsBtn" class="submit-btn" style="background: linear-gradient(45deg, #ff9800, #ffc107); box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);">Convert to Cash</button>
+                    <h4 data-lang-key="pointsWallet">Points Wallet</h4>
+                    <p><span data-lang-key="currentPoints">Current Points:</span> <b id="pointsAmount">0</b></p>
+                    <p style="font-size: 0.8em; color: #666;" data-lang-key="pointsToUsd">1,000 Points = $1.00 USD</p>
+                    <button id="convertPointsBtn" class="submit-btn" data-lang-key="convertToCash" style="background: linear-gradient(45deg, #ff9800, #ffc107); box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);">Convert to Cash</button>
                 </div>
                 
                 <div id="paymentMethodsContainer">
@@ -485,49 +514,49 @@
                     <p id="profileEmail">user@email.com</p>
                 </div>
                 <div class="card">
-                    <div id="myProductsBtn" class="setting-item"><span>My Products</span> <i class="material-icons">chevron_right</i></div>
-                    <div id="historyBtn" class="setting-item"><span>Task History</span> <i class="material-icons">chevron_right</i></div>
-                    <div id="withdrawHistoryBtn" class="setting-item"><span>Withdraw History</span> <i class="material-icons">chevron_right</i></div>
+                    <div id="myProductsBtn" class="setting-item"><span data-lang-key="myProductsNav">My Products</span> <i class="material-icons">chevron_right</i></div>
+                    <div id="historyBtn" class="setting-item"><span data-lang-key="taskHistory">Task History</span> <i class="material-icons">chevron_right</i></div>
+                    <div id="withdrawHistoryBtn" class="setting-item"><span data-lang-key="withdrawHistory">Withdraw History</span> <i class="material-icons">chevron_right</i></div>
                 </div>
                 <div class="card">
-                    <h4>Your Referral Code</h4>
-                    <p>Share this code with friends:</p>
+                    <h4 data-lang-key="yourReferralCode">Your Referral Code</h4>
+                    <p data-lang-key="shareThisCode">Share this code with friends:</p>
                     <b id="userReferralCode" style="font-size: 1.2em; letter-spacing: 2px;"></b>
-                    <button id="copyReferralBtn" class="submit-btn" style="margin-top:10px;">Copy Code</button>
+                    <button id="copyReferralBtn" class="submit-btn" style="margin-top:10px;" data-lang-key="copyCode">Copy Code</button>
                 </div>
                 <div class="card">
-                    <h4>Apply a Code</h4>
-                    <input type="text" id="referralCodeInput" placeholder="Enter referral code" class="withdraw-input">
-                    <button id="submitReferralBtn" class="submit-btn">Apply Code</button>
+                    <h4 data-lang-key="applyACode">Apply a Code</h4>
+                    <input type="text" id="referralCodeInput" data-lang-key-placeholder="enterReferralCode" placeholder="Enter referral code" class="withdraw-input">
+                    <button id="submitReferralBtn" class="submit-btn" data-lang-key="applyCode">Apply Code</button>
                 </div>
-                  <button id="logoutBtn" class="logout-button">Logout</button>
+                  <button id="logoutBtn" class="logout-button" data-lang-key="logout">Logout</button>
             </div>
             
             <!-- History Page -->
             <div id="historyPage" class="page">
-                <h2>Task History</h2>
-                <div id="historyList" class="card"> <p>No activity yet.</p> </div>
+                <h2 data-lang-key="taskHistoryTitle">Task History</h2>
+                <div id="historyList" class="card"> <p data-lang-key="noActivity">No activity yet.</p> </div>
             </div>
 
             <!-- Withdraw History Page -->
             <div id="withdrawHistoryPage" class="page">
-                <h2>Withdraw History</h2>
+                <h2 data-lang-key="withdrawHistoryTitle">Withdraw History</h2>
                 <div id="withdrawHistoryList" class="card">
-                    <p>No withdrawal history yet.</p>
+                    <p data-lang-key="noWithdrawalHistory">No withdrawal history yet.</p>
                 </div>
             </div>
         </div>
 
         <div class="nav-bottom" style="display: none;">
-            <button id="navHome"><i class="material-icons">home</i>Home</button>
-            <button id="navWork"><i class="material-icons">work</i>Work</button>
-            <button id="navProducts"><i class="material-icons">shopping_bag</i>Products</button>
-            <button id="navWithdraw"><i class="material-icons">account_balance_wallet</i>Withdraw</button>
+            <button id="navHome"><i class="material-icons">home</i><span data-lang-key="home">Home</span></button>
+            <button id="navWork"><i class="material-icons">work</i><span data-lang-key="work">Work</span></button>
+            <button id="navProducts"><i class="material-icons">shopping_bag</i><span data-lang-key="products">Products</span></button>
+            <button id="navWithdraw"><i class="material-icons">account_balance_wallet</i><span data-lang-key="withdraw">Withdraw</span></button>
         </div>
         <div id="notificationOverlay"></div>
         <div id="notificationPanel">
               <div class="notification-header">
-                <h3>Notifications</h3>
+                <h3 data-lang-key="notifications">Notifications</h3>
                 <button id="closeNotificationBtn" style="background:none; border:none; color: var(--text-light); cursor:pointer;"><i class="material-icons">close</i></button>
             </div>
             <ul class="notification-list"></ul>
@@ -543,18 +572,18 @@
                 <div style="margin: 20px 0;">
                     <div id="modalPriceDetails"></div>
                     <hr>
-                    <h4>Select Payment Method</h4>
+                    <h4 data-lang-key="selectPaymentMethod">Select Payment Method</h4>
                     <div id="paymentOptions">
                          <div class="payment-option" data-method="balance">
-                            <b>Pay with App Balance</b>
-                            <p style="font-size:0.9em; margin:5px 0 0;">Available: <b id="modalUserBalance"></b></p>
+                            <b data-lang-key="payWithAppBalance">Pay with App Balance</b>
+                            <p style="font-size:0.9em; margin:5px 0 0;"><span data-lang-key="available">Available:</span> <b id="modalUserBalance"></b></p>
                         </div>
-                        <p id="orText" style="text-align:center; color: #7f8c8d; margin: 15px 0; display:none;">- OR -</p>
+                        <p id="orText" style="text-align:center; color: #7f8c8d; margin: 15px 0; display:none;" data-lang-key="or">- OR -</p>
                         <div class="payment-method-buttons" id="externalPaymentButtons">
                             <!-- Buttons like Bkash, Nagad will be injected here -->
                         </div>
                          <div id="no-methods-msg" class="no-methods-message" style="display: none;">
-                            <p>No other payment methods are available. Please use your app balance or contact support.</p>
+                            <p data-lang-key="noOtherMethods">No other payment methods are available. Please use your app balance or contact support.</p>
                         </div>
                         <div class="payment-details" id="externalPaymentDetails">
                             <p id="externalPaymentInstruction" style="font-size:0.9em; margin:5px 0;"></p>
@@ -562,7 +591,7 @@
                         </div>
                     </div>
                 </div>
-                <button id="confirmPurchaseBtn" class="btn btn-primary" style="width: 100%;">Order Place</button>
+                <button id="confirmPurchaseBtn" class="btn btn-primary" style="width: 100%;" data-lang-key="orderPlace">Order Place</button>
             </div>
         </div>
     </div>
@@ -576,7 +605,6 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             // --- FIREBASE SETUP ---
-            // Use the globally provided Firebase config if available, with a fallback
             const firebaseConfig = JSON.parse(
                 typeof __firebase_config !== 'undefined' ?
                 __firebase_config :
@@ -598,21 +626,167 @@
             let noticeInterval = null;
             let settings = { minWithdrawal: 5, themeColor: '#8A2BE2' };
             let appConfig = { dailyAdLimit: 10 }; 
+            let currentBalanceInUSD = 0;
+
+            // --- LOCALIZATION & CURRENCY ---
+            let currentLanguage = localStorage.getItem('userLanguage') || 'en';
+            let currentCurrency = localStorage.getItem('userCurrency') || 'USD';
+            const BDT_CONVERSION_RATE = 117.50; // Example static rate
+
+            const translations = {
+                // General UI & Nav
+                appName: { en: 'Income Hobei', bn: 'ইনকাম হবেই', hi: 'इनकम होबेई' },
+                searchPlaceholder: { en: 'Search tasks...', bn: 'টাস্ক খুঁজুন...', hi: 'कार्य खोजें...' },
+                home: { en: 'Home', bn: 'হোম', hi: 'होम' },
+                work: { en: 'Work', bn: 'কাজ', hi: 'काम' },
+                products: { en: 'Products', bn: 'পণ্য', hi: 'उत्पाद' },
+                withdraw: { en: 'Withdraw', bn: 'উত্তোলন', hi: 'निकालें' },
+                notifications: { en: 'Notifications', bn: 'বিজ্ঞপ্তি', hi: 'सूचनाएं' },
+                // Auth Page
+                welcomeBack: { en: 'Welcome Back!', bn: 'আবার স্বাগতম!', hi: 'वापस स्वागत है!' },
+                emailPlaceholder: { en: 'Email', bn: 'ইমেল', hi: 'ईमेल' },
+                passwordPlaceholder: { en: 'Password', bn: 'পাসওয়ার্ড', hi: 'पासवर्ड' },
+                loginBtn: { en: 'Log In', bn: 'লগ ইন', hi: 'लॉग इन करें' },
+                noAccount: { en: "Don't have an account?", bn: 'অ্যাকাউন্ট নেই?', hi: 'खाता नहीं है?' },
+                signupLink: { en: 'Signup', bn: 'সাইন আপ', hi: 'साइन अप करें' },
+                createAccount: { en: 'Create Account', bn: 'অ্যাকাউন্ট তৈরি করুন', hi: 'खाता बनाएं' },
+                fullNamePlaceholder: { en: 'Full Name', bn: 'পুরো নাম', hi: 'पूरा नाम' },
+                createAccountBtn: { en: 'Create Account', bn: 'অ্যাকাউন্ট তৈরি করুন', hi: 'खाता बनाएं' },
+                hasAccount: { en: 'Already have an account?', bn: 'ইতিমধ্যে একটি অ্যাকাউন্ট আছে?', hi: 'पहले से ही एक खाता है?' },
+                loginLink: { en: 'Login', bn: 'লগইন', hi: 'लॉग इन करें' },
+                // Home Page
+                helloUser: { en: 'Hello, {name}!', bn: 'হ্যালো, {name}!', hi: 'नमस्ते, {name}!' },
+                todaysTasks: { en: "Today's Tasks", bn: 'আজকের কাজ', hi: 'आज के कार्य' },
+                continueToClaim: { en: 'Continue to claim', bn: 'দাবি করতে এগিয়ে যান', hi: 'दावा करने के लिए जारी रखें' },
+                recentProducts: { en: 'Recent Products', bn: 'সাম্প্রতিক পণ্য', hi: 'हाल के उत्पाद' },
+                // Work Page
+                taskBoard: { en: 'Task Board', bn: 'টাস্ক বোর্ড', hi: 'टास्क बोर्ड' },
+                watchAdToEarn: { en: 'Watch a short ad to earn points.', bn: 'পয়েন্ট অর্জনের জন্য একটি ছোট বিজ্ঞাপন দেখুন।', hi: 'अंक अर्जित करने के लिए एक छोटा विज्ञापन देखें।' },
+                // Products Page
+                digitalProducts: { en: 'Digital Products', bn: 'ডিজিটাল পণ্য', hi: 'डिजिटल उत्पाद' },
+                myProducts: { en: 'My Products', bn: 'আমার পণ্য', hi: 'मेरे उत्पाद' },
+                buyNow: { en: 'Buy Now', bn: 'এখনই কিনুন', hi: 'अभी खरीदें' },
+                purchased: { en: 'Purchased', bn: 'কেনা হয়েছে', hi: 'खरीदा हुआ' },
+                // Withdraw Page
+                withdrawAndConvert: { en: 'Withdraw & Convert', bn: 'উত্তোলন ও রূপান্তর', hi: 'निकालें और बदलें' },
+                yourCurrentBalance: { en: 'Your Current Balance', bn: 'আপনার বর্তমান ব্যালেন্স', hi: 'आपकी वर्तमान शेष राशि' },
+                pointsWallet: { en: 'Points Wallet', bn: 'পয়েন্ট ওয়ালেট', hi: 'पॉइंट्स वॉलेट' },
+                currentPoints: { en: 'Current Points:', bn: 'বর্তমান পয়েন্ট:', hi: 'वर्तमान अंक:' },
+                pointsToUsd: { en: '1,000 Points = $1.00 USD', bn: '১,০০০ পয়েন্ট = $১.০০ USD', hi: '१,००० अंक = $१.०० USD' },
+                convertToCash: { en: 'Convert to Cash', bn: 'টাকায় রূপান্তর করুন', hi: 'नकद में बदलें' },
+                requestWithdrawal: { en: 'Request Withdrawal', bn: 'উত্তোলনের অনুরোধ', hi: 'निकासी का अनुरोध करें' },
+                // Profile Page
+                myProductsNav: { en: 'My Products', bn: 'আমার পণ্য', hi: 'मेरे उत्पाद' },
+                taskHistory: { en: 'Task History', bn: 'কাজের ইতিহাস', hi: 'कार्य इतिहास' },
+                withdrawHistory: { en: 'Withdraw History', bn: 'উত্তোলনের ইতিহাস', hi: 'निकासी इतिहास' },
+                yourReferralCode: { en: 'Your Referral Code', bn: 'আপনার রেফারেল কোড', hi: 'आपका रेफरल कोड' },
+                shareThisCode: { en: 'Share this code with friends:', bn: 'এই কোড বন্ধুদের সাথে শেয়ার করুন:', hi: 'इस कोड को दोस्तों के साथ साझा करें:' },
+                copyCode: { en: 'Copy Code', bn: 'কোড কপি করুন', hi: 'कोड कॉपी करें' },
+                applyACode: { en: 'Apply a Code', bn: 'একটি কোড প্রয়োগ করুন', hi: 'एक कोड लागू करें' },
+                enterReferralCode: { en: 'Enter referral code', bn: 'রেফারেল কোড প্রবেশ করান', hi: 'रेफरल कोड दर्ज करें' },
+                applyCode: { en: 'Apply Code', bn: 'কোড প্রয়োগ করুন', hi: 'कोड लागू करें' },
+                logout: { en: 'Logout', bn: 'লগ আউট', hi: 'लॉग आउट' },
+                // History Pages
+                taskHistoryTitle: { en: 'Task History', bn: 'কাজের ইতিহাস', hi: 'कार्य इतिहास' },
+                noActivity: { en: 'No activity yet.', bn: 'এখনও কোন কার্যকলাপ নেই।', hi: 'अभी तक कोई गतिविधि नहीं।' },
+                withdrawHistoryTitle: { en: 'Withdraw History', bn: 'উত্তোলনের ইতিহাস', hi: 'निकासी इतिहास' },
+                noWithdrawalHistory: { en: 'No withdrawal history yet.', bn: 'এখনও কোন উত্তোলনের ইতিহাস নেই।', hi: 'अभी तक कोई निकासी इतिहास नहीं है।' },
+                 // Purchase Modal
+                selectPaymentMethod: { en: 'Select Payment Method', bn: 'পেমেন্ট পদ্ধতি নির্বাচন করুন', hi: 'भुगतान विधि चुनें' },
+                payWithAppBalance: { en: 'Pay with App Balance', bn: 'অ্যাপ ব্যালেন্স দিয়ে পেমেন্ট করুন', hi: 'ऐप बैलेंस से भुगतान करें' },
+                available: { en: 'Available:', bn: 'উপলব্ধ:', hi: 'उपलब्ध:' },
+                or: { en: '- OR -', bn: '- অথবা -', hi: '- या -' },
+                noOtherMethods: { en: 'No other payment methods are available. Please use your app balance or contact support.', bn: 'অন্য কোন পেমেন্ট পদ্ধতি উপলব্ধ নেই। অনুগ্রহ করে আপনার অ্যাপ ব্যালেন্স ব্যবহার করুন বা সহায়তার জন্য যোগাযোগ করুন।', hi: 'कोई अन्य भुगतान विधि उपलब्ध नहीं है। कृपया अपने ऐप बैलेंस का उपयोग करें या समर्थन से संपर्क करें।' },
+                orderPlace: { en: 'Order Place', bn: 'অর্ডার দিন', hi: 'आदेश दें' },
+                // Toast Messages
+                fillAllFields: { en: 'Please fill all fields', bn: 'অনুগ্রহ করে সমস্ত ঘর পূরণ করুন', hi: 'कृपया सभी फ़ील्ड भरें' },
+                dailyAdLimitReached: { en: 'Daily ad limit reached.', bn: 'দৈনিক বিজ্ঞাপনের সীমা শেষ।', hi: 'दैनिक विज्ञापन सीमा समाप्त हो गई है।' },
+                loadingAd: { en: 'Loading ad...', bn: 'বিজ্ঞাপন লোড হচ্ছে...', hi: 'विज्ञापन लोड हो रहा है...' },
+                congratsPoints: { en: 'Congratulations! You earned {points} points.', bn: 'অভিনন্দন! আপনি {points} পয়েন্ট অর্জন করেছেন।', hi: 'बधाई हो! आपने {points} अंक अर्जित किए।' },
+                errorOccurred: { en: 'An error occurred. Please try again.', bn: 'একটি ত্রুটি ঘটেছে। আবার চেষ্টা করুন।', hi: 'एक त्रुटि हुई। कृपया पुन: प्रयास करें।' },
+                invalidCode: { en: 'Invalid referral code.', bn: 'অবৈধ রেফারেল কোড।', hi: 'अमान्य रेफरल कोड।' },
+                referralUsed: { en: 'You have already used a referral code.', bn: 'আপনি ইতিমধ্যে একটি রেফারেল কোড ব্যবহার করেছেন।', hi: 'आपने पहले ही एक रेफरल कोड का उपयोग कर लिया है।' },
+                cannotUseOwnCode: { en: 'You cannot use your own referral code.', bn: 'আপনি নিজের রেফারেল কোড ব্যবহার করতে পারবেন না।', hi: 'आप अपना रेफरल कोड इस्तेमाल नहीं कर सकते।' },
+                referralBonusAdded: { en: 'Referral bonus added!', bn: 'রেফারেল বোনাস যোগ করা হয়েছে!', hi: 'रेफरल बोनस जोड़ा गया!' },
+                notEnoughPoints: { en: 'Not enough points (minimum 1000).', bn: 'পর্যাপ্ত পয়েন্ট নেই (সর্বনিম্ন ১০০০)।', hi: 'पर्याप्त अंक नहीं हैं (न्यूनतम 1000)।' },
+                pointsConverted: { en: 'Points converted successfully!', bn: 'পয়েন্ট সফলভাবে রূপান্তরিত হয়েছে!', hi: 'अंक सफलतापूर्वक परिवर्तित हो गए!' },
+                invalidAmountOrAccount: { en: 'Invalid amount or account details.', bn: 'অবৈধ পরিমাণ বা অ্যাকাউন্টের বিবরণ।', hi: 'अमान्य राशि या खाता विवरण।' },
+                minWithdrawal: { en: 'Minimum withdrawal is {amount}.', bn: 'সর্বনিম্ন উত্তোলন {amount}।', hi: 'न्यूनतम निकासी {amount} है।' },
+                insufficientBalance: { en: 'Insufficient balance for this withdrawal.', bn: 'এই উত্তোলনের জন্য অপর্যাপ্ত ব্যালেন্স।', hi: 'इस निकासी के लिए अपर्याप्त शेष राशि।' },
+                withdrawalRequestSuccess: { en: 'Withdrawal request successful! It is now pending review.', bn: 'উত্তোলনের অনুরোধ সফল হয়েছে! এটি এখন পর্যালোচনার অধীনে আছে।', hi: 'निकासी का अनुरोध सफल! यह अब समीक्षाधीन है।' },
+                codeCopied: { en: 'Referral Code copied!', bn: 'রেফারেল কোড কপি করা হয়েছে!', hi: 'रेफरल कोड कॉपी किया गया!' },
+                failedToCopy: { en: 'Failed to copy code.', bn: 'কোড কপি করতে ব্যর্থ।', hi: 'कोड कॉपी करने में विफल।' },
+                withdrawalRejected: { en: 'Your withdrawal was rejected.', bn: 'আপনার উত্তোলন প্রত্যাখ্যান করা হয়েছে।', hi: 'आपकी निकासी अस्वीकार कर दी गई थी।' },
+                purchaseFailed: { en: 'Purchase failed: {message}', bn: 'ক্রয় ব্যর্থ হয়েছে: {message}', hi: 'खरीद विफल: {message}' },
+                authenticationFailed: { en: 'Authentication failed. Please refresh.', bn: 'প্রমাণೀಕರಣ ব্যর্থ হয়েছে। অনুগ্রহ করে রিফ্রেশ করুন।', hi: 'प्रमाणीकरण विफल। कृपया रीफ़्रेश करें।' },
+                loadingHistory: { en: 'Loading history...', bn: 'ইতিহাস লোড হচ্ছে...', hi: 'इतिहास लोड हो रहा है...' },
+                errorLoadingHistory: { en: 'Error loading history. Check console for details.', bn: 'ইতিহাস লোড করতে ত্রুটি। বিস্তারিত জানতে কনসোল দেখুন।', hi: 'इतिहास लोड करने में त्रुटि। विवरण के लिए कंसोल देखें।' },
+            };
+
+            const getTranslation = (key, replacements = {}) => {
+                let text = (translations[key] && translations[key][currentLanguage]) ? translations[key][currentLanguage] : (translations[key] ? translations[key]['en'] : key);
+                for (const placeholder in replacements) {
+                    text = text.replace(`{${placeholder}}`, replacements[placeholder]);
+                }
+                return text;
+            };
+
+            const setLanguage = (lang) => {
+                currentLanguage = lang;
+                localStorage.setItem('userLanguage', lang);
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    el.innerText = getTranslation(el.dataset.langKey);
+                });
+                document.querySelectorAll('[data-lang-key-placeholder]').forEach(el => {
+                    el.placeholder = getTranslation(el.dataset.langKeyPlaceholder);
+                });
+                 // Re-render dynamic content that has text
+                if (currentUser) {
+                    generateTasks();
+                    generateProducts();
+                    generateHomeProducts();
+                    generatePaymentMethods();
+                }
+            };
+            
+            const formatCurrency = (amountInUSD) => {
+                if (currentCurrency === 'BDT') {
+                    return `৳${(amountInUSD * BDT_CONVERSION_RATE).toFixed(2)}`;
+                }
+                return `$${(amountInUSD || 0).toFixed(2)}`;
+            };
+
+            const setCurrency = (currency) => {
+                currentCurrency = currency;
+                localStorage.setItem('userCurrency', currency);
+                updateBalanceDisplay(currentBalanceInUSD);
+                // Re-render product lists to show new currency
+                 if (currentUser) {
+                    generateProducts();
+                    generateHomeProducts();
+                    generatePaymentMethods();
+                }
+            };
 
             // --- UI ELEMENTS ---
             const loader = document.getElementById('loader');
             const appContainer = document.getElementById('appContainer');
+            const currencySelector = document.getElementById('currencySelector');
+            const languageSelector = document.getElementById('languageSelector');
 
             // --- CORE FUNCTIONS ---
-            const showToast = (message, isError = false) => {
+            const showToast = (messageKey, isError = false, replacements = {}) => {
                 const toast = document.getElementById('toast');
-                toast.textContent = message;
+                toast.textContent = getTranslation(messageKey, replacements);
                 toast.style.backgroundColor = isError ? 'rgba(220, 53, 69, 0.9)' : 'rgba(30,30,30,0.9)';
                 toast.style.bottom = '80px';
                 setTimeout(() => { toast.style.bottom = '-100px'; }, 3000);
             };
 
-            const updateBalanceDisplay = (balance) => document.getElementById('balanceAmount').innerText = `$${(balance || 0).toFixed(2)}`;
+            const updateBalanceDisplay = (balanceInUSD) => {
+                currentBalanceInUSD = balanceInUSD || 0;
+                document.getElementById('balanceAmount').innerText = formatCurrency(currentBalanceInUSD);
+            };
             const updatePointsDisplay = (points) => {
                 document.getElementById('pointsAmount').innerText = points || 0;
                 document.getElementById('homePoints').innerText = points || 0;
@@ -656,7 +830,7 @@
 
             const updateHistoryPage = (history) => {
                 const historyList = document.getElementById('historyList');
-                if(!history || history.length === 0) { historyList.innerHTML = '<p>No activity yet.</p>'; return; }
+                if(!history || history.length === 0) { historyList.innerHTML = `<p data-lang-key="noActivity">${getTranslation('noActivity')}</p>`; return; }
                 historyList.innerHTML = history.sort((a, b) => b.date.seconds - a.date.seconds).map(item => 
                     `<div class="task-item" style="padding: 10px; border-bottom: 1px solid #eee;">
                         <div class="task-details">
@@ -683,24 +857,40 @@
                     where('userId', '==', userId)
                 );
                 userNotificationListener = onSnapshot(q, (snapshot) => {
-                    snapshot.docChanges().forEach(async (change) => {
+                    // Use a for...of loop for safer async operations
+                    for (const change of snapshot.docChanges()) {
                         if (change.type === 'modified') {
                             const data = change.doc.data();
-                            if(data.notified === true) return;
+                            if (data.notified === true) continue;
 
                             const withdrawalDocRef = doc(db, 'withdrawals', change.doc.id);
                             
                             if (data.status === 'approved') {
-                                addNotification(`Your withdrawal of $${data.amount.toFixed(2)} has been approved!`);
-                                showToast('Withdrawal successful!');
-                                await updateDoc(withdrawalDocRef, { notified: true });
+                                addNotification(`Your withdrawal of ${formatCurrency(data.amount)} has been approved!`);
+                                showToast('withdrawalRequestSuccess');
+                                updateDoc(withdrawalDocRef, { notified: true });
                             } else if (data.status === 'rejected') {
-                                addNotification(`Your withdrawal of $${data.amount.toFixed(2)} was rejected.`);
-                                showToast('Withdrawal rejected.', true);
-                                await updateDoc(withdrawalDocRef, { notified: true });
+                                addNotification(`Your withdrawal of ${formatCurrency(data.amount)} was rejected.`);
+                                showToast('withdrawalRejected', true);
+
+                                // Refund the balance to the user
+                                const userRef = doc(db, 'users', data.userId);
+                                updateDoc(userRef, {
+                                    balance: increment(data.amount)
+                                }).then(() => {
+                                    // Add a history entry for the refund
+                                    addDoc(collection(userRef, 'history'), {
+                                        type: 'Withdrawal Refund',
+                                        detail: `+${formatCurrency(data.amount)} for rejected withdrawal.`,
+                                        date: serverTimestamp()
+                                    });
+                                });
+
+                                // Mark as notified
+                                updateDoc(withdrawalDocRef, { notified: true });
                             }
                         }
-                    });
+                    }
                 }, error => console.error("Error setting up user notification listener: ", error));
             };
             
@@ -732,7 +922,7 @@
                             document.getElementById('profileName').innerText = data.name || 'User';
                             document.getElementById('profileEmail').innerText = data.email;
                             document.getElementById('profileImage').src = data.profileImageUrl || 'https://placehold.co/100x100/EFEFEF/31343C?text=User';
-                             document.getElementById('welcomeMessage').innerText = `Hello, ${data.name || 'User'}!`;
+                             document.getElementById('welcomeMessage').innerText = getTranslation('helloUser', {name: data.name || 'User'});
                             const historyQuery = query(collection(userRef, 'history'), orderBy('date', 'desc'));
                             onSnapshot(historyQuery, snap => updateHistoryPage(snap.docs.map(d => d.data())));
                         } else {
@@ -780,20 +970,15 @@
                 if (token) {
                     await signInWithCustomToken(auth, token);
                 } else if (!auth.currentUser) { 
-                    // Fallback for environments without the token, only if no user is signed in
-                    // This prevents re-triggering anonymous sign-in on hot reloads
-                    // console.log("No token found, attempting anonymous sign-in.");
-                    // await signInAnonymously(auth);
                 }
             } catch (error) {
                 console.error("Auth Error:", error);
-                showToast("Authentication failed. Please refresh.", true);
+                showToast("authenticationFailed", true);
             }
-
 
             const generateTasks = () => {
                 const taskList = document.querySelector('.task-list');
-                taskList.innerHTML = ''; // Clear
+                taskList.innerHTML = ''; 
                 
                 const tasks = [
                     { type: 'interstitial', title: 'Ad Task 1', points: 50 }, { type: 'popup', title: 'Ad Task 2', points: 50 },
@@ -807,7 +992,7 @@
                     taskItem.className = 'task-item';
                     taskItem.innerHTML = `
                         <i class="material-icons task-icon">play_circle_filled</i>
-                        <div class="task-details"><h4>${task.title}</h4><p>Watch a short ad to earn points.</p></div>
+                        <div class="task-details"><h4>${task.title}</h4><p>${getTranslation('watchAdToEarn')}</p></div>
                         <span class="task-reward">+${task.points} Pts</span>
                     `;
                     taskItem.addEventListener('click', () => window.claimReward(task.points, task.title));
@@ -816,11 +1001,10 @@
             };
 
             window.claimReward = async function(rewardAmount, taskTitle) {
-                if (!currentUser) return showToast("Please login first.", true);
+                if (!currentUser) return showToast("loginFirst", true);
                 const userRef = doc(db, "users", currentUser.uid);
 
                 try {
-                    // Step 1: Read the user's current ad count first.
                     const userDoc = await getDoc(userRef);
                     if (!userDoc.exists()) throw new Error("User document does not exist!");
 
@@ -834,12 +1018,11 @@
                     }
 
                     if (dailyCount >= (appConfig.dailyAdLimit || 10)) {
-                        throw new Error("Daily ad limit reached.");
+                        throw new Error(getTranslation("dailyAdLimitReached"));
                     }
 
-                    showToast("Loading ad...");
+                    showToast("loadingAd");
                     
-                    // Step 2: Show the ad (asynchronous operation).
                     await new Promise((resolve, reject) => {
                         try {
                             const adPromise = window.show_9829935();
@@ -851,9 +1034,7 @@
                         } catch(e) { reject(e); }
                     });
                     
-                    // Step 3: Once ad is successful, run a transaction to update points.
                     await runTransaction(db, async (transaction) => {
-                        // Re-read the document inside the transaction to ensure data consistency
                         const freshUserDoc = await transaction.get(userRef);
                         if (!freshUserDoc.exists()) throw "User not found during transaction.";
                         
@@ -865,7 +1046,7 @@
                         }
 
                         transaction.update(userRef, { 
-                            dailyAdCount: increment(1), // Use increment for safety
+                            dailyAdCount: increment(1),
                             points: increment(rewardAmount),
                             lastAdWatchDate: today
                         });
@@ -878,11 +1059,11 @@
                         });
                     });
                     
-                    showToast(`Congratulations! You earned ${rewardAmount} points.`);
+                    showToast('congratsPoints', false, {points: rewardAmount});
 
                 } catch (error) {
                     console.error("Error claiming reward:", error);
-                    showToast(error.message || "An error occurred. Please try again.", true);
+                    showToast(error.message || "errorOccurred", true);
                 }
             };
             
@@ -915,46 +1096,82 @@
                 }, error => console.error("Error fetching notices:", error));
             };
 
+            const renderProductCard = (doc) => {
+                const product = doc.data();
+                const finalPrice = (product.discount && product.discount > 0) ? product.price * (1 - product.discount / 100) : product.price;
+                let priceHTML = `<div class="price-wrapper"><span class="final-price">${formatCurrency(finalPrice)}</span></div>`;
+                let discountBadge = '';
+
+                if (product.discount && product.discount > 0) {
+                    priceHTML = `
+                        <div class="price-wrapper">
+                            <span class="original-price">${formatCurrency(product.price)}</span>
+                            <span class="final-price">${formatCurrency(finalPrice)}</span>
+                        </div>`;
+                    discountBadge = `<div class="discount-badge">${product.discount}% OFF</div>`;
+                }
+
+                return `
+                    <div class="product-card" 
+                        data-product-id="${doc.id}" 
+                        data-product-name="${product.name}" 
+                        data-original-price="${product.price}"
+                        data-final-price="${finalPrice}"
+                        data-product-description="${product.description || ''}">
+                        ${discountBadge}
+                        <img src="${product.imageUrl || 'https://via.placeholder.com/150'}" alt="${product.name}">
+                        <div class="product-info">
+                            <h4>${product.name}</h4>
+                            ${priceHTML}
+                        </div>
+                    </div>`;
+            };
+            
+            const renderFullProductCard = (doc) => {
+                const product = { id: doc.id, ...doc.data() };
+                const finalPrice = (product.discount && product.discount > 0) ? product.price * (1 - product.discount / 100) : product.price;
+                let priceHTML = `<p class="price final-price">${formatCurrency(finalPrice)}</p>`;
+                let discountBadge = '';
+
+                if (product.discount && product.discount > 0) {
+                    priceHTML = `
+                        <div class="price-wrapper">
+                            <span class="original-price">${formatCurrency(product.price)}</span>
+                            <span class="final-price">${formatCurrency(finalPrice)}</span>
+                        </div>`;
+                    discountBadge = `<div class="discount-badge">${product.discount}% OFF</div>`;
+                }
+
+                return `
+                    <div class="product-card" 
+                        data-product-id="${product.id}" 
+                        data-product-name="${product.name}" 
+                        data-original-price="${product.price}"
+                        data-final-price="${finalPrice}"
+                        data-product-description="${product.description || ''}">
+                        ${discountBadge}
+                        <img src="${product.imageUrl || 'https://via.placeholder.com/150'}" alt="${product.name}">
+                        <div class="product-info">
+                            <h4>${product.name}</h4>
+                            <p class="description">${product.description || ''}</p>
+                            ${priceHTML}
+                            <button class="buy-now-btn">${getTranslation('buyNow')}</button>
+                        </div>
+                    </div>`;
+            };
+
             const generateHomeProducts = () => {
                 const productGrid = document.getElementById('homeProductGrid');
-                productGrid.innerHTML = '<p style="text-align:center; color: #7f8c8d;">Loading...</p>';
+                productGrid.innerHTML = `<p style="text-align:center; color: #7f8c8d;">${getTranslation('loading')}</p>`;
                 const q = query(collection(db, 'products'), orderBy('timestamp', 'desc'), limit(4));
                 onSnapshot(q, (snapshot) => {
                     if (snapshot.empty) {
-                        productGrid.innerHTML = "<p>No recent products available.</p>";
+                        productGrid.innerHTML = `<p>${getTranslation('noRecentProducts')}</p>`;
                         return;
                     }
                     productGrid.innerHTML = '';
                     snapshot.forEach(doc => {
-                        const product = doc.data();
-                        const finalPrice = (product.discount && product.discount > 0) ? product.price * (1 - product.discount / 100) : product.price;
-                        let priceHTML = `<div class="price-wrapper"><span class="final-price">$${(finalPrice || 0).toFixed(2)}</span></div>`;
-                        let discountBadge = '';
-
-                        if (product.discount && product.discount > 0) {
-                            priceHTML = `
-                                <div class="price-wrapper">
-                                    <span class="original-price">$${product.price.toFixed(2)}</span>
-                                    <span class="final-price">$${finalPrice.toFixed(2)}</span>
-                                </div>`;
-                            discountBadge = `<div class="discount-badge">${product.discount}% OFF</div>`;
-                        }
-
-                        const productCardHTML = `
-                            <div class="product-card" 
-                                data-product-id="${doc.id}" 
-                                data-product-name="${product.name}" 
-                                data-original-price="${product.price}"
-                                data-final-price="${finalPrice}"
-                                data-product-description="${product.description || ''}">
-                                ${discountBadge}
-                                <img src="${product.imageUrl || 'https://via.placeholder.com/150'}" alt="${product.name}">
-                                <div class="product-info">
-                                    <h4>${product.name}</h4>
-                                    ${priceHTML}
-                                </div>
-                            </div>`;
-                        productGrid.innerHTML += productCardHTML;
+                        productGrid.innerHTML += renderProductCard(doc);
                     });
                     document.querySelectorAll('#homeProductGrid .product-card').forEach(card => {
                         card.addEventListener('click', (e) => {
@@ -967,46 +1184,16 @@
 
             const generateProducts = () => {
                 const productContainer = document.getElementById('productList');
-                productContainer.innerHTML = '<p style="text-align:center; color: #7f8c8d;">Loading products...</p>';
+                productContainer.innerHTML = `<p style="text-align:center; color: #7f8c8d;">${getTranslation('loadingProducts')}</p>`;
                 const q = query(collection(db, "products"), orderBy("timestamp", "desc"));
                 onSnapshot(q, snapshot => {
                     if (snapshot.empty) {
-                        productContainer.innerHTML = "<p>No digital products available right now.</p>";
+                        productContainer.innerHTML = `<p>${getTranslation('noDigitalProducts')}</p>`;
                         return;
                     }
                     productContainer.innerHTML = '';
                     snapshot.forEach(doc => {
-                        const product = { id: doc.id, ...doc.data() };
-                        const finalPrice = (product.discount && product.discount > 0) ? product.price * (1 - product.discount / 100) : product.price;
-                        let priceHTML = `<p class="price final-price">$${(finalPrice || 0).toFixed(2)}</p>`;
-                        let discountBadge = '';
-
-                        if (product.discount && product.discount > 0) {
-                            priceHTML = `
-                                <div class="price-wrapper">
-                                    <span class="original-price">$${product.price.toFixed(2)}</span>
-                                    <span class="final-price">$${finalPrice.toFixed(2)}</span>
-                                </div>`;
-                            discountBadge = `<div class="discount-badge">${product.discount}% OFF</div>`;
-                        }
-
-                        const productCardHTML = `
-                            <div class="product-card" 
-                                data-product-id="${product.id}" 
-                                data-product-name="${product.name}" 
-                                data-original-price="${product.price}"
-                                data-final-price="${finalPrice}"
-                                data-product-description="${product.description || ''}">
-                                ${discountBadge}
-                                <img src="${product.imageUrl || 'https://via.placeholder.com/150'}" alt="${product.name}">
-                                <div class="product-info">
-                                    <h4>${product.name}</h4>
-                                    <p class="description">${product.description || ''}</p>
-                                    ${priceHTML}
-                                    <button class="buy-now-btn">Buy Now</button>
-                                </div>
-                            </div>`;
-                        productContainer.innerHTML += productCardHTML;
+                        productContainer.innerHTML += renderFullProductCard(doc);
                     });
                     document.querySelectorAll('#productsPage .product-card').forEach(card => {
                         card.addEventListener('click', (e) => {
@@ -1020,12 +1207,12 @@
             const generateMyProducts = () => {
                 const productList = document.getElementById('myProductList');
                 if (!currentUser) return;
-                productList.innerHTML = '<p style="text-align:center; color: #7f8c8d;">Loading your products...</p>';
+                productList.innerHTML = `<p style="text-align:center; color: #7f8c8d;">${getTranslation('loadingYourProducts')}</p>`;
 
                 const q = query(collection(db, 'users', currentUser.uid, 'my_products'), orderBy('purchaseDate', 'desc'));
                 onSnapshot(q, (snapshot) => {
                     if (snapshot.empty) {
-                        productList.innerHTML = "<p>You haven't purchased any products yet.</p>";
+                        productList.innerHTML = `<p>${getTranslation('noPurchasedProducts')}</p>`;
                         return;
                     }
                     let productsHTML = "";
@@ -1037,7 +1224,7 @@
                                 <div class="product-info">
                                     <h4>${product.name}</h4>
                                     <p class="description">${product.description || ''}</p>
-                                    <p class="price">Purchased</p>
+                                    <p class="price">${getTranslation('purchased')}</p>
                                 </div>
                             </div>
                         `;
@@ -1049,27 +1236,31 @@
             const generateWithdrawHistory = () => {
                 const historyList = document.getElementById('withdrawHistoryList');
                 if (!currentUser) return;
-                historyList.innerHTML = '<p style="text-align:center; color: #7f8c8d;">Loading history...</p>';
+                historyList.innerHTML = `<p style="text-align:center; color: #7f8c8d;">${getTranslation('loadingHistory')}</p>`;
 
                 const q = query(
                     collection(db, 'withdrawals'),
-                    where('userId', '==', currentUser.uid),
-                    orderBy('timestamp', 'desc')
+                    where('userId', '==', currentUser.uid)
+                    // REMOVED: orderBy('timestamp', 'desc') to avoid needing a composite index
                 );
 
                 onSnapshot(q, (snapshot) => {
                     if (snapshot.empty) {
-                        historyList.innerHTML = "<p>You haven't made any withdrawal requests yet.</p>";
+                        historyList.innerHTML = `<p data-lang-key="noWithdrawalHistory">${getTranslation('noWithdrawalHistory')}</p>`;
                         return;
                     }
+
+                    // Sort documents client-side
+                    const historyDocs = snapshot.docs.map(doc => doc.data());
+                    historyDocs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
                     let historyHTML = "";
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
+                    historyDocs.forEach(data => {
                         const statusClass = data.status === 'approved' ? 'approved' : (data.status === 'rejected' ? 'rejected' : 'pending');
                         historyHTML += `
                             <div class="history-item">
                                 <div class="history-details">
-                                    <h4>${data.method} - $${data.amount.toFixed(2)}</h4>
+                                    <h4>${data.method} - ${formatCurrency(data.amount)}</h4>
                                     <p>To: ${data.account}</p>
                                     <small>${data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString() : 'Date not available'}</small>
                                 </div>
@@ -1080,7 +1271,7 @@
                     historyList.innerHTML = historyHTML;
                 }, (error) => {
                     console.error("Error fetching withdrawal history: ", error);
-                    historyList.innerHTML = `<p style="color: red;">Error loading history. You might need to create a Firestore index. Check the browser console for a link.</p>`;
+                    historyList.innerHTML = `<p style="color: red;">${getTranslation('errorLoadingHistory')}</p>`;
                 });
             };
             
@@ -1107,9 +1298,9 @@
                                      <img src="${method.logoUrl}" alt="${method.name}" class="payment-logo"> 
                                      <h3>Withdraw via ${method.name}</h3> 
                                  </div>
-                                 <input type="number" class="withdraw-input" id="${method.name.toLowerCase()}Amount" placeholder="Amount (USD)">
+                                 <input type="number" class="withdraw-input" id="${method.name.toLowerCase()}Amount" placeholder="${currentCurrency === 'USD' ? 'Amount (USD)' : 'Amount (BDT)'}">
                                  <input type="text" class="withdraw-input" id="${method.name.toLowerCase()}Account" placeholder="Your ${method.name} Details (e.g. Number)">
-                                 <button class="withdraw-btn" data-method="${method.name}">Request Withdrawal</button>
+                                 <button class="withdraw-btn" data-method="${method.name}">${getTranslation('requestWithdrawal')}</button>
                             </div>
                         `).join('');
 
@@ -1117,7 +1308,7 @@
                             btn.addEventListener('click', handleWithdrawalRequest);
                         });
                     } else {
-                        container.innerHTML = '<p>No payment methods available. Please contact admin.</p>';
+                        container.innerHTML = `<p>${getTranslation('noPaymentMethods')}</p>`;
                     }
                 });
             };
@@ -1128,49 +1319,50 @@
                 const amountInput = document.getElementById(`${method.toLowerCase()}Amount`);
                 const accountInput = document.getElementById(`${method.toLowerCase()}Account`);
                 
-                const amount = parseFloat(amountInput.value);
+                let amount = parseFloat(amountInput.value);
                 const account = accountInput.value.trim();
                 
+                // Convert BDT to USD if necessary for storage
+                let amountInUSD = (currentCurrency === 'BDT') ? amount / BDT_CONVERSION_RATE : amount;
+
                 const userRef = doc(db, 'users', currentUser.uid);
                 const userDoc = await getDoc(userRef);
                 const currentBalance = userDoc.data().balance;
 
-                if (!account || isNaN(amount) || amount <= 0) return showToast('Invalid amount or account details.', true);
-                if (amount < settings.minWithdrawal) return showToast(`Minimum withdrawal is $${settings.minWithdrawal}.`, true);
-                if (amount > currentBalance) return showToast('Insufficient balance for this withdrawal.', true);
+                if (!account || isNaN(amountInUSD) || amountInUSD <= 0) return showToast('invalidAmountOrAccount', true);
+                if (amountInUSD < settings.minWithdrawal) return showToast('minWithdrawal', true, {amount: formatCurrency(settings.minWithdrawal)});
+                if (amountInUSD > currentBalance) return showToast('insufficientBalance', true);
                 
                 btn.disabled = true;
                 btn.innerText = "Processing...";
 
                 try {
-                    // Create the withdrawal request document
                     const withdrawalRequest = {
                         userId: currentUser.uid, 
                         email: currentUser.email,
                         userName: currentUser.displayName || 'A User',
-                        amount: amount, 
+                        amount: amountInUSD, // Always store in USD
                         method: method, 
                         account: account, 
                         status: 'pending',
-                        notified: false, // Admin will trigger notification
+                        notified: false,
                         timestamp: serverTimestamp()
                     };
                     await addDoc(collection(db, 'withdrawals'), withdrawalRequest);
 
-                    // FIX: Deduct balance from user's account immediately
                     await updateDoc(userRef, {
-                        balance: increment(-amount)
+                        balance: increment(-amountInUSD)
                     });
                     
-                    showToast('Withdrawal request successful! It is now pending review.');
+                    showToast('withdrawalRequestSuccess');
                     amountInput.value = '';
                     accountInput.value = '';
                 } catch (error) {
                     console.error("Withdrawal error:", error);
-                    showToast("Failed to send request. Please try again.", true);
+                    showToast("failedToSendRequest", true);
                 } finally {
                      btn.disabled = false;
-                     btn.innerText = "Request Withdrawal";
+                     btn.innerText = getTranslation('requestWithdrawal');
                 }
             };
             
@@ -1181,16 +1373,16 @@
                 const storageRef = ref(storage, `profileImages/${currentUser.uid}`);
                 const uploadTask = uploadBytesResumable(storageRef, file);
 
-                showToast('Uploading image...');
+                showToast('uploadingImage');
 
                 uploadTask.on('state_changed', 
                     (snapshot) => {}, 
-                    (error) => { showToast('Upload failed: ' + error.message, true); }, 
+                    (error) => { showToast('uploadFailed', true, {message: error.message}); }, 
                     async () => {
                         const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
                         await updateDoc(doc(db, 'users', currentUser.uid), { profileImageUrl: downloadURL });
                         document.getElementById('profileImage').src = downloadURL;
-                        showToast('Profile picture updated!');
+                        showToast('profilePictureUpdated');
                     }
                 );
             };
@@ -1204,14 +1396,14 @@
                 
                 if (originalPrice !== finalPrice) {
                     priceDetailsDiv.innerHTML = `
-                        <p>Original Price: <s style="color: #999;">$${originalPrice.toFixed(2)}</s></p>
-                        <p>Discounted Price: <b style="font-size: 1.2em; color: var(--primary-color);">$${finalPrice.toFixed(2)}</b></p>
+                        <p>Original Price: <s style="color: #999;">${formatCurrency(originalPrice)}</s></p>
+                        <p>Discounted Price: <b style="font-size: 1.2em; color: var(--primary-color);">${formatCurrency(finalPrice)}</b></p>
                     `;
                 } else {
-                    priceDetailsDiv.innerHTML = `<p>Price: <b>$${finalPrice.toFixed(2)}</b></p>`;
+                    priceDetailsDiv.innerHTML = `<p>Price: <b>${formatCurrency(finalPrice)}</b></p>`;
                 }
 
-                document.getElementById('modalUserBalance').innerText = `$${userBalance.toFixed(2)}`;
+                document.getElementById('modalUserBalance').innerText = formatCurrency(userBalance);
                 
                 const paymentOptionsDiv = document.getElementById('paymentOptions');
                 const externalButtonsDiv = document.getElementById('externalPaymentButtons');
@@ -1221,22 +1413,19 @@
                 const noMethodsMsg = document.getElementById('no-methods-msg');
                 const orText = document.getElementById('orText');
 
-                // Clear previous state
                 externalButtonsDiv.innerHTML = '';
                 externalDetailsDiv.style.display = 'none';
                 noMethodsMsg.style.display = 'none';
                 orText.style.display = 'none';
                 
-                // Unselect all options
                 paymentOptionsDiv.querySelectorAll('.payment-option, .payment-btn').forEach(el => el.classList.remove('selected'));
 
-                // Generate external payment buttons
                 const methodsDoc = await getDoc(doc(db, 'config', 'paymentMethods'));
                 let methods = [];
                  if (methodsDoc.exists() && methodsDoc.data().methods && methodsDoc.data().methods.length > 0) {
-                     methods = methodsDoc.data().methods;
+                      methods = methodsDoc.data().methods;
                 } else {
-                     methods = [
+                      methods = [
                          { name: "bKash", details: "01xxxxxxxxx (Personal)" },
                          { name: "Nagad", details: "01xxxxxxxxx (Personal)" },
                          { name: "Rocket", details: "01xxxxxxxxx (Personal)" }
@@ -1257,7 +1446,6 @@
                      noMethodsMsg.style.display = 'block';
                 }
                 
-                // Add click listener to options
                 let selectedMethod = null;
                 let selectedMethodDetails = null;
                 const allOptions = paymentOptionsDiv.querySelectorAll('.payment-option, .payment-btn');
@@ -1275,7 +1463,7 @@
                             confirmBtn.disabled = userBalance < finalPrice;
                         } else {
                             externalDetailsDiv.style.display = 'block';
-                            externalInstructionP.innerText = `Please send $${finalPrice.toFixed(2)} to our ${selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1)} account (${selectedMethodDetails}) and enter the Transaction ID below.`;
+                            externalInstructionP.innerText = `Please send ${formatCurrency(finalPrice)} to our ${selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1)} account (${selectedMethodDetails}) and enter the Transaction ID below.`;
                             confirmBtn.disabled = false;
                         }
                     });
@@ -1289,7 +1477,7 @@
 
             const confirmPurchase = async (productId, productName, productPrice, method) => {
                 const confirmBtn = document.getElementById('confirmPurchaseBtn');
-                if (!method) return showToast('Please select a payment method.', true);
+                if (!method) return showToast('selectPaymentMethod', true);
 
                 confirmBtn.disabled = true;
                 confirmBtn.innerText = 'Processing...';
@@ -1315,14 +1503,13 @@
                             const historyRef = doc(collection(userRef, 'history'));
                             transaction.set(historyRef, {
                                 type: 'Product Purchase',
-                                detail: `Purchased '${productName}' for $${productPrice.toFixed(2)}`,
+                                detail: `Purchased '${productName}' for ${formatCurrency(productPrice)}`,
                                 date: serverTimestamp()
                             });
                         });
-                        showToast('Purchase successful!');
+                        showToast('purchaseSuccessful');
                         document.getElementById('purchaseModal').classList.remove('show');
                     } else {
-                        // Handle external payment methods
                         const trxId = document.getElementById('trxIdInput').value.trim();
                         if (!trxId) throw new Error('Please enter the Transaction ID.');
 
@@ -1339,19 +1526,27 @@
                         };
                         
                         await addDoc(collection(db, 'orders'), orderData);
-                        showToast('Order placed! It will be reviewed by an admin shortly.');
+                        showToast('orderPlaced');
                         document.getElementById('purchaseModal').classList.remove('show');
                     }
                 } catch (error) {
-                    showToast('Purchase failed: ' + error.message, true);
+                    showToast('purchaseFailed', true, { message: error.message });
                 } finally {
                     confirmBtn.disabled = false;
-                    confirmBtn.innerText = 'Order Place';
+                    confirmBtn.innerText = getTranslation('orderPlace');
                 }
             };
 
 
             // --- EVENT LISTENERS ---
+            currencySelector.value = currentCurrency;
+            languageSelector.value = currentLanguage;
+            setLanguage(currentLanguage);
+            setCurrency(currentCurrency);
+
+            languageSelector.addEventListener('change', (e) => setLanguage(e.target.value));
+            currencySelector.addEventListener('change', (e) => setCurrency(e.target.value));
+
             document.getElementById('profileImageUpload').addEventListener('change', handleProfileImageUpload);
 
             const flipper = document.querySelector('.auth-flipper');
@@ -1361,7 +1556,7 @@
             document.getElementById('loginBtn').addEventListener('click', () => {
                 const email = document.getElementById('loginEmail').value;
                 const password = document.getElementById('loginPassword').value;
-                if(!email || !password) return showToast("Please fill all fields", true);
+                if(!email || !password) return showToast("fillAllFields", true);
                 signInWithEmailAndPassword(auth, email, password).catch(e => showToast(e.message, true));
             });
 
@@ -1369,7 +1564,7 @@
                 const name = document.getElementById('signupFullName').value;
                 const email = document.getElementById('signupEmail').value;
                 const pass = document.getElementById('signupPassword').value;
-                if(!name || !email || !pass) return showToast("Please fill all fields", true);
+                if(!name || !email || !pass) return showToast("fillAllFields", true);
                 createUserWithEmailAndPassword(auth, email, pass)
                     .then(cred => updateProfile(cred.user, {displayName: name}))
                     .catch(e => showToast(e.message, true));
@@ -1377,17 +1572,17 @@
             
             document.getElementById('submitReferralBtn').addEventListener('click', async () => {
                 const code = document.getElementById('referralCodeInput').value.trim();
-                if (!code) return showToast("Please enter a code.", true);
+                if (!code) return showToast("enterCode", true);
                 const userRef = doc(db, 'users', currentUser.uid);
                 const userDoc = await getDoc(userRef);
                 const userData = userDoc.data();
 
-                if(userData.referralUsed) return showToast('You have already used a referral code.', true);
-                if(code === userData.referralCode) return showToast('You cannot use your own referral code.', true);
+                if(userData.referralUsed) return showToast('referralUsed', true);
+                if(code === userData.referralCode) return showToast('cannotUseOwnCode', true);
 
                 const q = query(collection(db, 'users'), where('referralCode', '==', code), limit(1));
                 const referrerQuerySnapshot = await getDocs(q);
-                if (referrerQuerySnapshot.empty) return showToast('Invalid referral code.', true);
+                if (referrerQuerySnapshot.empty) return showToast('invalidCode', true);
                 
                 await updateDoc(userRef, {
                     balance: increment(0.20),
@@ -1397,7 +1592,7 @@
                     type: 'Referral Bonus', detail: '+$0.20 for applying code.', date: serverTimestamp()
                 });
                 addNotification('+$0.20 Referral Bonus added!');
-                showToast('Referral bonus added!');
+                showToast('referralBonusAdded');
             });
 
             document.getElementById('convertPointsBtn').addEventListener('click', async () => {
@@ -1416,9 +1611,9 @@
                         detail: `-${dollars*1000} Pts, +$${dollars}.00 to balance.`,
                         date: serverTimestamp()
                     });
-                    showToast('Points converted successfully!');
+                    showToast('pointsConverted');
                 } else {
-                    showToast('Not enough points (minimum 1000).', true);
+                    showToast('notEnoughPoints', true);
                 }
             });
 
@@ -1437,19 +1632,18 @@
                 const codeToCopy = document.getElementById('userReferralCode').innerText;
                 try {
                     navigator.clipboard.writeText(codeToCopy);
-                    showToast('Referral Code copied!');
+                    showToast('codeCopied');
                 } catch (err) {
-                     // Fallback for older browsers
-                    const textArea = document.createElement("textarea");
+                     const textArea = document.createElement("textarea");
                     textArea.value = codeToCopy;
                     document.body.appendChild(textArea);
                     textArea.focus();
                     textArea.select();
                     try {
                         document.execCommand('copy');
-                        showToast('Referral Code copied!');
+                        showToast('codeCopied');
                     } catch (err) {
-                        showToast('Failed to copy code.', true);
+                        showToast('failedToCopy', true);
                     }
                     document.body.removeChild(textArea);
                 }
