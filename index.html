@@ -361,7 +361,7 @@
         <div id="toast" style="position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background-color: rgba(30,30,30,0.9); color: white; padding: 12px 25px; border-radius: 25px; z-index: 2000; transition: bottom 0.5s ease-in-out; font-size: 0.9em; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"></div>
         
         <div class="header" style="display: none;">
-             <span class="logo">Work & Earn</span>
+             <span class="logo">Income Hobei</span>
             <div id="searchBar" style="display:none; flex-grow: 1; padding: 0 10px;"> <input type="text" id="searchInput" placeholder="Search tasks..." style="width: 100%; padding: 8px; border-radius: 20px; border: none; outline: none;"> </div>
             <div class="icons">
                 <button id="searchButton"><i class="material-icons">search</i></button>
@@ -860,7 +860,7 @@
                         const freshData = freshUserDoc.data();
                         const freshDailyCount = (freshData.lastAdWatchDate === today) ? freshData.dailyAdCount : 0;
                         
-                        if (freshDailyCount >= (appConfig.dailyAdLimit || 10)) {
+                        if (freshDailyCount >= (appConfig.dailyAdLimit || 15)) {
                             throw "Limit reached during transaction.";
                         }
 
