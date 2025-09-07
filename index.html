@@ -78,7 +78,7 @@
             animation: fadeIn 0.5s ease-in-out;
         }
         .page.active { display: block; }
-        .page#homePage, .page#workPage, .page#withdrawPage, .page#profilePage, .page#historyPage, .page#productsPage, .page#myProductsPage { padding-top: 70px; }
+        .page#homePage, .page#workPage, .page#withdrawPage, .page#profilePage, .page#historyPage, .page#productsPage, .page#myProductsPage, .page#withdrawHistoryPage { padding-top: 70px; }
         .page#homePage {
             padding-top: 20px;
             background: linear-gradient(180deg, #a56eff, #f0e6ff 40%);
@@ -313,6 +313,30 @@
         }
         .no-methods-message { text-align: center; color: var(--text-light-secondary); padding: 20px 0;}
 
+        /* History Styles */
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .history-item:last-child { border-bottom: none; }
+        .history-details h4 { margin: 0 0 5px; }
+        .history-details p { margin: 0; font-size: 0.9em; color: #666; }
+        .history-details small { font-size: 0.8em; color: #999; }
+        .history-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: white;
+            text-transform: capitalize;
+        }
+        .history-status.pending { background-color: #ffc107; }
+        .history-status.approved { background-color: #28a745; }
+        .history-status.rejected { background-color: #dc3545; }
+
     </style>
 </head>
 <body>
@@ -448,6 +472,7 @@
                 <div class="card">
                     <div id="myProductsBtn" class="setting-item"><span>My Products</span> <i class="material-icons">chevron_right</i></div>
                     <div id="historyBtn" class="setting-item"><span>Task History</span> <i class="material-icons">chevron_right</i></div>
+                    <div id="withdrawHistoryBtn" class="setting-item"><span>Withdraw History</span> <i class="material-icons">chevron_right</i></div>
                 </div>
                 <div class="card">
                     <h4>Your Referral Code</h4>
@@ -467,6 +492,14 @@
             <div id="historyPage" class="page">
                 <h2>Task History</h2>
                 <div id="historyList" class="card"> <p>No activity yet.</p> </div>
+            </div>
+
+            <!-- Withdraw History Page -->
+            <div id="withdrawHistoryPage" class="page">
+                <h2>Withdraw History</h2>
+                <div id="withdrawHistoryList" class="card">
+                    <p>No withdrawal history yet.</p>
+                </div>
             </div>
         </div>
 
@@ -711,6 +744,7 @@
                     generateNotices();
                     generatePaymentMethods();
                     generateMyProducts();
+                    generateWithdrawHistory();
                     setupUserNotificationListener(user.uid);
                     showPage('home');
                 } else {
@@ -940,6 +974,41 @@
                         `;
                     });
                     productList.innerHTML = productsHTML;
+                });
+            };
+
+            const generateWithdrawHistory = () => {
+                const historyList = document.getElementById('withdrawHistoryList');
+                if (!currentUser) return;
+                historyList.innerHTML = '<p style="text-align:center; color: #7f8c8d;">Loading history...</p>';
+
+                const q = query(
+                    collection(db, 'withdrawals'),
+                    where('userId', '==', currentUser.uid),
+                    orderBy('timestamp', 'desc')
+                );
+
+                onSnapshot(q, (snapshot) => {
+                    if (snapshot.empty) {
+                        historyList.innerHTML = "<p>You haven't made any withdrawal requests yet.</p>";
+                        return;
+                    }
+                    let historyHTML = "";
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const statusClass = data.status === 'approved' ? 'approved' : (data.status === 'rejected' ? 'rejected' : 'pending');
+                        historyHTML += `
+                            <div class="history-item">
+                                <div class="history-details">
+                                    <h4>${data.method} - $${data.amount.toFixed(2)}</h4>
+                                    <p>To: ${data.account}</p>
+                                    <small>${new Date(data.timestamp.seconds * 1000).toLocaleString()}</small>
+                                </div>
+                                <span class="history-status ${statusClass}">${data.status}</span>
+                            </div>
+                        `;
+                    });
+                    historyList.innerHTML = historyHTML;
                 });
             };
             
@@ -1269,6 +1338,7 @@
             document.getElementById('profileButton').addEventListener('click', () => showPage('profile'));
             document.getElementById('myProductsBtn').addEventListener('click', () => showPage('myProducts'));
             document.getElementById('historyBtn').addEventListener('click', () => showPage('history'));
+            document.getElementById('withdrawHistoryBtn').addEventListener('click', () => showPage('withdrawHistory'));
             document.getElementById('claimTasksButton').addEventListener('click', () => showPage('work'));
             
             document.getElementById('copyReferralBtn').addEventListener('click', () => {
