@@ -685,7 +685,7 @@
                 applyACode: { en: 'Apply a Code', bn: 'একটি কোড প্রয়োগ করুন', hi: 'एक कोड लागू करें' },
                 enterReferralCode: { en: 'Enter referral code', bn: 'রেফারেল কোড প্রবেশ করান', hi: 'रेफरल कोड दर्ज करें' },
                 applyCode: { en: 'Apply Code', bn: 'কোড প্রয়োগ করুন', hi: 'कोड लागू करें' },
-                logout: { en: 'Logout', bn: 'লগ আউট', hi: 'लॉग आउट' },
+                logout: { en: 'Logout', bn: 'লগ আউট', hi: 'लॉग আউট' },
                 // History Pages
                 taskHistoryTitle: { en: 'Task History', bn: 'কাজের ইতিহাস', hi: 'कार्य इतिहास' },
                 noActivity: { en: 'No activity yet.', bn: 'এখনও কোন কার্যকলাপ নেই।', hi: 'अभी तक कोई गतिविधि नहीं।' },
@@ -714,7 +714,7 @@
                 minWithdrawal: { en: 'Minimum withdrawal is {amount}.', bn: 'সর্বনিম্ন উত্তোলন {amount}।', hi: 'न्यूनतम निकासी {amount} है।' },
                 insufficientBalance: { en: 'Insufficient balance for this withdrawal.', bn: 'এই উত্তোলনের জন্য অপর্যাপ্ত ব্যালেন্স।', hi: 'इस निकासी के लिए अपर्याप्त शेष राशि।' },
                 withdrawalRequestSuccess: { en: 'Withdrawal request successful! It is now pending review.', bn: 'উত্তোলনের অনুরোধ সফল হয়েছে! এটি এখন পর্যালোচনার অধীনে আছে।', hi: 'निकासी का अनुरोध सफल! यह अब समीक्षाधीन है।' },
-                codeCopied: { en: 'Referral Code copied!', bn: 'রেফারেল কোড কপি করা হয়েছে!', hi: 'रेफरल कोड कॉपी किया गया!' },
+                codeCopied: { en: 'Referral Code copied!', bn: 'রেফারেল কোড কপি করা হয়েছে!', hi: 'रेफरल कोड কপি किया गया!' },
                 failedToCopy: { en: 'Failed to copy code.', bn: 'কোড কপি করতে ব্যর্থ।', hi: 'कोड कॉपी करने में विफल।' },
                 withdrawalRejected: { en: 'Your withdrawal was rejected.', bn: 'আপনার উত্তোলন প্রত্যাখ্যান করা হয়েছে।', hi: 'आपकी निकासी अस्वीकार कर दी गई थी।' },
                 purchaseFailed: { en: 'Purchase failed: {message}', bn: 'ক্রয় ব্যর্থ হয়েছে: {message}', hi: 'खरीद विफल: {message}' },
@@ -852,15 +852,15 @@
 
             const setupUserNotificationListener = (userId) => {
                 if (userNotificationListener) userNotificationListener();
-                const q = query(
-                    collection(db, 'withdrawals'),
-                    where('userId', '==', userId)
-                );
+                const q = query(collection(db, 'withdrawals')); // Fetch all
+                
                 userNotificationListener = onSnapshot(q, (snapshot) => {
-                    // Use a for...of loop for safer async operations
                     for (const change of snapshot.docChanges()) {
+                        const data = change.doc.data();
+                        // Add client-side filter
+                        if (data.userId !== userId) continue; 
+
                         if (change.type === 'modified') {
-                            const data = change.doc.data();
                             if (data.notified === true) continue;
 
                             const withdrawalDocRef = doc(db, 'withdrawals', change.doc.id);
@@ -1239,23 +1239,24 @@
                 historyList.innerHTML = `<p style="text-align:center; color: #7f8c8d;">${getTranslation('loadingHistory')}</p>`;
 
                 const q = query(
-                    collection(db, 'withdrawals'),
-                    where('userId', '==', currentUser.uid)
-                    // REMOVED: orderBy('timestamp', 'desc') to avoid needing a composite index
+                    collection(db, 'withdrawals')
                 );
 
                 onSnapshot(q, (snapshot) => {
-                    if (snapshot.empty) {
+                    const userHistoryDocs = snapshot.docs
+                        .map(doc => doc.data())
+                        .filter(data => data.userId === currentUser.uid);
+
+                    if (userHistoryDocs.length === 0) {
                         historyList.innerHTML = `<p data-lang-key="noWithdrawalHistory">${getTranslation('noWithdrawalHistory')}</p>`;
                         return;
                     }
 
                     // Sort documents client-side
-                    const historyDocs = snapshot.docs.map(doc => doc.data());
-                    historyDocs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                    userHistoryDocs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
 
                     let historyHTML = "";
-                    historyDocs.forEach(data => {
+                    userHistoryDocs.forEach(data => {
                         const statusClass = data.status === 'approved' ? 'approved' : (data.status === 'rejected' ? 'rejected' : 'pending');
                         historyHTML += `
                             <div class="history-item">
