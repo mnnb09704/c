@@ -208,6 +208,7 @@
             text-align: center;
             transition: transform 0.2s ease-in-out;
             cursor: pointer;
+            position: relative;
         }
         .product-card:hover {
             transform: translateY(-5px);
@@ -221,7 +222,9 @@
             padding: 15px;
         }
         .product-info h4 { margin: 0 0 5px; font-size: 0.9em; }
-        .product-info .price { font-weight: bold; color: var(--primary-color); margin-bottom: 10px;}
+        .price-wrapper { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+        .original-price { text-decoration: line-through; color: #999; font-size: 0.9em; }
+        .final-price { font-weight: bold; color: var(--primary-color); font-size: 1.1em; }
         .product-info .description { font-size: 0.8em; color: var(--text-light-secondary); margin-bottom: 10px; height: 3em; overflow: hidden; }
         .buy-now-btn {
             background: var(--orange-gradient);
@@ -232,6 +235,17 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
+        }
+        .discount-badge { 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            background: #e74c3c; 
+            color: white; 
+            padding: 3px 8px; 
+            border-radius: 5px; 
+            font-size: 0.8em; 
+            font-weight: bold; 
         }
         
         /* Auth Styles */
@@ -251,6 +265,7 @@
         .auth-switch { text-align: center; margin-top: 20px; font-size: 0.9em; }
         .auth-switch a { color: var(--primary-color); text-decoration: none; font-weight: bold; }
         .submit-btn { width: 100%; border: none; padding: 15px; border-radius: 8px; font-size: 1.1em; font-weight: 500; cursor: pointer; color: white; background: linear-gradient(45deg, var(--primary-color), var(--primary-light)); box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4); transition: transform 0.2s, box-shadow 0.2s; }
+        .submit-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
         .submit-btn:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(138, 43, 226, 0.4); }
         
         /* Other Component Styles */
@@ -526,7 +541,7 @@
                     <button onclick="document.getElementById('purchaseModal').classList.remove('show')" style="background:none; border:none; cursor:pointer;"><i class="material-icons">close</i></button>
                 </div>
                 <div style="margin: 20px 0;">
-                    <p>Price: <b id="modalProductPrice"></b></p>
+                    <div id="modalPriceDetails"></div>
                     <hr>
                     <h4>Select Payment Method</h4>
                     <div id="paymentOptions">
@@ -665,13 +680,15 @@
                 if (userNotificationListener) userNotificationListener();
                 const q = query(
                     collection(db, 'withdrawals'),
-                    where('userId', '==', userId),
-                    where('notified', '==', false)
+                    where('userId', '==', userId)
                 );
                 userNotificationListener = onSnapshot(q, (snapshot) => {
                     snapshot.docChanges().forEach(async (change) => {
-                        if (change.type === 'added' || change.type === 'modified') {
+                        // Only process modified documents that haven't been notified yet
+                        if (change.type === 'modified') {
                             const data = change.doc.data();
+                            if(data.notified === true) return; // FIX: Prevents re-notifying
+
                             const withdrawalDocRef = doc(db, 'withdrawals', change.doc.id);
                             
                             if (data.status === 'approved') {
@@ -889,24 +906,42 @@
                         productGrid.innerHTML = "<p>No recent products available.</p>";
                         return;
                     }
-                    productGrid.innerHTML = ''; // Notun data ashar shathe shathe purono list clear kore din
+                    productGrid.innerHTML = '';
                     snapshot.forEach(doc => {
                         const product = doc.data();
+                        const finalPrice = (product.discount && product.discount > 0) ? product.price * (1 - product.discount / 100) : product.price;
+                        let priceHTML = `<div class="price-wrapper"><span class="final-price">$${(finalPrice || 0).toFixed(2)}</span></div>`;
+                        let discountBadge = '';
+
+                        if (product.discount && product.discount > 0) {
+                            priceHTML = `
+                                <div class="price-wrapper">
+                                    <span class="original-price">$${product.price.toFixed(2)}</span>
+                                    <span class="final-price">$${finalPrice.toFixed(2)}</span>
+                                </div>`;
+                            discountBadge = `<div class="discount-badge">${product.discount}% OFF</div>`;
+                        }
+
                         const productCardHTML = `
-                            <div class="product-card" data-product-id="${doc.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-description="${product.description || ''}">
+                            <div class="product-card" 
+                                data-product-id="${doc.id}" 
+                                data-product-name="${product.name}" 
+                                data-original-price="${product.price}"
+                                data-final-price="${finalPrice}"
+                                data-product-description="${product.description || ''}">
+                                ${discountBadge}
                                 <img src="${product.imageUrl || 'https://via.placeholder.com/150'}" alt="${product.name}">
                                 <div class="product-info">
                                     <h4>${product.name}</h4>
-                                    <p class="price">$${(product.price || 0).toFixed(2)}</p>
+                                    ${priceHTML}
                                 </div>
-                            </div>
-                        `;
+                            </div>`;
                         productGrid.innerHTML += productCardHTML;
                     });
                     document.querySelectorAll('#homeProductGrid .product-card').forEach(card => {
                         card.addEventListener('click', (e) => {
                             const data = e.currentTarget.dataset;
-                            openPurchaseModal(data.productId, data.productName, parseFloat(data.productPrice), data.productDescription);
+                            openPurchaseModal(data.productId, data.productName, parseFloat(data.originalPrice), parseFloat(data.finalPrice), data.productDescription);
                         });
                     });
                 });
@@ -921,28 +956,44 @@
                         productContainer.innerHTML = "<p>No digital products available right now.</p>";
                         return;
                     }
-                    // Protibar notun data ashar shathe shathe purono list clear kore din
                     productContainer.innerHTML = '';
                     snapshot.forEach(doc => {
                         const product = { id: doc.id, ...doc.data() };
-                        // Ekhane prottek'ta product'er jonno apnar design onujayi HTML toiri korun
+                        const finalPrice = (product.discount && product.discount > 0) ? product.price * (1 - product.discount / 100) : product.price;
+                        let priceHTML = `<p class="price final-price">$${(finalPrice || 0).toFixed(2)}</p>`;
+                        let discountBadge = '';
+
+                        if (product.discount && product.discount > 0) {
+                            priceHTML = `
+                                <div class="price-wrapper">
+                                    <span class="original-price">$${product.price.toFixed(2)}</span>
+                                    <span class="final-price">$${finalPrice.toFixed(2)}</span>
+                                </div>`;
+                            discountBadge = `<div class="discount-badge">${product.discount}% OFF</div>`;
+                        }
+
                         const productCardHTML = `
-                            <div class="product-card" data-product-id="${product.id}" data-product-name="${product.name}" data-product-price="${product.price}" data-product-description="${product.description || ''}">
+                            <div class="product-card" 
+                                data-product-id="${product.id}" 
+                                data-product-name="${product.name}" 
+                                data-original-price="${product.price}"
+                                data-final-price="${finalPrice}"
+                                data-product-description="${product.description || ''}">
+                                ${discountBadge}
                                 <img src="${product.imageUrl || 'https://via.placeholder.com/150'}" alt="${product.name}">
                                 <div class="product-info">
                                     <h4>${product.name}</h4>
                                     <p class="description">${product.description || ''}</p>
-                                    <p class="price">$${(product.price || 0).toFixed(2)}</p>
+                                    ${priceHTML}
                                     <button class="buy-now-btn">Buy Now</button>
                                 </div>
-                            </div>
-                        `;
+                            </div>`;
                         productContainer.innerHTML += productCardHTML;
                     });
-                    document.querySelectorAll('#productsPage .product-card').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('#productsPage .product-card').forEach(card => {
+                        card.addEventListener('click', (e) => {
                             const data = e.currentTarget.dataset;
-                            openPurchaseModal(data.productId, data.productName, parseFloat(data.productPrice), data.productDescription);
+                            openPurchaseModal(data.productId, data.productName, parseFloat(data.originalPrice), parseFloat(data.finalPrice), data.productDescription);
                         });
                     });
                 }, error => console.error("Error fetching products:", error));
@@ -977,6 +1028,12 @@
                 });
             };
 
+            /**
+             * NOTE: For this query to work, you need a composite index in Firestore.
+             * If it's not working, check your browser's console for an error message.
+             * It will contain a link to create the required index automatically.
+             * The index will be on the 'withdrawals' collection for fields 'userId' (ascending) and 'timestamp' (descending).
+             */
             const generateWithdrawHistory = () => {
                 const historyList = document.getElementById('withdrawHistoryList');
                 if (!currentUser) return;
@@ -1002,13 +1059,16 @@
                                 <div class="history-details">
                                     <h4>${data.method} - $${data.amount.toFixed(2)}</h4>
                                     <p>To: ${data.account}</p>
-                                    <small>${new Date(data.timestamp.seconds * 1000).toLocaleString()}</small>
+                                    <small>${data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString() : 'Date not available'}</small>
                                 </div>
                                 <span class="history-status ${statusClass}">${data.status}</span>
                             </div>
                         `;
                     });
                     historyList.innerHTML = historyHTML;
+                }, (error) => {
+                    console.error("Error fetching withdrawal history: ", error);
+                    historyList.innerHTML = `<p style="color: red;">Error loading history. You might need to create a Firestore index. Check the browser console for a link.</p>`;
                 });
             };
             
@@ -1071,7 +1131,8 @@
                 btn.innerText = "Processing...";
 
                 try {
-                     await addDoc(collection(db, 'withdrawals'), {
+                    // Create the withdrawal request document
+                    const withdrawalRequest = {
                         userId: currentUser.uid, 
                         email: currentUser.email,
                         userName: currentUser.displayName || 'A User',
@@ -1079,8 +1140,14 @@
                         method: method, 
                         account: account, 
                         status: 'pending',
-                        notified: false,
+                        notified: false, // Admin will trigger notification
                         timestamp: serverTimestamp()
+                    };
+                    await addDoc(collection(db, 'withdrawals'), withdrawalRequest);
+
+                    // FIX: Deduct balance from user's account immediately
+                    await updateDoc(userRef, {
+                        balance: increment(-amount)
                     });
                     
                     showToast('Withdrawal request successful! It is now pending review.');
@@ -1116,12 +1183,22 @@
                 );
             };
 
-            const openPurchaseModal = async (productId, productName, productPrice, productDescription) => {
+            const openPurchaseModal = async (productId, productName, originalPrice, finalPrice, productDescription) => {
                 const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
                 const userBalance = userDoc.data().balance || 0;
 
                 document.getElementById('modalProductName').innerText = productName;
-                document.getElementById('modalProductPrice').innerText = `$${productPrice.toFixed(2)}`;
+                const priceDetailsDiv = document.getElementById('modalPriceDetails');
+                
+                if (originalPrice !== finalPrice) {
+                    priceDetailsDiv.innerHTML = `
+                        <p>Original Price: <s style="color: #999;">$${originalPrice.toFixed(2)}</s></p>
+                        <p>Discounted Price: <b style="font-size: 1.2em; color: var(--primary-color);">$${finalPrice.toFixed(2)}</b></p>
+                    `;
+                } else {
+                    priceDetailsDiv.innerHTML = `<p>Price: <b>$${finalPrice.toFixed(2)}</b></p>`;
+                }
+
                 document.getElementById('modalUserBalance').innerText = `$${userBalance.toFixed(2)}`;
                 
                 const paymentOptionsDiv = document.getElementById('paymentOptions');
@@ -1183,10 +1260,10 @@
 
                         if (selectedMethod === 'balance') {
                             externalDetailsDiv.style.display = 'none';
-                            confirmBtn.disabled = userBalance < productPrice;
+                            confirmBtn.disabled = userBalance < finalPrice;
                         } else {
                             externalDetailsDiv.style.display = 'block';
-                            externalInstructionP.innerText = `Please send $${productPrice.toFixed(2)} to our ${selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1)} account (${selectedMethodDetails}) and enter the Transaction ID below.`;
+                            externalInstructionP.innerText = `Please send $${finalPrice.toFixed(2)} to our ${selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1)} account (${selectedMethodDetails}) and enter the Transaction ID below.`;
                             confirmBtn.disabled = false;
                         }
                     });
@@ -1194,17 +1271,21 @@
 
 
                 confirmBtn.disabled = true; 
-                confirmBtn.onclick = () => confirmPurchase(productId, productName, productPrice, selectedMethod);
+                confirmBtn.onclick = () => confirmPurchase(productId, productName, finalPrice, selectedMethod);
                 document.getElementById('purchaseModal').classList.add('show');
             };
 
             const confirmPurchase = async (productId, productName, productPrice, method) => {
+                const confirmBtn = document.getElementById('confirmPurchaseBtn');
                 if (!method) return showToast('Please select a payment method.', true);
+
+                confirmBtn.disabled = true;
+                confirmBtn.innerText = 'Processing...';
 
                 const userRef = doc(db, 'users', currentUser.uid);
                 
-                if (method === 'balance') {
-                     try {
+                try {
+                    if (method === 'balance') {
                         await runTransaction(db, async (transaction) => {
                             const userDoc = await transaction.get(userRef);
                             if (!userDoc.exists()) throw "User not found";
@@ -1228,33 +1309,32 @@
                         });
                         showToast('Purchase successful!');
                         document.getElementById('purchaseModal').classList.remove('show');
-                    } catch (error) {
-                        showToast('Purchase failed: ' + error, true);
-                    }
-                } else {
-                    // Handle external payment methods
-                    const trxId = document.getElementById('trxIdInput').value.trim();
-                    if (!trxId) return showToast('Please enter the Transaction ID.', true);
+                    } else {
+                        // Handle external payment methods
+                        const trxId = document.getElementById('trxIdInput').value.trim();
+                        if (!trxId) throw new Error('Please enter the Transaction ID.');
 
-                    const orderData = {
-                        userId: currentUser.uid,
-                        email: currentUser.email,
-                        productId,
-                        productName,
-                        productPrice,
-                        paymentMethod: method,
-                        transactionId: trxId,
-                        status: 'pending',
-                        timestamp: serverTimestamp()
-                    };
-                    
-                    try {
+                        const orderData = {
+                            userId: currentUser.uid,
+                            email: currentUser.email,
+                            productId,
+                            productName,
+                            productPrice,
+                            paymentMethod: method,
+                            transactionId: trxId,
+                            status: 'pending',
+                            timestamp: serverTimestamp()
+                        };
+                        
                         await addDoc(collection(db, 'orders'), orderData);
                         showToast('Order placed! It will be reviewed by an admin shortly.');
                         document.getElementById('purchaseModal').classList.remove('show');
-                    } catch (error) {
-                        showToast('Failed to place order: ' + error.message, true);
                     }
+                } catch (error) {
+                    showToast('Purchase failed: ' + error.message, true);
+                } finally {
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerText = 'Order Place';
                 }
             };
 
