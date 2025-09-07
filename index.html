@@ -18,14 +18,15 @@
     
     <style>
         :root {
-            --primary-color: #0088cc;
-            --primary-light: #00b3ee;
-            --background-light: #f4f6f9;
+            --primary-color: #8A2BE2; /* Changed to a purple theme */
+            --primary-light: #9370DB;
+            --background-light: #f0e6ff; /* Lighter purple background */
             --card-light: #ffffff;
             --text-light: #333;
             --text-light-secondary: #7f8c8d;
             --shadow: 0 4px 15px rgba(0,0,0,0.06);
-            --border-radius: 12px;
+            --border-radius: 16px; /* Bouncier radius */
+            --orange-gradient: linear-gradient(45deg, #FF8C00, #FFA500);
         }
 
         body {
@@ -77,7 +78,11 @@
             animation: fadeIn 0.5s ease-in-out;
         }
         .page.active { display: block; }
-        .page#homePage, .page#workPage, .page#withdrawPage, .page#profilePage, .page#historyPage { padding-top: 70px; }
+        .page#homePage, .page#workPage, .page#withdrawPage, .page#profilePage, .page#historyPage, .page#productsPage { padding-top: 70px; }
+        .page#homePage {
+            padding-top: 20px;
+            background: linear-gradient(180deg, #a56eff, #f0e6ff 40%);
+        }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -87,6 +92,138 @@
         .card { 
             background-color: var(--card-light); border-radius: var(--border-radius); 
             padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow);
+        }
+
+        /* New Home Page Styles */
+        .home-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .points-display {
+            background: rgba(255,255,255,0.8);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .points-display .material-icons {
+            color: #FFD700;
+            margin-right: 5px;
+        }
+        .progress-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0 50px;
+        }
+        .progress-circle {
+            width: 200px;
+            height: 200px;
+        }
+        .progress-circle-bg, .progress-circle-fg {
+            fill: none;
+            stroke-width: 15;
+        }
+        .progress-circle-bg {
+            stroke: rgba(255,255,255,0.5);
+        }
+        .progress-circle-fg {
+            stroke: white;
+            stroke-linecap: round;
+            transform: rotate(-90deg 100px 100px);
+            transition: stroke-dashoffset 0.5s ease-in-out;
+        }
+        .progress-text {
+            position: absolute;
+            text-align: center;
+            color: white;
+        }
+        .progress-text span {
+            display: block;
+        }
+        .progress-text .label { font-size: 1em; opacity: 0.8;}
+        .progress-text .value { font-size: 2.5em; font-weight: bold; }
+        .claim-button {
+            background: var(--orange-gradient);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(255, 165, 0, 0.4);
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .reward-cards-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .reward-card {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(5px);
+            padding: 15px;
+            text-align: center;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+        .reward-card h4 { margin: 0 0 10px; font-size: 0.9em; }
+        .reward-card p { margin: 0 0 10px; font-weight: bold;}
+        .reward-card button {
+            background: var(--primary-light);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        /* Digital Products Section Styles */
+        .section-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 20px 15px 10px;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            padding: 0 15px;
+        }
+        .product-card {
+            background: var(--card-light);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        .product-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        .product-info {
+            padding: 15px;
+        }
+        .product-info h4 { margin: 0 0 5px; }
+        .product-info .price { font-weight: bold; color: var(--primary-color); margin-bottom: 10px;}
+        .buy-now-btn {
+            background: var(--orange-gradient);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
         }
         
         #authPage {
@@ -151,10 +288,10 @@
             font-size: 1.1em; font-weight: 500; cursor: pointer;
             color: white;
             background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
-            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4);
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        .submit-btn:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(0, 136, 204, 0.4); }
+        .submit-btn:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(138, 43, 226, 0.4); }
         
         .youtube-card { display: flex; align-items: center; justify-content: space-between; background: linear-gradient(45deg, #ff0000, #ff5c5c); color: white; cursor: pointer; }
         .youtube-card h3 { margin: 0; }
@@ -204,7 +341,7 @@
                 <button id="searchButton"><i class="material-icons">search</i></button>
                 <button id="notificationButton" style="position: relative;">
                     <i class="material-icons">notifications</i>
-                    <span id="notificationBadge" class="notification-badge">0</span>
+                    <span id="notificationBadge" class="notification-badge" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; font-size: 10px; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;">0</span>
                 </button>
                 <button id="profileButton"><i class="material-icons">person</i></button>
             </div>
@@ -238,20 +375,47 @@
 
             <!-- Home Page -->
             <div id="homePage" class="page">
-                <div class="welcome-banner card"> <h2 id="welcomeMessage">Hello, User!</h2> </div>
-                <div id="youtubeCard" class="card youtube-card">
-                    <h3>Join our YouTube</h3>
-                    <i class="material-icons">play_circle_filled</i>
-                </div>
-                <div class="card">
-                    <h3><i class="material-icons" style="vertical-align: middle;">group</i> Users Working Now</h3>
-                    <p class="counter">1,245</p>
-                </div>
-                <div class="card">
-                    <h3><i class="material-icons" style="vertical-align: middle;">history</i> Recent Withdrawals</h3>
-                    <div id="withdrawalFeed" class="feed-container">
-                        <p>No recent activity.</p>
+                <div class="home-header">
+                    <div class="points-display">
+                        <i class="material-icons">monetization_on</i>
+                        <span id="homePoints">4045</span>
                     </div>
+                    <div class="welcome-message" style="color: white; font-weight: bold;" id="welcomeMessage">Hello, User!</div>
+                </div>
+
+                <div class="progress-container">
+                    <svg class="progress-circle" viewBox="0 0 200 200">
+                        <circle class="progress-circle-bg" cx="100" cy="100" r="90" />
+                        <circle class="progress-circle-fg" cx="100" cy="100" r="90" id="progressCircleFg" />
+                    </svg>
+                    <div class="progress-text">
+                        <span class="label">Today's Tasks</span>
+                        <span class="value" id="dailyProgressValue">0/10</span>
+                        <button class="claim-button" id="claimTasksButton">Continue to claim</button>
+                    </div>
+                </div>
+
+                <div class="reward-cards-container">
+                    <div class="reward-card">
+                        <h4>Countdown</h4>
+                        <p>🎁 1/3</p>
+                        <button>Claim</button>
+                    </div>
+                    <div class="reward-card">
+                        <h4>Daily Reward</h4>
+                        <p>💰 150 max</p>
+                        <button>Claim</button>
+                    </div>
+                    <div class="reward-card">
+                        <h4>Daily Check-in</h4>
+                        <p>💎 800 max</p>
+                        <button>Claim</button>
+                    </div>
+                </div>
+
+                <div id="homeProductsLink" class="card" style="margin-top: 20px; background: var(--orange-gradient); color: white; cursor: pointer;">
+                    <h3>More Earning</h3>
+                    <p>Check out our digital products!</p>
                 </div>
             </div>
 
@@ -259,6 +423,14 @@
             <div id="workPage" class="page">
                 <h2>Task Board</h2>
                 <div class="card task-list"></div>
+            </div>
+            
+            <!-- Digital Products Page -->
+            <div id="productsPage" class="page">
+                <h2>Digital Products</h2>
+                <div class="product-grid" id="productList">
+                    <!-- Products will be loaded here by JavaScript -->
+                </div>
             </div>
 
             <!-- Withdraw Page -->
@@ -276,19 +448,19 @@
                 </div>
                 
                 <div class="card">
-                    <div class="payment-method-header"> <img src="https://tinyurl.com/mr2sfn7f" alt="Bkash" class="payment-logo"> <h3>Withdraw via Bkash</h3> </div>
+                    <div class="payment-method-header" style="display:flex; align-items:center;"> <img src="https://tinyurl.com/mr2sfn7f" alt="Bkash" class="payment-logo"> <h3>Withdraw via Bkash</h3> </div>
                     <input type="number" class="withdraw-input" id="bkashAmount" placeholder="Amount (USD)">
                     <input type="text" class="withdraw-input" id="bkashNumber" placeholder="Your Bkash Number">
                     <button class="withdraw-btn" data-method="Bkash">Request Withdrawal</button>
                 </div>
                 <div class="card">
-                    <div class="payment-method-header"> <img src="https://tinyurl.com/37kbzs6c" alt="Nagad" class="payment-logo"> <h3>Withdraw via Nagad</h3> </div>
+                    <div class="payment-method-header" style="display:flex; align-items:center;"> <img src="https://tinyurl.com/37kbzs6c" alt="Nagad" class="payment-logo"> <h3>Withdraw via Nagad</h3> </div>
                     <input type="number" class="withdraw-input" id="nagadAmount" placeholder="Amount (USD)">
                     <input type="text" class="withdraw-input" id="nagadNumber" placeholder="Your Nagad Number">
                     <button class="withdraw-btn" data-method="Nagad">Request Withdrawal</button>
                 </div>
                  <div class="card">
-                    <div class="payment-method-header"> <img src="https://tinyurl.com/mvbbv7eb" alt="USDT" class="payment-logo"> <h3>Withdraw via USDT (TRC20)</h3> </div>
+                    <div class="payment-method-header" style="display:flex; align-items:center;"> <img src="https://tinyurl.com/mvbbv7eb" alt="USDT" class="payment-logo"> <h3>Withdraw via USDT (TRC20)</h3> </div>
                     <input type="number" class="withdraw-input" id="usdtAmount" placeholder="Amount (USD)">
                     <input type="text" class="withdraw-input" id="usdtAddress" placeholder="Your USDT Address">
                     <button class="withdraw-btn" data-method="USDT">Request Withdrawal</button>
@@ -297,8 +469,8 @@
             
             <!-- Profile Page -->
             <div id="profilePage" class="page">
-                <div class="card profile-header">
-                    <img id="profileImage" src="https://via.placeholder.com/100" alt="Profile Picture" style="width:100px; height:100px; border-radius:50%;">
+                <div class="card profile-header" style="text-align: center;">
+                    <img id="profileImage" src="https://via.placeholder.com/100" alt="Profile Picture" style="width:100px; height:100px; border-radius:50%; margin: 0 auto 10px;">
                     <h2 id="profileName">User</h2>
                     <p id="profileEmail">user@email.com</p>
                 </div>
@@ -315,7 +487,7 @@
                 </div>
                  <div class="card">
                     <div id="historyBtn" class="setting-item"><span>Task History</span> <i class="material-icons">chevron_right</i></div>
-                 </div>
+                </div>
                  <button id="logoutBtn" class="logout-button">Logout</button>
             </div>
             
@@ -329,6 +501,7 @@
         <div class="nav-bottom" style="display: none;">
             <button id="navHome"><i class="material-icons">home</i>Home</button>
             <button id="navWork"><i class="material-icons">work</i>Work</button>
+            <button id="navProducts"><i class="material-icons">shopping_bag</i>Products</button>
             <button id="navWithdraw"><i class="material-icons">account_balance_wallet</i>Withdraw</button>
         </div>
         <div id="notificationOverlay"></div>
@@ -350,7 +523,7 @@
           apiKey: "AIzaSyAQG6aZY3kaleNFi2vdR5_FPk8fHnI8kRk",
           authDomain: "income-hobei.firebaseapp.com",
           projectId: "income-hobei",
-          storageBucket: "income-hobei.firebasestorage.app",
+          storageBucket: "income-hobei.appspot.com", // Corrected storage bucket
           messagingSenderId: "87846212742",
           appId: "1:87846212742:web:6b5961db7f2a7df3932d07"
         };
@@ -366,8 +539,8 @@
             // --- STATE MANAGEMENT ---
             let currentUser = null;
             let userUnsubscribe; 
-            let userWithdrawalListener = null;
-            let settings = { minWithdrawal: 5, themeColor: '#0088cc' };
+            let userNotificationListener = null; 
+            let settings = { minWithdrawal: 5, themeColor: '#8A2BE2' };
             let appConfig = { dailyAdLimit: 10 }; 
 
             // --- UI ELEMENTS ---
@@ -375,21 +548,40 @@
             const appContainer = document.getElementById('appContainer');
 
             // --- CORE FUNCTIONS ---
-            const showToast = (message) => {
+            const showToast = (message, isError = false) => {
                 const toast = document.getElementById('toast');
                 toast.textContent = message;
+                toast.style.backgroundColor = isError ? 'rgba(220, 53, 69, 0.9)' : 'rgba(30,30,30,0.9)';
                 toast.style.bottom = '80px';
                 setTimeout(() => { toast.style.bottom = '-100px'; }, 3000);
             };
 
             const updateBalanceDisplay = (balance) => document.getElementById('balanceAmount').innerText = `$${balance.toFixed(2)}`;
-            const updatePointsDisplay = (points) => document.getElementById('pointsAmount').innerText = points;
+            const updatePointsDisplay = (points) => {
+                 document.getElementById('pointsAmount').innerText = points;
+                 document.getElementById('homePoints').innerText = points;
+            }
+
+            const updateDailyProgress = (count, limit) => {
+                const progressCircleFg = document.getElementById('progressCircleFg');
+                const dailyProgressValue = document.getElementById('dailyProgressValue');
+                const radius = progressCircleFg.r.baseVal.value;
+                const circumference = 2 * Math.PI * radius;
+                const offset = circumference - (count / limit) * circumference;
+                
+                progressCircleFg.style.strokeDasharray = `${circumference} ${circumference}`;
+                progressCircleFg.style.strokeDashoffset = offset;
+                dailyProgressValue.innerText = `${count}/${limit}`;
+            };
             
             const showPage = (pageId) => {
                 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                document.getElementById(pageId + 'Page').classList.add('active');
+                const page = document.getElementById(pageId + 'Page');
+                if(page) page.classList.add('active');
+
                 document.querySelectorAll('.nav-bottom button').forEach(b => b.classList.remove('active'));
-                const activeBtn = document.getElementById('nav' + pageId.charAt(0).toUpperCase() + pageId.slice(1));
+                const activeBtnId = 'nav' + pageId.charAt(0).toUpperCase() + pageId.slice(1);
+                const activeBtn = document.getElementById(activeBtnId);
                 if (activeBtn) activeBtn.classList.add('active');
             };
 
@@ -401,6 +593,7 @@
                 if(link) newNotif.dataset.link = link;
                 notificationList.prepend(newNotif);
                 badge.innerText = parseInt(badge.innerText) + 1;
+                badge.style.display = 'flex';
             };
 
             const updateHistoryPage = (history) => {
@@ -421,79 +614,44 @@
                     const data = doc.data();
                     settings = data;
                     appConfig = { ...appConfig, ...data };
-                    document.documentElement.style.setProperty('--primary-color', settings.themeColor || '#0088cc');
+                    document.documentElement.style.setProperty('--primary-color', settings.themeColor || '#8A2BE2');
                 }
             });
 
             const setupWithdrawalFeedListener = () => {
-                const feedContainer = document.getElementById('withdrawalFeed');
-                db.collection('withdrawals')
-                  .where('status', '==', 'approved')
-                  .orderBy('timestamp', 'desc')
-                  .limit(5)
-                  .onSnapshot(snapshot => {
-                      if (snapshot.empty) {
-                          feedContainer.innerHTML = '<p>No recent approved withdrawals.</p>';
-                          return;
-                      }
-                      const feedHTML = snapshot.docs.map(doc => {
-                          const data = doc.data();
-                          const timeAgo = new Date(data.timestamp.seconds * 1000).toLocaleTimeString();
-                          return `
-                              <div class="feed-item">
-                                  <i class="material-icons">check_circle</i>
-                                  <span><b>${data.userName || 'Someone'}</b> just withdrew <b>$${data.amount.toFixed(2)}</b> via ${data.method}. <small>(${timeAgo})</small></span>
-                              </div>
-                          `;
-                      }).join('');
-                      feedContainer.innerHTML = feedHTML;
-                  }, error => {
-                      console.error("Error setting up withdrawal feed listener: ", error);
-                      feedContainer.innerHTML = '<p>Could not load recent activity.</p>';
-                  });
+                // This is now removed from the home page design, but kept for potential future use.
             };
 
             const setupUserNotificationListener = (userId) => {
-                if (userWithdrawalListener) userWithdrawalListener();
-
-                // GURU: এই কোয়েরিটির জন্য Firestore-এ একটি কম্পোজিট ইনডেক্স তৈরি করতে হবে।
-                // ইনডেক্স: collection=withdrawals, fields: userId ASC, notified ASC
-                userWithdrawalListener = db.collection('withdrawals')
-                  .where('userId', '==', userId)
-                  .where('notified', '==', false)
-                  .onSnapshot(snapshot => {
-                      snapshot.docChanges().forEach(async (change) => {
-                          if (change.type === 'modified') {
-                              const data = change.doc.data();
-                              const userRef = db.collection('users').doc(userId);
-
-                              // WARNING: ক্লায়েন্ট-সাইড কোড ব্যবহার করে ব্যালেন্স কমানো নিরাপদ নয়।
-                              // এটি Firebase Cloud Functions ব্যবহার করে করা উচিত।
-                              
-                              if (data.status === 'approved') {
-                                  try {
-                                      // অ্যাডমিন অ্যাপ্রুভ করলে টাকা কমানো হবে
-                                      await userRef.update({ balance: firebase.firestore.FieldValue.increment(-data.amount) });
-                                      addNotification(`Your withdrawal of $${data.amount.toFixed(2)} has been approved!`);
-                                      showToast('Withdrawal approved!');
-                                      await db.collection('withdrawals').doc(change.doc.id).update({ notified: true });
-                                  } catch (error) {
-                                      console.error("Error processing approved withdrawal:", error);
-                                      showToast("Error updating balance for approved withdrawal.");
-                                  }
-                              } else if (data.status === 'rejected') {
-                                   addNotification(`Your withdrawal of $${data.amount.toFixed(2)} was rejected. Contact support.`);
-                                   showToast('Withdrawal rejected.');
-                                   // টাকা ফেরত দেওয়া হবে কারণ অ্যাডমিন রিজেক্ট করেছেন
-                                   await userRef.update({ balance: firebase.firestore.FieldValue.increment(data.amount) });
-                                   await db.collection('withdrawals').doc(change.doc.id).update({ notified: true });
-                              }
-                          }
-                      });
-                  }, error => {
-                      console.error("Error setting up user notification listener: ", error);
-                  });
+                if (userNotificationListener) userNotificationListener();
+                userNotificationListener = db.collection('withdrawals')
+                    .where('userId', '==', userId)
+                    .where('notified', '==', false)
+                    .onSnapshot(snapshot => {
+                        snapshot.docChanges().forEach(async (change) => {
+                            if (change.type === 'added' || change.type === 'modified') {
+                                const data = change.doc.data();
+                                const withdrawalDocRef = db.collection('withdrawals').doc(change.doc.id);
+                                
+                                if (data.status === 'approved') {
+                                    addNotification(`Your withdrawal of $${data.amount.toFixed(2)} has been approved!`);
+                                    showToast('Withdrawal approved!');
+                                    await withdrawalDocRef.update({ notified: true });
+                                } else if (data.status === 'rejected') {
+                                    const userRef = db.collection('users').doc(userId);
+                                    await userRef.update({ balance: firebase.firestore.FieldValue.increment(data.amount) });
+                                    addNotification(`Your withdrawal of $${data.amount.toFixed(2)} was rejected. The amount has been returned to your balance.`);
+                                    showToast('Withdrawal rejected and refunded.', true);
+                                    await withdrawalDocRef.update({ notified: true });
+                                }
+                            }
+                        });
+                    }, error => {
+                        console.error("Error setting up user notification listener: ", error);
+                        showToast("Could not check withdrawal status. Please contact support.", true);
+                    });
             };
+
 
             // --- AUTHENTICATION ---
             auth.onAuthStateChanged(async (user) => {
@@ -510,17 +668,22 @@
                     userUnsubscribe = userRef.onSnapshot(doc => {
                         if (doc.exists) {
                             const data = doc.data();
+                             if (data.status === 'blocked') {
+                                document.body.innerHTML = '<h1 style="text-align:center; padding-top: 50px;">Your account has been blocked.</h1>';
+                                if(userUnsubscribe) userUnsubscribe();
+                                if(userNotificationListener) userNotificationListener();
+                                return;
+                            }
                             updateBalanceDisplay(data.balance || 0);
                             updatePointsDisplay(data.points || 0);
+                            updateDailyProgress(data.dailyAdCount || 0, appConfig.dailyAdLimit || 10);
                             document.getElementById('userReferralCode').innerText = data.referralCode;
                             document.getElementById('profileName').innerText = data.name || 'User';
                             document.getElementById('profileEmail').innerText = data.email;
+                             document.getElementById('welcomeMessage').innerText = `Hello, ${data.name || 'User'}!`;
                             db.collection('users').doc(user.uid).collection('history').orderBy('date', 'desc').onSnapshot(snap => {
                                 updateHistoryPage(snap.docs.map(d => d.data()));
                             });
-                            if (data.status === 'blocked') {
-                                document.body.innerHTML = '<h1>Your account has been blocked by the administrator.</h1>';
-                            }
                         }
                     });
 
@@ -542,15 +705,14 @@
                     
                     document.querySelector('.header').style.display = 'flex';
                     document.querySelector('.nav-bottom').style.display = 'flex';
-                    document.getElementById('welcomeMessage').innerText = `Hello, ${user.displayName || 'User'}!`;
                     
                     generateTasks();
-                    setupWithdrawalFeedListener();
+                    generateProducts();
                     setupUserNotificationListener(user.uid);
                     showPage('home');
                 } else {
                     if(userUnsubscribe) userUnsubscribe();
-                    if(userWithdrawalListener) userWithdrawalListener();
+                    if(userNotificationListener) userNotificationListener();
                     currentUser = null;
                     document.querySelector('.header').style.display = 'none';
                     document.querySelector('.nav-bottom').style.display = 'none';
@@ -559,91 +721,67 @@
             });
 
             window.claimReward = async function(taskType) {
-                if (!currentUser) return showToast("Please login first.");
+                if (!currentUser) return showToast("Please login first.", true);
                 const today = new Date().toISOString().split('T')[0];
                 const userRef = db.collection("users").doc(currentUser.uid);
 
                 try {
-                    const userDoc = await userRef.get();
-                    let currentData = userDoc.data();
-
-                    if (currentData.lastAdWatchDate !== today) {
-                        await userRef.update({ dailyAdCount: 0, lastAdWatchDate: today });
-                        currentData.dailyAdCount = 0;
-                    }
-
-                    if (currentData.dailyAdCount >= (appConfig.dailyAdLimit || 10)) {
-                        return showToast("আজকের বিজ্ঞাপন দেখার সীমা পূর্ণ হয়েছে।");
-                    }
-                    
-                    if (typeof window.show_9829935 !== 'function') {
-                        return showToast("এখন বিজ্ঞাপন সার্ভিস উপলব্ধ নয়। অনুগ্রহ করে পরে চেষ্টা করুন।");
-                    }
-                    
-                    showToast("Loading ad...");
-
-                    let adPromise;
-                    switch(taskType) {
-                        case 'interstitial': adPromise = window.show_9829935(); break;
-                        case 'popup': adPromise = window.show_9829935('pop'); break;
-                        case 'inApp': adPromise = window.show_9829935({ type: 'inApp' }); break;
-                        case 'miniApp': adPromise = window.show_9829935(); break;
-                        default: return;
-                    }
-
-                    adPromise.then(async () => {
-                        let rewardAmount = (taskType === 'miniApp') ? 1000 : 50;
+                    await db.runTransaction(async (transaction) => {
+                        const userDoc = await transaction.get(userRef);
+                        if (!userDoc.exists) {
+                            throw "User document does not exist!";
+                        }
                         
-                        await userRef.update({ 
+                        let currentData = userDoc.data();
+                        let dailyCount = currentData.dailyAdCount || 0;
+                        let lastDate = currentData.lastAdWatchDate || new Date(0).toISOString().split('T')[0];
+
+                        if (lastDate !== today) {
+                            dailyCount = 0;
+                        }
+
+                        if (dailyCount >= (appConfig.dailyAdLimit || 10)) {
+                            return Promise.reject("Daily ad limit reached.");
+                        }
+
+                        showToast("Loading ad...");
+                        
+                        await new Promise((resolve, reject) => {
+                             window.show_9829935().then(resolve).catch(reject);
+                        });
+
+                        let rewardAmount = (taskType === 'miniApp') ? 100 : 50;
+                        
+                        transaction.update(userRef, { 
                             dailyAdCount: firebase.firestore.FieldValue.increment(1),
-                            points: firebase.firestore.FieldValue.increment(rewardAmount)
+                            points: firebase.firestore.FieldValue.increment(rewardAmount),
+                            lastAdWatchDate: today
                         });
 
-                        await db.collection('users').doc(currentUser.uid).collection('history').add({
-                            type: 'Task Reward', detail: `+${rewardAmount} Coins for watching ad.`, date: firebase.firestore.FieldValue.serverTimestamp()
+                        const historyRef = userRef.collection('history').doc();
+                        transaction.set(historyRef, {
+                            type: 'Task Reward', detail: `+${rewardAmount} Points for watching ad.`, date: firebase.firestore.FieldValue.serverTimestamp()
                         });
                         
-                        showToast(`অভিনন্দন! আপনি ${rewardAmount} কয়েন পেয়েছেন।`);
-                    }).catch(error => {
-                        console.error("Ad error:", error);
-                        showToast("Failed to show ad. Please try again.");
+                        showToast(`Congratulations! You earned ${rewardAmount} points.`);
                     });
                 } catch (error) {
                     console.error("Error claiming reward:", error);
-                    showToast("An error occurred. Please try again.");
+                    showToast(typeof error === 'string' ? error : "An error occurred. Please try again.", true);
                 }
             };
             
              const generateTasks = () => {
                 const taskList = document.querySelector('.task-list');
+                taskList.innerHTML = '<p style="text-align:center; color: #7f8c8d;">Loading tasks...</p>';
                 
-                const staticTaskHTML = `
+                 const staticTaskHTML = `
                     <div class="task-item" data-task-type="interstitial">
                         <i class="material-icons task-icon">ads_click</i>
                         <div class="task-details"><h4>Watch Ad 1</h4><p>Click here to earn points by watching a short ad.</p></div>
                         <span class="task-reward">+50 Pts</span>
                     </div>
-                     <div class="task-item" data-task-type="popup">
-                        <i class="material-icons task-icon">open_in_new</i>
-                        <div class="task-details"><h4>Watch Ad 2</h4><p>Watch a short ad to complete the survey and earn rewards.</p></div>
-                        <span class="task-reward">+50 Pts</span>
-                    </div>
-                     <div class="task-item" data-task-type="inApp">
-                        <i class="material-icons task-icon">slideshow</i>
-                        <div class="task-details"><h4>Watch Ad 3</h4><p>Watch a video from our sponsors to get your points.</p></div>
-                        <span class="task-reward">+50 Pts</span>
-                    </div>
-                    <div class="task-item" data-task-type="miniApp">
-                        <i class="material-icons task-icon">videogame_asset</i>
-                        <div class="task-details"><h4>Watch Ad 4</h4><p>Engage with this special ad to earn a bigger reward.</p></div>
-                        <span class="task-reward">+100 Pts</span>
-                    </div>
-                    <div class="task-item" data-task-type="interstitial">
-                        <i class="material-icons task-icon">card_giftcard</i>
-                        <div class="task-details"><h4>Watch Ad 5</h4><p>Watch this ad to claim your special daily bonus points.</p></div>
-                        <span class="task-reward">+50 Pts</span>
-                    </div>
-                `;
+                 `;
 
                 db.collection('tasks').onSnapshot(snapshot => {
                     let firestoreTasksHTML = "";
@@ -673,6 +811,43 @@
                 });
             };
 
+            const generateProducts = () => {
+                const productList = document.getElementById('productList');
+                productList.innerHTML = '<p style="text-align:center; color: #7f8c8d;">Loading products...</p>';
+                
+                db.collection('products').onSnapshot(snapshot => {
+                    if (snapshot.empty) {
+                        productList.innerHTML = "<p>No digital products available right now.</p>";
+                        return;
+                    }
+
+                    let productsHTML = "";
+                    snapshot.forEach(doc => {
+                        const product = doc.data();
+                        productsHTML += `
+                            <div class="product-card">
+                                <img src="${product.imageUrl || 'https://via.placeholder.com/150'}" alt="${product.name}">
+                                <div class="product-info">
+                                    <h4>${product.name}</h4>
+                                    <p class="price">$${product.price.toFixed(2)}</p>
+                                    <button class="buy-now-btn" data-product-id="${doc.id}">Buy Now</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    productList.innerHTML = productsHTML;
+                    document.querySelectorAll('.buy-now-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            showToast("Purchase feature is coming soon!");
+                        });
+                    });
+                }, error => {
+                    console.error("Error fetching products:", error);
+                    productList.innerHTML = "<p>Could not load products. Please try again.</p>";
+                });
+            };
+
             // --- EVENT LISTENERS ---
             const flipper = document.querySelector('.auth-flipper');
             document.getElementById('showSignupLink').addEventListener('click', e => { e.preventDefault(); flipper.classList.add('flipped'); });
@@ -681,32 +856,32 @@
             document.getElementById('loginBtn').addEventListener('click', () => {
                 const email = document.getElementById('loginEmail').value;
                 const password = document.getElementById('loginPassword').value;
-                if(!email || !password) return showToast("Please fill all fields");
-                auth.signInWithEmailAndPassword(email, password).catch(e => showToast(e.message));
+                if(!email || !password) return showToast("Please fill all fields", true);
+                auth.signInWithEmailAndPassword(email, password).catch(e => showToast(e.message, true));
             });
             document.getElementById('signupBtn').addEventListener('click', () => {
                 const name = document.getElementById('signupFullName').value;
                 const email = document.getElementById('signupEmail').value;
                 const pass = document.getElementById('signupPassword').value;
-                if(!name || !email || !pass) return showToast("Please fill all fields");
+                if(!name || !email || !pass) return showToast("Please fill all fields", true);
                 auth.createUserWithEmailAndPassword(email, pass)
                     .then(cred => cred.user.updateProfile({displayName: name}))
-                    .catch(e => showToast(e.message));
+                    .catch(e => showToast(e.message, true));
             });
             
             document.getElementById('submitReferralBtn').addEventListener('click', async () => {
                 const code = document.getElementById('referralCodeInput').value.trim();
-                if (!code) return showToast("Please enter a code.");
+                if (!code) return showToast("Please enter a code.", true);
                 const userRef = db.collection('users').doc(currentUser.uid);
                 const userDoc = await userRef.get();
                 const userData = userDoc.data();
 
-                if(userData.referralUsed) return showToast('You have already used a referral code.');
-                if(code === userData.referralCode) return showToast('You cannot use your own referral code.');
+                if(userData.referralUsed) return showToast('You have already used a referral code.', true);
+                if(code === userData.referralCode) return showToast('You cannot use your own referral code.', true);
 
                 const referrerQuery = await db.collection('users').where('referralCode', '==', code).limit(1).get();
                 if (referrerQuery.empty) {
-                    return showToast('Invalid referral code.');
+                    return showToast('Invalid referral code.', true);
                 }
                 
                 await userRef.update({
@@ -740,7 +915,7 @@
                     });
                     showToast('Points converted successfully!');
                 } else {
-                    showToast('Not enough points (minimum 1000).');
+                    showToast('Not enough points (minimum 1000).', true);
                 }
             });
 
@@ -757,12 +932,18 @@
                     const userDoc = await userRef.get();
                     const currentBalance = userDoc.data().balance;
 
-                    if (!account || isNaN(amount) || amount <= 0) return showToast('Invalid amount or account details.');
-                    if (amount < settings.minWithdrawal) return showToast(`Minimum withdrawal is $${settings.minWithdrawal}.`);
-                    if (amount > currentBalance) return showToast('Insufficient balance for this withdrawal.');
+                    if (!account || isNaN(amount) || amount <= 0) return showToast('Invalid amount or account details.', true);
+                    if (amount < settings.minWithdrawal) return showToast(`Minimum withdrawal is $${settings.minWithdrawal}.`, true);
+                    if (amount > currentBalance) return showToast('Insufficient balance for this withdrawal.', true);
                     
+                    btn.disabled = true;
+                    btn.innerText = "Processing...";
+
                     try {
-                        // টাকা কাটার লজিকটি এখন নোটিফিকেশন লিসেনারে রয়েছে।
+                        await userRef.update({
+                            balance: firebase.firestore.FieldValue.increment(-amount)
+                        });
+                        
                         await db.collection('withdrawals').add({
                             userId: currentUser.uid, email: currentUser.email,
                             userName: currentUser.displayName || 'A User',
@@ -773,32 +954,58 @@
                         await db.collection('users').doc(currentUser.uid).collection('history').add({
                             type: 'Withdrawal Request', detail: `-$${amount.toFixed(2)} via ${method}.`, date: firebase.firestore.FieldValue.serverTimestamp()
                         });
-                        showToast('Withdrawal request has been sent successfully!');
-                        addNotification(`Your $${amount.toFixed(2)} withdrawal request via ${method} is pending approval.`);
+                        showToast('Withdrawal request sent successfully!');
+                        addNotification(`Your $${amount.toFixed(2)} withdrawal request via ${method} is pending.`);
                         amountInput.value = '';
                         accountInput.value = '';
                     } catch (error) {
                         console.error("Withdrawal error:", error);
-                        showToast("Failed to send withdrawal request. Please try again.");
+                        showToast("Failed to send request. Please try again.", true);
+                        await userRef.update({
+                            balance: firebase.firestore.FieldValue.increment(amount)
+                        });
+                    } finally {
+                         btn.disabled = false;
+                         btn.innerText = "Request Withdrawal";
                     }
                 });
             });
 
+
             document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
             document.getElementById('navHome').addEventListener('click', () => showPage('home'));
             document.getElementById('navWork').addEventListener('click', () => showPage('work'));
+            document.getElementById('navProducts').addEventListener('click', () => showPage('products'));
             document.getElementById('navWithdraw').addEventListener('click', () => showPage('withdraw'));
             document.getElementById('profileButton').addEventListener('click', () => showPage('profile'));
             document.getElementById('historyBtn').addEventListener('click', () => showPage('history'));
-            document.getElementById('youtubeCard').addEventListener('click', () => window.open('https://www.youtube.com', '_blank'));
+            document.getElementById('claimTasksButton').addEventListener('click', () => showPage('work'));
+            document.getElementById('homeProductsLink').addEventListener('click', () => showPage('products'));
+
             document.getElementById('copyReferralBtn').addEventListener('click', () => {
-                navigator.clipboard.writeText(document.getElementById('userReferralCode').innerText)
-                    .then(() => showToast('Referral Code copied!'))
-                    .catch(() => showToast('Failed to copy code.'));
+                const codeToCopy = document.getElementById('userReferralCode').innerText;
+                if(navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(codeToCopy)
+                        .then(() => showToast('Referral Code copied!'))
+                        .catch(() => showToast('Failed to copy code.', true));
+                } else {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = codeToCopy;
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        showToast('Referral Code copied!');
+                    } catch (err) {
+                        showToast('Failed to copy code.', true);
+                    }
+                    document.body.removeChild(textArea);
+                }
             });
         
             const notificationButton = document.getElementById('notificationButton'), closeNotificationBtn = document.getElementById('closeNotificationBtn'), notificationOverlay = document.getElementById('notificationOverlay');
-            const showNotificationPanel = () => { document.getElementById('notificationPanel').classList.add('show'); notificationOverlay.classList.add('show'); };
+            const showNotificationPanel = () => { document.getElementById('notificationPanel').classList.add('show'); notificationOverlay.classList.add('show'); document.getElementById('notificationBadge').style.display = 'none'; document.getElementById('notificationBadge').innerText = '0';};
             const hideNotificationPanel = () => { document.getElementById('notificationPanel').classList.remove('show'); notificationOverlay.classList.remove('show'); };
             notificationButton.addEventListener('click', showNotificationPanel);
             closeNotificationBtn.addEventListener('click', hideNotificationPanel);
