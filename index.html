@@ -1,1670 +1,595 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Income Hobei</title>
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Material Design Icons -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <!-- Telegram Mini App Script -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Monetag SDK -->
-    <script src='//libtl.com/sdk.js' data-zone='9829935' data-sdk='show_9829935'></script>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store - Futuristic Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
         :root {
-            --primary-color: #8A2BE2; /* Default Purple */
-            --primary-light: #9370DB;
-            --background-light: #f0e6ff; /* Lighter purple background */
-            --card-light: #ffffff;
-            --text-light: #333;
-            --text-light-secondary: #7f8c8d;
-            --shadow: 0 4px 15px rgba(0,0,0,0.06);
-            --border-radius: 16px; /* Bouncier radius */
-            --orange-gradient: linear-gradient(45deg, #FF8C00, #FFA500);
+            --color-bg: #0d0c22;
+            --color-surface: #191932;
+            --color-card: #232342;
+            --color-primary: #00f6ff;
+            --color-secondary: #ff00f8;
+            --color-glow: rgba(0, 246, 255, 0.3);
         }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0; padding: 0; background-color: var(--background-light);
-            color: var(--text-light); -webkit-user-select: none; user-select: none;
-            overflow-x: hidden; transition: background-color 0.3s, color 0.3s;
+            font-family: 'Inter', 'Noto Sans Bengali', sans-serif;
+            background-color: var(--color-bg);
+            color: #ffffff;
         }
-        
-        #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--background-light); display: flex; justify-content: center;
-            align-items: center; z-index: 9999; transition: opacity 0.5s, visibility 0.5s;
-        }
-        .spinner {
-            width: 40px; height: 40px; border: 4px solid rgba(0,0,0,0.1);
-            border-left-color: var(--primary-color); border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .container { max-width: 500px; margin: 0 auto; padding-bottom: 70px; }
-
-        .header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 15px; background-color: var(--primary-color); color: white;
-            position: fixed; top: 0; width: 100%; max-width: 500px;
-            box-sizing: border-box; z-index: 100; transition: background-color 0.3s;
-        }
-        .header .logo { font-weight: bold; font-size: 1.2em; }
-        .header .icons button { background: none; border: none; color: white; cursor: pointer; padding: 5px; border-radius: 50%; }
-
-        .header-right-controls { display: flex; align-items: center; gap: 5px; }
-        .selectors-container { display: flex; gap: 5px; }
-        .header-selector {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white; border: none; border-radius: 8px;
-            padding: 6px 4px; font-size: 0.8em; font-weight: 500;
-            -webkit-appearance: none; -moz-appearance: none; appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-caret-down-fill' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 5px center;
-            padding-right: 20px;
-        }
-        .header-selector option { color: black; background-color: white; }
-        
-        .nav-bottom { 
-            display: flex; justify-content: space-around; padding: 5px 0; 
-            background-color: var(--card-light); border-top: 1px solid #eee; 
-            position: fixed; bottom: 0; width: 100%; max-width: 500px; 
-            box-sizing: border-box; z-index: 100;
-        }
-        .nav-bottom button { 
-            background: none; border: none; color: #555; font-size: 12px; 
-            display: flex; flex-direction: column; align-items: center; 
-            cursor: pointer; padding: 5px 10px; flex-grow: 1; 
-        }
-        .nav-bottom button.active { color: var(--primary-color); }
-        .nav-bottom button .material-icons { font-size: 24px; margin-bottom: 2px; }
-
-        .page { 
-            display: none; padding: 15px; 
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        .page.active { display: block; }
-        .page#homePage, .page#workPage, .page#withdrawPage, .page#profilePage, .page#historyPage, .page#productsPage, .page#myProductsPage, .page#withdrawHistoryPage { padding-top: 70px; }
-        .page#homePage {
-            padding-top: 20px;
-            background: linear-gradient(180deg, #a56eff, #f0e6ff 40%);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .card { 
-            background-color: var(--card-light); border-radius: var(--border-radius); 
-            padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow);
-        }
-
-        /* Home Page Styles */
-        .home-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        .points-display {
-            background: rgba(255,255,255,0.8);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .points-display .material-icons {
-            color: #FFD700;
-            margin-right: 5px;
-        }
-        .progress-container {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 30px 0 50px;
-        }
-        .progress-circle {
-            width: 200px;
-            height: 200px;
-        }
-        .progress-circle-bg, .progress-circle-fg {
-            fill: none;
-            stroke-width: 15;
-        }
-        .progress-circle-bg {
-            stroke: rgba(255,255,255,0.5);
-        }
-        .progress-circle-fg {
-            stroke: white;
-            stroke-linecap: round;
-            transform: rotate(-90deg 100px 100px);
-            transition: stroke-dashoffset 0.5s ease-in-out;
-        }
-        .progress-text {
-            position: absolute;
-            text-align: center;
-            color: black;
-        }
-        .progress-text span {
-            display: block;
-        }
-        .progress-text .label { font-size: 1em; opacity: 0.8;}
-        .progress-text .value { font-size: 2.5em; font-weight: bold; }
-        .claim-button {
-            background: var(--orange-gradient);
+        .bg-surface { background-color: var(--color-surface); }
+        .bg-card { background-color: var(--color-card); }
+        .text-primary { color: var(--color-primary); }
+        .btn-primary {
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
             color: white;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
             border: none;
-            padding: 15px 40px;
-            border-radius: 30px;
-            font-size: 1.1em;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(255, 165, 0, 0.4);
-            cursor: pointer;
-            margin-top: 20px;
+            box-shadow: 0 0 15px var(--color-glow);
         }
-        
-        /* Notice Slider */
-        .notice-slider-container {
-            margin: 20px 0;
-            height: 50px;
-            background-color: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(5px);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            position: relative;
-            padding: 0;
+        .btn-primary:hover { transform: scale(1.05); box-shadow: 0 0 25px var(--color-glow); }
+        .btn-primary:disabled { background: #555; cursor: not-allowed; box-shadow: none; }
+        .card-glow {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
         }
-        .notice-slider-wrapper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            transition: top 0.5s ease-in-out;
-        }
-        .notice-slide {
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 15px;
-            font-weight: 500;
-        }
-        .section-title {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin: 20px 15px 10px;
-            color: #333;
-        }
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-            padding: 0 15px;
-        }
-        .product-card {
-            background: var(--card-light);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            text-align: center;
-            transition: transform 0.2s ease-in-out;
-            cursor: pointer;
-            position: relative;
-        }
-        .product-card:hover {
+        .card-glow:hover {
             transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 0 0 15px var(--color-glow);
         }
-        .product-card img {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-        }
-        .product-info {
-            padding: 15px;
-        }
-        .product-info h4 { margin: 0 0 5px; font-size: 0.9em; }
-        .price-wrapper { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-        .original-price { text-decoration: line-through; color: #999; font-size: 0.9em; }
-        .final-price { font-weight: bold; color: var(--primary-color); font-size: 1.1em; }
-        .product-info .description { font-size: 0.8em; color: var(--text-light-secondary); margin-bottom: 10px; height: 3em; overflow: hidden; }
-        .buy-now-btn {
-            background: var(--orange-gradient);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .discount-badge { 
-            position: absolute; 
-            top: 10px; 
-            right: 10px; 
-            background: #e74c3c; 
-            color: white; 
-            padding: 3px 8px; 
-            border-radius: 5px; 
-            font-size: 0.8em; 
-            font-weight: bold; 
-        }
-        
-        /* Auth Styles */
-        #authPage { padding: 0; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
-        .auth-container { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; perspective: 1200px; }
-        #authCard { width: 100%; max-width: 380px; box-sizing: border-box; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); transform: rotateY(-5deg); transition: transform 0.5s ease-in-out; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
-        #authCard:hover { transform: rotateY(0deg); }
-        .auth-flipper { transition: transform 0.6s; transform-style: preserve-3d; position: relative; }
-        .auth-flipper.flipped { transform: rotateY(180deg); }
-        #loginForm, #signupForm { backface-visibility: hidden; -webkit-backface-visibility: hidden; width: 100%; }
-        #signupForm { transform: rotateY(180deg); position: absolute; top: 0; left: 0; }
-        .auth-header { text-align: center; margin-bottom: 25px; }
-        .auth-header h2 { color: var(--text-light); margin: 0; }
-        .input-group { position: relative; margin-bottom: 20px; }
-        .input-group input { width: 100%; padding: 15px 15px 15px 50px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; box-sizing: border-box; background: #f9f9f9; }
-        .input-group .material-icons { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-light-secondary); }
-        .auth-switch { text-align: center; margin-top: 20px; font-size: 0.9em; }
-        .auth-switch a { color: var(--primary-color); text-decoration: none; font-weight: bold; }
-        .submit-btn { width: 100%; border: none; padding: 15px; border-radius: 8px; font-size: 1.1em; font-weight: 500; cursor: pointer; color: white; background: linear-gradient(45deg, var(--primary-color), var(--primary-light)); box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4); transition: transform 0.2s, box-shadow 0.2s; }
-        .submit-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
-        .submit-btn:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(138, 43, 226, 0.4); }
-        
-        /* Other Component Styles */
-        .task-list .task-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; }
-        .task-icon { font-size: 30px; color: var(--primary-color); margin-right: 15px; }
-        .task-details h4 { margin: 0 0 5px; }
-        .task-details p { margin: 0; font-size: 0.9em; color: #666; }
-        .task-reward { margin-left: auto; color: #28a745; font-weight: bold; }
-        .withdraw-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1em; box-sizing: border-box; margin-bottom: 10px;}
-        .logout-button, .withdraw-btn, #copyReferralBtn { width: 100%; border: none; padding: 15px; border-radius: 8px; font-size: 1.1em; font-weight: 500; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-        #copyReferralBtn { margin-top: 10px; }
-        .logout-button { background-color: #dc3545; color: white; margin-top:0; }
-        .withdraw-btn { background-color: #28a745; color: white; margin-top:0; }
-        .payment-logo { width: 30px; height: 30px; margin-right: 10px; border-radius: 5px; }
-        .balance-amount { font-size: 2.5em; font-weight: bold; margin: 10px 0 0 0; }
-        .setting-item { cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
-        .setting-item:last-child { border-bottom: none; }
-        
-        #notificationPanel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 300px; height: 100%; background-color: var(--card-light); box-shadow: -5px 0 15px rgba(0,0,0,0.1); z-index: 1001; transition: right 0.3s ease-in-out; display: flex; flex-direction: column;}
-        #notificationPanel.show { right: 0; }
-        .notification-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
-        .notification-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
-        .notification-list li { padding: 15px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-        #notificationOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none;}
-        #notificationOverlay.show { opacity: 1; pointer-events: auto; }
-        
-        /* Profile Picture Upload */
-        .profile-image-container { position: relative; width: 100px; height: 100px; margin: 0 auto 10px; cursor: pointer; }
-        .profile-image-container img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .profile-image-overlay { position: absolute; bottom: 0; right: 0; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; padding: 5px; }
-
-        /* Purchase Modal */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: none; justify-content: center; align-items: center; }
+        .modal { display: none; }
         .modal.show { display: flex; }
-        .modal-content { background: white; padding: 25px; border-radius: var(--border-radius); width: 100%; max-width: 400px; box-sizing: border-box; margin: 15px; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .modal-header h3 { margin: 0; }
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; }
-        .btn-primary { background-color: var(--primary-color); color: white; }
-        .payment-option { border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.2s, background-color 0.2s; }
-        .payment-option.selected { border-color: var(--primary-color); background-color: #f0e6ff; border-width: 2px;}
-        .payment-details { display: none; margin-top: 15px; padding: 10px; background-color: #f7f7f7; border-radius: 8px;}
-        .payment-method-buttons { display: flex; flex-wrap: nowrap; gap: 8px; justify-content: center; margin-top: 15px; }
-        .payment-btn {
-            flex: 1;
-            padding: 12px 8px;
-            border: none;
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-bg);
+            padding: 14px 28px;
             border-radius: 8px;
-            background-color: var(--primary-color);
-            color: white;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s;
-            font-size: 0.9em;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            transform: translate(-50%, 20px);
+            font-weight: 600;
+            box-shadow: 0 0 20px var(--color-glow);
         }
-        .payment-btn.selected {
-            background-color: var(--primary-light);
-            transform: translateY(2px);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .no-methods-message { text-align: center; color: var(--text-light-secondary); padding: 20px 0;}
-
-        /* History Styles */
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .history-item:last-child { border-bottom: none; }
-        .history-details h4 { margin: 0 0 5px; }
-        .history-details p { margin: 0; font-size: 0.9em; color: #666; }
-        .history-details small { font-size: 0.8em; color: #999; }
-        .history-status {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: bold;
-            color: white;
-            text-transform: capitalize;
-        }
-        .history-status.pending { background-color: #ffc107; }
-        .history-status.approved { background-color: #28a745; }
-        .history-status.rejected { background-color: #dc3545; }
-
+        .toast.show { opacity: 1; transform: translate(-50%, 0); }
+        .step-indicator.active { background-color: var(--color-primary); color: var(--color-bg); }
+        .payment-option { border: 2px solid #4a4a4a; transition: all 0.3s ease; }
+        .payment-option.selected { border-color: var(--color-primary); box-shadow: 0 0 10px var(--color-glow); }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--color-primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
-    <div id="loader"><div class="spinner"></div></div>
+<body class="bg-surface">
 
-    <div id="appContainer" style="visibility: hidden;">
-        <div id="toast" style="position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background-color: rgba(30,30,30,0.9); color: white; padding: 12px 25px; border-radius: 25px; z-index: 2000; transition: bottom 0.5s ease-in-out; font-size: 0.9em; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"></div>
+    <div id="toast" class="toast"></div>
+
+    <div class="max-w-screen-md mx-auto p-4">
+        <header class="flex justify-between items-center mb-6">
+            <h1 id="home-btn" class="text-2xl font-extrabold cursor-pointer tracking-wider" style="text-shadow: 0 0 10px var(--color-glow);">PSH STORE</h1>
+            <div class="flex items-center gap-4">
+                <button id="search-icon" class="p-2 rounded-full hover:bg-card transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></button>
+                <button id="cart-btn" class="relative p-2 rounded-full hover:bg-card transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.19.988.707.988H19m-9-6h2m-2 4h2" /></svg><span id="cart-count" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">0</span></button>
+                <button id="my-products-button" class="p-2 rounded-full hover:bg-card transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0v10l-8 4-8-4V7m16 0l-8 4-8-4" /></svg></button>
+            </div>
+        </header>
         
-        <div class="header" style="display: none;">
-            <span class="logo" data-lang-key="appName">Income Hobei</span>
-            <div id="searchBar" style="display:none; flex-grow: 1; padding: 0 10px;"> 
-                <input type="text" id="searchInput" data-lang-key-placeholder="searchPlaceholder" placeholder="Search tasks..." style="width: 100%; padding: 8px; border-radius: 20px; border: none; outline: none;"> 
-            </div>
-            <div class="header-right-controls">
-                <div class="selectors-container">
-                    <select id="currencySelector" class="header-selector">
-                        <option value="USD">$ USD</option>
-                        <option value="BDT">৳ BDT</option>
-                    </select>
-                    <select id="languageSelector" class="header-selector">
-                        <option value="en">EN</option>
-                        <option value="bn">BN</option>
-                        <option value="hi">HI</option>
-                    </select>
-                </div>
-                <div class="icons">
-                    <button id="searchButton"><i class="material-icons">search</i></button>
-                    <button id="notificationButton" style="position: relative;">
-                        <i class="material-icons">notifications</i>
-                        <span id="notificationBadge" class="notification-badge" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; font-size: 10px; width: 16px; height: 16px; display: none; align-items: center; justify-content: center;">0</span>
-                    </button>
-                    <button id="profileButton"><i class="material-icons">person</i></button>
-                </div>
-            </div>
-        </div>
+        <div id="initial-error" class="hidden p-4 mb-4 text-center bg-red-800 text-white rounded-lg"></div>
 
-        <div class="container">
-            <!-- Auth Page -->
-            <div id="authPage" class="page">
-                <div class="auth-container">
-                    <div class="card" id="authCard">
-                        <div class="auth-flipper">
-                            <div id="loginForm">
-                                <div class="auth-header"><h2 data-lang-key="welcomeBack">Welcome Back!</h2></div>
-                                <div class="input-group"> <i class="material-icons">email</i> <input type="email" id="loginEmail" data-lang-key-placeholder="emailPlaceholder" placeholder="Email"> </div>
-                                <div class="input-group"> <i class="material-icons">lock</i> <input type="password" id="loginPassword" data-lang-key-placeholder="passwordPlaceholder" placeholder="Password"> </div>
-                                <button id="loginBtn" class="submit-btn" data-lang-key="loginBtn">Log In</button>
-                                <p class="auth-switch"><span data-lang-key="noAccount">Don't have an account?</span> <a href="#" id="showSignupLink" data-lang-key="signupLink">Signup</a></p>
-                            </div>
-                            <div id="signupForm">
-                                <div class="auth-header"><h2 data-lang-key="createAccount">Create Account</h2></div>
-                                <div class="input-group"> <i class="material-icons">person</i> <input type="text" id="signupFullName" data-lang-key-placeholder="fullNamePlaceholder" placeholder="Full Name"> </div>
-                                <div class="input-group"> <i class="material-icons">email</i> <input type="email" id="signupEmail" data-lang-key-placeholder="emailPlaceholder" placeholder="Email"> </div>
-                                <div class="input-group"> <i class="material-icons">lock</i> <input type="password" id="signupPassword" data-lang-key-placeholder="passwordPlaceholder" placeholder="Password"> </div>
-                                <button id="signupBtn" class="submit-btn" data-lang-key="createAccountBtn">Create Account</button>
-                                <p class="auth-switch"><span data-lang-key="hasAccount">Already have an account?</span> <a href="#" id="showLoginLink" data-lang-key="loginLink">Login</a></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <section id="search-section" class="hidden mb-6">
+            <input type="text" id="search-input" placeholder="Search products..." class="w-full p-3 rounded-lg bg-card border border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary">
+            <div id="search-results" class="mt-4 text-center text-gray-400"><svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg><p>Type to find scripts and games.</p></div>
+        </section>
 
-            <!-- Home Page -->
-            <div id="homePage" class="page">
-                <div class="home-header">
-                    <div class="points-display">
-                        <i class="material-icons">monetization_on</i>
-                        <span id="homePoints">0</span>
-                    </div>
-                    <div class="welcome-message" style="color: black; font-weight: bold;" id="welcomeMessage">Hello, User!</div>
-                </div>
-
-                <div class="progress-container">
-                    <svg class="progress-circle" viewBox="0 0 200 200">
-                        <circle class="progress-circle-bg" cx="100" cy="100" r="90" />
-                        <circle class="progress-circle-fg" cx="100" cy="100" r="90" id="progressCircleFg" />
-                    </svg>
-                    <div class="progress-text">
-                        <span class="label" data-lang-key="todaysTasks">Today's Tasks</span>
-                        <span class="value" id="dailyProgressValue">0/10</span>
-                        <button class="claim-button" id="claimTasksButton" data-lang-key="continueToClaim">Continue to claim</button>
-                    </div>
-                </div>
-                
-                <div class="notice-slider-container">
-                    <div class="notice-slider-wrapper" id="noticeSliderWrapper">
-                        <!-- Notices will be loaded here -->
-                    </div>
-                </div>
-
-                <h3 class="section-title" style="padding: 0 15px;" data-lang-key="recentProducts">Recent Products</h3>
-                <div class="product-grid" id="homeProductGrid">
-                    <!-- Recent products will be loaded here -->
-                </div>
-            </div>
-
-            <!-- Work Page -->
-            <div id="workPage" class="page">
-                <h2 data-lang-key="taskBoard">Task Board</h2>
-                <div class="card task-list"></div>
-            </div>
-            
-            <!-- Digital Products Page -->
-            <div id="productsPage" class="page">
-                <h2 data-lang-key="digitalProducts">Digital Products</h2>
-                <div class="product-grid" id="productList">
-                    <!-- Products will be loaded here by JavaScript -->
-                </div>
-            </div>
-             <!-- My Products Page -->
-            <div id="myProductsPage" class="page">
-                <h2 data-lang-key="myProducts">My Products</h2>
-                <div class="product-grid" id="myProductList">
-                    <!-- Purchased products will be loaded here -->
-                </div>
-            </div>
-
-            <!-- Withdraw Page -->
-            <div id="withdrawPage" class="page">
-                <h2 data-lang-key="withdrawAndConvert">Withdraw & Convert</h2>
-                    <div class="card balance-card">
-                        <h4 data-lang-key="yourCurrentBalance">Your Current Balance</h4>
-                        <p id="balanceAmount" class="balance-amount">$0.00</p>
-                    </div>
-                <div class="card">
-                    <h4 data-lang-key="pointsWallet">Points Wallet</h4>
-                    <p><span data-lang-key="currentPoints">Current Points:</span> <b id="pointsAmount">0</b></p>
-                    <p style="font-size: 0.8em; color: #666;" data-lang-key="pointsToUsd">1,000 Points = $1.00 USD</p>
-                    <button id="convertPointsBtn" class="submit-btn" data-lang-key="convertToCash" style="background: linear-gradient(45deg, #ff9800, #ffc107); box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);">Convert to Cash</button>
-                </div>
-                
-                <div id="paymentMethodsContainer">
-                    <!-- Payment methods from Firestore will be loaded here -->
-                </div>
-            </div>
-            
-            <!-- Profile Page -->
-            <div id="profilePage" class="page">
-                <div class="card profile-header" style="text-align: center;">
-                    <div class="profile-image-container" onclick="document.getElementById('profileImageUpload').click()">
-                        <img id="profileImage" src="https://placehold.co/100x100/EFEFEF/31343C?text=User" alt="Profile Picture">
-                        <div class="profile-image-overlay"><i class="material-icons" style="font-size: 18px;">edit</i></div>
-                    </div>
-                    <input type="file" id="profileImageUpload" accept="image/*" style="display: none;">
-                    <h2 id="profileName">User</h2>
-                    <p id="profileEmail">user@email.com</p>
-                </div>
-                <div class="card">
-                    <div id="myProductsBtn" class="setting-item"><span data-lang-key="myProductsNav">My Products</span> <i class="material-icons">chevron_right</i></div>
-                    <div id="historyBtn" class="setting-item"><span data-lang-key="taskHistory">Task History</span> <i class="material-icons">chevron_right</i></div>
-                    <div id="withdrawHistoryBtn" class="setting-item"><span data-lang-key="withdrawHistory">Withdraw History</span> <i class="material-icons">chevron_right</i></div>
-                </div>
-                <div class="card">
-                    <h4 data-lang-key="yourReferralCode">Your Referral Code</h4>
-                    <p data-lang-key="shareThisCode">Share this code with friends:</p>
-                    <b id="userReferralCode" style="font-size: 1.2em; letter-spacing: 2px;"></b>
-                    <button id="copyReferralBtn" class="submit-btn" style="margin-top:10px;" data-lang-key="copyCode">Copy Code</button>
-                </div>
-                <div class="card">
-                    <h4 data-lang-key="applyACode">Apply a Code</h4>
-                    <input type="text" id="referralCodeInput" data-lang-key-placeholder="enterReferralCode" placeholder="Enter referral code" class="withdraw-input">
-                    <button id="submitReferralBtn" class="submit-btn" data-lang-key="applyCode">Apply Code</button>
-                </div>
-                  <button id="logoutBtn" class="logout-button" data-lang-key="logout">Logout</button>
-            </div>
-            
-            <!-- History Page -->
-            <div id="historyPage" class="page">
-                <h2 data-lang-key="taskHistoryTitle">Task History</h2>
-                <div id="historyList" class="card"> <p data-lang-key="noActivity">No activity yet.</p> </div>
-            </div>
-
-            <!-- Withdraw History Page -->
-            <div id="withdrawHistoryPage" class="page">
-                <h2 data-lang-key="withdrawHistoryTitle">Withdraw History</h2>
-                <div id="withdrawHistoryList" class="card">
-                    <p data-lang-key="noWithdrawalHistory">No withdrawal history yet.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="nav-bottom" style="display: none;">
-            <button id="navHome"><i class="material-icons">home</i><span data-lang-key="home">Home</span></button>
-            <button id="navWork"><i class="material-icons">work</i><span data-lang-key="work">Work</span></button>
-            <button id="navProducts"><i class="material-icons">shopping_bag</i><span data-lang-key="products">Products</span></button>
-            <button id="navWithdraw"><i class="material-icons">account_balance_wallet</i><span data-lang-key="withdraw">Withdraw</span></button>
-        </div>
-        <div id="notificationOverlay"></div>
-        <div id="notificationPanel">
-              <div class="notification-header">
-                <h3 data-lang-key="notifications">Notifications</h3>
-                <button id="closeNotificationBtn" style="background:none; border:none; color: var(--text-light); cursor:pointer;"><i class="material-icons">close</i></button>
-            </div>
-            <ul class="notification-list"></ul>
-        </div>
-
-        <!-- Purchase Modal -->
-        <div id="purchaseModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="modalProductName">Product Name</h3>
-                    <button onclick="document.getElementById('purchaseModal').classList.remove('show')" style="background:none; border:none; cursor:pointer;"><i class="material-icons">close</i></button>
-                </div>
-                <div style="margin: 20px 0;">
-                    <div id="modalPriceDetails"></div>
-                    <hr>
-                    <h4 data-lang-key="selectPaymentMethod">Select Payment Method</h4>
-                    <div id="paymentOptions">
-                         <div class="payment-option" data-method="balance">
-                            <b data-lang-key="payWithAppBalance">Pay with App Balance</b>
-                            <p style="font-size:0.9em; margin:5px 0 0;"><span data-lang-key="available">Available:</span> <b id="modalUserBalance"></b></p>
-                        </div>
-                        <p id="orText" style="text-align:center; color: #7f8c8d; margin: 15px 0; display:none;" data-lang-key="or">- OR -</p>
-                        <div class="payment-method-buttons" id="externalPaymentButtons">
-                            <!-- Buttons like Bkash, Nagad will be injected here -->
-                        </div>
-                         <div id="no-methods-msg" class="no-methods-message" style="display: none;">
-                            <p data-lang-key="noOtherMethods">No other payment methods are available. Please use your app balance or contact support.</p>
-                        </div>
-                        <div class="payment-details" id="externalPaymentDetails">
-                            <p id="externalPaymentInstruction" style="font-size:0.9em; margin:5px 0;"></p>
-                            <input type="text" id="trxIdInput" class="withdraw-input" placeholder="Transaction ID">
-                        </div>
-                    </div>
-                </div>
-                <button id="confirmPurchaseBtn" class="btn btn-primary" style="width: 100%;" data-lang-key="orderPlace">Order Place</button>
-            </div>
-        </div>
+        <main id="main-content"><div class="h-64 flex justify-center items-center"><div class="loader"></div></div></main>
     </div>
 
-    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, onSnapshot, getDoc, getDocs, addDoc, updateDoc, setDoc, serverTimestamp, increment, query, where, orderBy, limit, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            // --- FIREBASE SETUP ---
-            const firebaseConfig = JSON.parse(
-                typeof __firebase_config !== 'undefined' ?
-                __firebase_config :
-                '{"apiKey":"AIzaSyAQG6aZY3kaleNFi2vdR5_FPk8fHnI8kRk","authDomain":"income-hobei.firebaseapp.com","projectId":"income-hobei","storageBucket":"income-hobei.appspot.com","messagingSenderId":"87846212742","appId":"1:87846212742:web:6b5961db7f2a7df3932d07"}'
-            );
-
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const db = getFirestore(app);
-            const storage = getStorage(app);
-
-            const Telegram = window.Telegram ? window.Telegram.WebApp : null;
-            if (Telegram) Telegram.ready();
-
-            // --- STATE MANAGEMENT ---
-            let currentUser = null;
-            let userUnsubscribe; 
-            let userNotificationListener = null; 
-            let noticeInterval = null;
-            let settings = { minWithdrawal: 5, themeColor: '#8A2BE2' };
-            let appConfig = { dailyAdLimit: 10 }; 
-            let currentBalanceInUSD = 0;
-
-            // --- LOCALIZATION & CURRENCY ---
-            let currentLanguage = localStorage.getItem('userLanguage') || 'en';
-            let currentCurrency = localStorage.getItem('userCurrency') || 'USD';
-            const BDT_CONVERSION_RATE = 117.50; // Example static rate
-
-            const translations = {
-                // General UI & Nav
-                appName: { en: 'Income Hobei', bn: 'ইনকাম হবেই', hi: 'इनकम होबेई' },
-                searchPlaceholder: { en: 'Search tasks...', bn: 'টাস্ক খুঁজুন...', hi: 'कार्य खोजें...' },
-                home: { en: 'Home', bn: 'হোম', hi: 'होम' },
-                work: { en: 'Work', bn: 'কাজ', hi: 'काम' },
-                products: { en: 'Products', bn: 'পণ্য', hi: 'उत्पाद' },
-                withdraw: { en: 'Withdraw', bn: 'উত্তোলন', hi: 'निकालें' },
-                notifications: { en: 'Notifications', bn: 'বিজ্ঞপ্তি', hi: 'सूचनाएं' },
-                // Auth Page
-                welcomeBack: { en: 'Welcome Back!', bn: 'আবার স্বাগতম!', hi: 'वापस स्वागत है!' },
-                emailPlaceholder: { en: 'Email', bn: 'ইমেল', hi: 'ईमेल' },
-                passwordPlaceholder: { en: 'Password', bn: 'পাসওয়ার্ড', hi: 'पासवर्ड' },
-                loginBtn: { en: 'Log In', bn: 'লগ ইন', hi: 'लॉग इन करें' },
-                noAccount: { en: "Don't have an account?", bn: 'অ্যাকাউন্ট নেই?', hi: 'खाता नहीं है?' },
-                signupLink: { en: 'Signup', bn: 'সাইন আপ', hi: 'साइन अप करें' },
-                createAccount: { en: 'Create Account', bn: 'অ্যাকাউন্ট তৈরি করুন', hi: 'खाता बनाएं' },
-                fullNamePlaceholder: { en: 'Full Name', bn: 'পুরো নাম', hi: 'पूरा नाम' },
-                createAccountBtn: { en: 'Create Account', bn: 'অ্যাকাউন্ট তৈরি করুন', hi: 'खाता बनाएं' },
-                hasAccount: { en: 'Already have an account?', bn: 'ইতিমধ্যে একটি অ্যাকাউন্ট আছে?', hi: 'पहले से ही एक खाता है?' },
-                loginLink: { en: 'Login', bn: 'লগইন', hi: 'लॉग इन करें' },
-                // Home Page
-                helloUser: { en: 'Hello, {name}!', bn: 'হ্যালো, {name}!', hi: 'नमस्ते, {name}!' },
-                todaysTasks: { en: "Today's Tasks", bn: 'আজকের কাজ', hi: 'आज के कार्य' },
-                continueToClaim: { en: 'Continue to claim', bn: 'দাবি করতে এগিয়ে যান', hi: 'दावा करने के लिए जारी रखें' },
-                recentProducts: { en: 'Recent Products', bn: 'সাম্প্রতিক পণ্য', hi: 'हाल के उत्पाद' },
-                // Work Page
-                taskBoard: { en: 'Task Board', bn: 'টাস্ক বোর্ড', hi: 'टास्क बोर्ड' },
-                watchAdToEarn: { en: 'Watch a short ad to earn points.', bn: 'পয়েন্ট অর্জনের জন্য একটি ছোট বিজ্ঞাপন দেখুন।', hi: 'अंक अर्जित करने के लिए एक छोटा विज्ञापन देखें।' },
-                // Products Page
-                digitalProducts: { en: 'Digital Products', bn: 'ডিজিটাল পণ্য', hi: 'डिजिटल उत्पाद' },
-                myProducts: { en: 'My Products', bn: 'আমার পণ্য', hi: 'मेरे उत्पाद' },
-                buyNow: { en: 'Buy Now', bn: 'এখনই কিনুন', hi: 'अभी खरीदें' },
-                purchased: { en: 'Purchased', bn: 'কেনা হয়েছে', hi: 'खरीदा हुआ' },
-                // Withdraw Page
-                withdrawAndConvert: { en: 'Withdraw & Convert', bn: 'উত্তোলন ও রূপান্তর', hi: 'निकालें और बदलें' },
-                yourCurrentBalance: { en: 'Your Current Balance', bn: 'আপনার বর্তমান ব্যালেন্স', hi: 'आपकी वर्तमान शेष राशि' },
-                pointsWallet: { en: 'Points Wallet', bn: 'পয়েন্ট ওয়ালেট', hi: 'पॉइंट्स वॉलेट' },
-                currentPoints: { en: 'Current Points:', bn: 'বর্তমান পয়েন্ট:', hi: 'वर्तमान अंक:' },
-                pointsToUsd: { en: '1,000 Points = $1.00 USD', bn: '১,০০০ পয়েন্ট = $১.০০ USD', hi: '१,००० अंक = $१.०० USD' },
-                convertToCash: { en: 'Convert to Cash', bn: 'টাকায় রূপান্তর করুন', hi: 'नकद में बदलें' },
-                requestWithdrawal: { en: 'Request Withdrawal', bn: 'উত্তোলনের অনুরোধ', hi: 'निकासी का अनुरोध करें' },
-                // Profile Page
-                myProductsNav: { en: 'My Products', bn: 'আমার পণ্য', hi: 'मेरे उत्पाद' },
-                taskHistory: { en: 'Task History', bn: 'কাজের ইতিহাস', hi: 'कार्य इतिहास' },
-                withdrawHistory: { en: 'Withdraw History', bn: 'উত্তোলনের ইতিহাস', hi: 'निकासी इतिहास' },
-                yourReferralCode: { en: 'Your Referral Code', bn: 'আপনার রেফারেল কোড', hi: 'आपका रेफरल कोड' },
-                shareThisCode: { en: 'Share this code with friends:', bn: 'এই কোড বন্ধুদের সাথে শেয়ার করুন:', hi: 'इस कोड को दोस्तों के साथ साझा करें:' },
-                copyCode: { en: 'Copy Code', bn: 'কোড কপি করুন', hi: 'कोड कॉपी करें' },
-                applyACode: { en: 'Apply a Code', bn: 'একটি কোড প্রয়োগ করুন', hi: 'एक कोड लागू करें' },
-                enterReferralCode: { en: 'Enter referral code', bn: 'রেফারেল কোড প্রবেশ করান', hi: 'रेफरल कोड दर्ज करें' },
-                applyCode: { en: 'Apply Code', bn: 'কোড প্রয়োগ করুন', hi: 'कोड लागू करें' },
-                logout: { en: 'Logout', bn: 'লগ আউট', hi: 'लॉग আউট' },
-                // History Pages
-                taskHistoryTitle: { en: 'Task History', bn: 'কাজের ইতিহাস', hi: 'कार्य इतिहास' },
-                noActivity: { en: 'No activity yet.', bn: 'এখনও কোন কার্যকলাপ নেই।', hi: 'अभी तक कोई गतिविधि नहीं।' },
-                withdrawHistoryTitle: { en: 'Withdraw History', bn: 'উত্তোলনের ইতিহাস', hi: 'निकासी इतिहास' },
-                noWithdrawalHistory: { en: 'No withdrawal history yet.', bn: 'এখনও কোন উত্তোলনের ইতিহাস নেই।', hi: 'अभी तक कोई निकासी इतिहास नहीं है।' },
-                 // Purchase Modal
-                selectPaymentMethod: { en: 'Select Payment Method', bn: 'পেমেন্ট পদ্ধতি নির্বাচন করুন', hi: 'भुगतान विधि चुनें' },
-                payWithAppBalance: { en: 'Pay with App Balance', bn: 'অ্যাপ ব্যালেন্স দিয়ে পেমেন্ট করুন', hi: 'ऐप बैलेंस से भुगतान करें' },
-                available: { en: 'Available:', bn: 'উপলব্ধ:', hi: 'उपलब्ध:' },
-                or: { en: '- OR -', bn: '- অথবা -', hi: '- या -' },
-                noOtherMethods: { en: 'No other payment methods are available. Please use your app balance or contact support.', bn: 'অন্য কোন পেমেন্ট পদ্ধতি উপলব্ধ নেই। অনুগ্রহ করে আপনার অ্যাপ ব্যালেন্স ব্যবহার করুন বা সহায়তার জন্য যোগাযোগ করুন।', hi: 'कोई अन्य भुगतान विधि उपलब्ध नहीं है। कृपया अपने ऐप बैलेंस का उपयोग करें या समर्थन से संपर्क करें।' },
-                orderPlace: { en: 'Order Place', bn: 'অর্ডার দিন', hi: 'आदेश दें' },
-                // Toast Messages
-                fillAllFields: { en: 'Please fill all fields', bn: 'অনুগ্রহ করে সমস্ত ঘর পূরণ করুন', hi: 'कृपया सभी फ़ील्ड भरें' },
-                dailyAdLimitReached: { en: 'Daily ad limit reached.', bn: 'দৈনিক বিজ্ঞাপনের সীমা শেষ।', hi: 'दैनिक विज्ञापन सीमा समाप्त हो गई है।' },
-                loadingAd: { en: 'Loading ad...', bn: 'বিজ্ঞাপন লোড হচ্ছে...', hi: 'विज्ञापन लोड हो रहा है...' },
-                congratsPoints: { en: 'Congratulations! You earned {points} points.', bn: 'অভিনন্দন! আপনি {points} পয়েন্ট অর্জন করেছেন।', hi: 'बधाई हो! आपने {points} अंक अर्जित किए।' },
-                errorOccurred: { en: 'An error occurred. Please try again.', bn: 'একটি ত্রুটি ঘটেছে। আবার চেষ্টা করুন।', hi: 'एक त्रुटि हुई। कृपया पुन: प्रयास करें।' },
-                invalidCode: { en: 'Invalid referral code.', bn: 'অবৈধ রেফারেল কোড।', hi: 'अमान्य रेफरल कोड।' },
-                referralUsed: { en: 'You have already used a referral code.', bn: 'আপনি ইতিমধ্যে একটি রেফারেল কোড ব্যবহার করেছেন।', hi: 'आपने पहले ही एक रेफरल कोड का उपयोग कर लिया है।' },
-                cannotUseOwnCode: { en: 'You cannot use your own referral code.', bn: 'আপনি নিজের রেফারেল কোড ব্যবহার করতে পারবেন না।', hi: 'आप अपना रेफरल कोड इस्तेमाल नहीं कर सकते।' },
-                referralBonusAdded: { en: 'Referral bonus added!', bn: 'রেফারেল বোনাস যোগ করা হয়েছে!', hi: 'रेफरल बोनस जोड़ा गया!' },
-                notEnoughPoints: { en: 'Not enough points (minimum 1000).', bn: 'পর্যাপ্ত পয়েন্ট নেই (সর্বনিম্ন ১০০০)।', hi: 'पर्याप्त अंक नहीं हैं (न्यूनतम 1000)।' },
-                pointsConverted: { en: 'Points converted successfully!', bn: 'পয়েন্ট সফলভাবে রূপান্তরিত হয়েছে!', hi: 'अंक सफलतापूर्वक परिवर्तित हो गए!' },
-                invalidAmountOrAccount: { en: 'Invalid amount or account details.', bn: 'অবৈধ পরিমাণ বা অ্যাকাউন্টের বিবরণ।', hi: 'अमान्य राशि या खाता विवरण।' },
-                minWithdrawal: { en: 'Minimum withdrawal is {amount}.', bn: 'সর্বনিম্ন উত্তোলন {amount}।', hi: 'न्यूनतम निकासी {amount} है।' },
-                insufficientBalance: { en: 'Insufficient balance for this withdrawal.', bn: 'এই উত্তোলনের জন্য অপর্যাপ্ত ব্যালেন্স।', hi: 'इस निकासी के लिए अपर्याप्त शेष राशि।' },
-                withdrawalRequestSuccess: { en: 'Withdrawal request successful! It is now pending review.', bn: 'উত্তোলনের অনুরোধ সফল হয়েছে! এটি এখন পর্যালোচনার অধীনে আছে।', hi: 'निकासी का अनुरोध सफल! यह अब समीक्षाधीन है।' },
-                codeCopied: { en: 'Referral Code copied!', bn: 'রেফারেল কোড কপি করা হয়েছে!', hi: 'रेफरल कोड কপি किया गया!' },
-                failedToCopy: { en: 'Failed to copy code.', bn: 'কোড কপি করতে ব্যর্থ।', hi: 'कोड कॉपी करने में विफल।' },
-                withdrawalRejected: { en: 'Your withdrawal was rejected.', bn: 'আপনার উত্তোলন প্রত্যাখ্যান করা হয়েছে।', hi: 'आपकी निकासी अस्वीकार कर दी गई थी।' },
-                purchaseFailed: { en: 'Purchase failed: {message}', bn: 'ক্রয় ব্যর্থ হয়েছে: {message}', hi: 'खरीद विफल: {message}' },
-                authenticationFailed: { en: 'Authentication failed. Please refresh.', bn: 'প্রমাণೀಕರಣ ব্যর্থ হয়েছে। অনুগ্রহ করে রিফ্রেশ করুন।', hi: 'प्रमाणीकरण विफल। कृपया रीफ़्रेश करें।' },
-                loadingHistory: { en: 'Loading history...', bn: 'ইতিহাস লোড হচ্ছে...', hi: 'इतिहास लोड हो रहा है...' },
-                errorLoadingHistory: { en: 'Error loading history. Check console for details.', bn: 'ইতিহাস লোড করতে ত্রুটি। বিস্তারিত জানতে কনসোল দেখুন।', hi: 'इतिहास लोड करने में त्रुटि। विवरण के लिए कंसोल देखें।' },
-            };
-
-            const getTranslation = (key, replacements = {}) => {
-                let text = (translations[key] && translations[key][currentLanguage]) ? translations[key][currentLanguage] : (translations[key] ? translations[key]['en'] : key);
-                for (const placeholder in replacements) {
-                    text = text.replace(`{${placeholder}}`, replacements[placeholder]);
-                }
-                return text;
-            };
-
-            const setLanguage = (lang) => {
-                currentLanguage = lang;
-                localStorage.setItem('userLanguage', lang);
-                document.querySelectorAll('[data-lang-key]').forEach(el => {
-                    el.innerText = getTranslation(el.dataset.langKey);
-                });
-                document.querySelectorAll('[data-lang-key-placeholder]').forEach(el => {
-                    el.placeholder = getTranslation(el.dataset.langKeyPlaceholder);
-                });
-                 // Re-render dynamic content that has text
-                if (currentUser) {
-                    generateTasks();
-                    generateProducts();
-                    generateHomeProducts();
-                    generatePaymentMethods();
-                }
-            };
-            
-            const formatCurrency = (amountInUSD) => {
-                if (currentCurrency === 'BDT') {
-                    return `৳${(amountInUSD * BDT_CONVERSION_RATE).toFixed(2)}`;
-                }
-                return `$${(amountInUSD || 0).toFixed(2)}`;
-            };
-
-            const setCurrency = (currency) => {
-                currentCurrency = currency;
-                localStorage.setItem('userCurrency', currency);
-                updateBalanceDisplay(currentBalanceInUSD);
-                // Re-render product lists to show new currency
-                 if (currentUser) {
-                    generateProducts();
-                    generateHomeProducts();
-                    generatePaymentMethods();
-                }
-            };
-
-            // --- UI ELEMENTS ---
-            const loader = document.getElementById('loader');
-            const appContainer = document.getElementById('appContainer');
-            const currencySelector = document.getElementById('currencySelector');
-            const languageSelector = document.getElementById('languageSelector');
-
-            // --- CORE FUNCTIONS ---
-            const showToast = (messageKey, isError = false, replacements = {}) => {
-                const toast = document.getElementById('toast');
-                toast.textContent = getTranslation(messageKey, replacements);
-                toast.style.backgroundColor = isError ? 'rgba(220, 53, 69, 0.9)' : 'rgba(30,30,30,0.9)';
-                toast.style.bottom = '80px';
-                setTimeout(() => { toast.style.bottom = '-100px'; }, 3000);
-            };
-
-            const updateBalanceDisplay = (balanceInUSD) => {
-                currentBalanceInUSD = balanceInUSD || 0;
-                document.getElementById('balanceAmount').innerText = formatCurrency(currentBalanceInUSD);
-            };
-            const updatePointsDisplay = (points) => {
-                document.getElementById('pointsAmount').innerText = points || 0;
-                document.getElementById('homePoints').innerText = points || 0;
-            }
-
-            const updateDailyProgress = (count, limit) => {
-                const progressCircleFg = document.getElementById('progressCircleFg');
-                const dailyProgressValue = document.getElementById('dailyProgressValue');
-                if (!progressCircleFg || !dailyProgressValue) return;
-                const radius = progressCircleFg.r.baseVal.value;
-                const circumference = 2 * Math.PI * radius;
-                const offset = circumference - (count / limit) * circumference;
-                
-                progressCircleFg.style.strokeDasharray = `${circumference} ${circumference}`;
-                progressCircleFg.style.strokeDashoffset = offset;
-                dailyProgressValue.innerText = `${count}/${limit}`;
-            };
-            
-            const showPage = (pageId) => {
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                const page = document.getElementById(pageId + 'Page');
-                if(page) page.classList.add('active');
-
-                document.querySelectorAll('.nav-bottom button').forEach(b => b.classList.remove('active'));
-                const activeBtnId = 'nav' + pageId.charAt(0).toUpperCase() + pageId.slice(1);
-                const activeBtn = document.getElementById(activeBtnId);
-                if (activeBtn) activeBtn.classList.add('active');
-            };
-
-            const addNotification = (message, link = null) => {
-                const notificationList = document.querySelector('.notification-list');
-                const badge = document.getElementById('notificationBadge');
-                if (!notificationList || !badge) return;
-                const newNotif = document.createElement('li');
-                newNotif.innerHTML = `<p>${message}</p>`;
-                if(link) newNotif.dataset.link = link;
-                notificationList.prepend(newNotif);
-                badge.innerText = parseInt(badge.innerText) + 1;
-                badge.style.display = 'flex';
-            };
-
-            const updateHistoryPage = (history) => {
-                const historyList = document.getElementById('historyList');
-                if(!history || history.length === 0) { historyList.innerHTML = `<p data-lang-key="noActivity">${getTranslation('noActivity')}</p>`; return; }
-                historyList.innerHTML = history.sort((a, b) => b.date.seconds - a.date.seconds).map(item => 
-                    `<div class="task-item" style="padding: 10px; border-bottom: 1px solid #eee;">
-                        <div class="task-details">
-                            <h4>${item.type}</h4> <p>${item.detail}</p> <small>${new Date(item.date.seconds * 1000).toLocaleString()}</small>
-                        </div>
-                    </div>`
-                ).join('');
-            };
-
-            // --- Firestore Listeners ---
-            onSnapshot(doc(db, 'config', 'settings'), (doc) => {
-                if (doc.exists()) {
-                    const data = doc.data();
-                    settings = { ...settings, ...data };
-                    appConfig = { ...appConfig, ...data };
-                    document.documentElement.style.setProperty('--primary-color', settings.themeColor || '#8A2BE2');
-                }
-            });
-
-            const setupUserNotificationListener = (userId) => {
-                if (userNotificationListener) userNotificationListener();
-                const q = query(collection(db, 'withdrawals')); // Fetch all
-                
-                userNotificationListener = onSnapshot(q, (snapshot) => {
-                    for (const change of snapshot.docChanges()) {
-                        const data = change.doc.data();
-                        // Add client-side filter
-                        if (data.userId !== userId) continue; 
-
-                        if (change.type === 'modified') {
-                            if (data.notified === true) continue;
-
-                            const withdrawalDocRef = doc(db, 'withdrawals', change.doc.id);
-                            
-                            if (data.status === 'approved') {
-                                addNotification(`Your withdrawal of ${formatCurrency(data.amount)} has been approved!`);
-                                showToast('withdrawalRequestSuccess');
-                                updateDoc(withdrawalDocRef, { notified: true });
-                            } else if (data.status === 'rejected') {
-                                addNotification(`Your withdrawal of ${formatCurrency(data.amount)} was rejected.`);
-                                showToast('withdrawalRejected', true);
-
-                                // Refund the balance to the user
-                                const userRef = doc(db, 'users', data.userId);
-                                updateDoc(userRef, {
-                                    balance: increment(data.amount)
-                                }).then(() => {
-                                    // Add a history entry for the refund
-                                    addDoc(collection(userRef, 'history'), {
-                                        type: 'Withdrawal Refund',
-                                        detail: `+${formatCurrency(data.amount)} for rejected withdrawal.`,
-                                        date: serverTimestamp()
-                                    });
-                                });
-
-                                // Mark as notified
-                                updateDoc(withdrawalDocRef, { notified: true });
-                            }
-                        }
-                    }
-                }, error => console.error("Error setting up user notification listener: ", error));
-            };
-            
-            // --- AUTHENTICATION ---
-            onAuthStateChanged(auth, async (user) => {
-                loader.style.opacity = '0';
-                loader.style.visibility = 'hidden';
-                appContainer.style.visibility = 'visible';
-
-                if (user) {
-                    currentUser = user;
-                    const userRef = doc(db, 'users', user.uid);
-                    
-                    if (userUnsubscribe) userUnsubscribe(); 
-
-                    userUnsubscribe = onSnapshot(userRef, async (docSnap) => {
-                        if (docSnap.exists()) {
-                            const data = docSnap.data();
-                             if (data.status === 'blocked') {
-                                document.body.innerHTML = '<h1 style="text-align:center; padding-top: 50px;">Your account has been blocked.</h1>';
-                                if(userUnsubscribe) userUnsubscribe();
-                                if(userNotificationListener) userNotificationListener();
-                                return;
-                            }
-                            updateBalanceDisplay(data.balance);
-                            updatePointsDisplay(data.points);
-                            updateDailyProgress(data.dailyAdCount || 0, appConfig.dailyAdLimit || 10);
-                            document.getElementById('userReferralCode').innerText = data.referralCode;
-                            document.getElementById('profileName').innerText = data.name || 'User';
-                            document.getElementById('profileEmail').innerText = data.email;
-                            document.getElementById('profileImage').src = data.profileImageUrl || 'https://placehold.co/100x100/EFEFEF/31343C?text=User';
-                             document.getElementById('welcomeMessage').innerText = getTranslation('helloUser', {name: data.name || 'User'});
-                            const historyQuery = query(collection(userRef, 'history'), orderBy('date', 'desc'));
-                            onSnapshot(historyQuery, snap => updateHistoryPage(snap.docs.map(d => d.data())));
-                        } else {
-                             const newUser = {
-                                email: user.email, name: user.displayName, balance: 0.50,
-                                points: 0, status: 'active', referralUsed: false,
-                                referralCode: `REF${user.uid.substring(0, 6).toUpperCase()}`,
-                                dailyAdCount: 0,
-                                lastAdWatchDate: new Date(0).toISOString().split('T')[0]
-                            };
-                            await setDoc(userRef, newUser, { merge: true });
-                            await addDoc(collection(userRef, 'history'), {
-                                type: 'Welcome Bonus', detail: '+$0.50 for creating account', date: serverTimestamp()
-                            });
-                            addNotification('Welcome! You received a $0.50 bonus.');
-                        }
-                    });
-                    
-                    document.querySelector('.header').style.display = 'flex';
-                    document.querySelector('.nav-bottom').style.display = 'flex';
-                    
-                    generateTasks();
-                    generateProducts();
-                    generateHomeProducts();
-                    generateNotices();
-                    generatePaymentMethods();
-                    generateMyProducts();
-                    generateWithdrawHistory();
-                    setupUserNotificationListener(user.uid);
-                    showPage('home');
-                } else {
-                    if(userUnsubscribe) userUnsubscribe();
-                    if(userNotificationListener) userNotificationListener();
-                    if(noticeInterval) clearInterval(noticeInterval);
-                    currentUser = null;
-                    document.querySelector('.header').style.display = 'none';
-                    document.querySelector('.nav-bottom').style.display = 'none';
-                    showPage('auth');
-                }
-            });
-
-            // Handle initial auth
-             try {
-                const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                if (token) {
-                    await signInWithCustomToken(auth, token);
-                } else if (!auth.currentUser) { 
-                }
-            } catch (error) {
-                console.error("Auth Error:", error);
-                showToast("authenticationFailed", true);
-            }
-
-            const generateTasks = () => {
-                const taskList = document.querySelector('.task-list');
-                taskList.innerHTML = ''; 
-                
-                const tasks = [
-                    { type: 'interstitial', title: 'Ad Task 1', points: 50 }, { type: 'popup', title: 'Ad Task 2', points: 50 },
-                    { type: 'inApp', title: 'Ad Task 3', points: 50 }, { type: 'miniApp', title: 'Ad Task 4', points: 100 },
-                    { type: 'interstitial', title: 'Ad Task 5', points: 50 }, { type: 'popup', title: 'Ad Task 6', points: 60 },
-                    { type: 'inApp', title: 'Ad Task 7', points: 60 }, { type: 'miniApp', title: 'Ad Task 8', points: 120 },
-                ];
-
-                tasks.forEach(task => {
-                    const taskItem = document.createElement('div');
-                    taskItem.className = 'task-item';
-                    taskItem.innerHTML = `
-                        <i class="material-icons task-icon">play_circle_filled</i>
-                        <div class="task-details"><h4>${task.title}</h4><p>${getTranslation('watchAdToEarn')}</p></div>
-                        <span class="task-reward">+${task.points} Pts</span>
-                    `;
-                    taskItem.addEventListener('click', () => window.claimReward(task.points, task.title));
-                    taskList.appendChild(taskItem);
-                });
-            };
-
-            window.claimReward = async function(rewardAmount, taskTitle) {
-                if (!currentUser) return showToast("loginFirst", true);
-                const userRef = doc(db, "users", currentUser.uid);
-
-                try {
-                    const userDoc = await getDoc(userRef);
-                    if (!userDoc.exists()) throw new Error("User document does not exist!");
-
-                    const today = new Date().toISOString().split('T')[0];
-                    let currentData = userDoc.data();
-                    let dailyCount = currentData.dailyAdCount || 0;
-                    let lastDate = currentData.lastAdWatchDate || new Date(0).toISOString().split('T')[0];
-
-                    if (lastDate !== today) {
-                        dailyCount = 0; // Reset count for the new day
-                    }
-
-                    if (dailyCount >= (appConfig.dailyAdLimit || 10)) {
-                        throw new Error(getTranslation("dailyAdLimitReached"));
-                    }
-
-                    showToast("loadingAd");
-                    
-                    await new Promise((resolve, reject) => {
-                        try {
-                            const adPromise = window.show_9829935();
-                            if (adPromise && typeof adPromise.then === 'function') {
-                                adPromise.then(resolve).catch(reject);
-                            } else {
-                                setTimeout(resolve, 1500); 
-                            }
-                        } catch(e) { reject(e); }
-                    });
-                    
-                    await runTransaction(db, async (transaction) => {
-                        const freshUserDoc = await transaction.get(userRef);
-                        if (!freshUserDoc.exists()) throw "User not found during transaction.";
-                        
-                        const freshData = freshUserDoc.data();
-                        const freshDailyCount = (freshData.lastAdWatchDate === today) ? freshData.dailyAdCount : 0;
-                        
-                        if (freshDailyCount >= (appConfig.dailyAdLimit || 15)) {
-                            throw "Limit reached during transaction.";
-                        }
-
-                        transaction.update(userRef, { 
-                            dailyAdCount: increment(1),
-                            points: increment(rewardAmount),
-                            lastAdWatchDate: today
-                        });
-
-                        const historyRef = doc(collection(userRef, 'history'));
-                        transaction.set(historyRef, {
-                            type: 'Task Reward', 
-                            detail: `+${rewardAmount} Points for '${taskTitle}'`, 
-                            date: serverTimestamp()
-                        });
-                    });
-                    
-                    showToast('congratsPoints', false, {points: rewardAmount});
-
-                } catch (error) {
-                    console.error("Error claiming reward:", error);
-                    showToast(error.message || "errorOccurred", true);
-                }
-            };
-            
-            const generateNotices = () => {
-                const wrapper = document.getElementById('noticeSliderWrapper');
-                if (noticeInterval) clearInterval(noticeInterval);
-                const q = query(collection(db, 'notices'), orderBy('timestamp', 'desc'));
-                onSnapshot(q, (snapshot) => {
-                    if (snapshot.empty) {
-                        wrapper.innerHTML = '<div class="notice-slide">Welcome to our app!</div>';
-                        return;
-                    }
-
-                    let noticesHTML = "";
-                    snapshot.forEach(doc => {
-                        noticesHTML += `<div class="notice-slide">${doc.data().text}</div>`;
-                    });
-                    wrapper.innerHTML = noticesHTML;
-
-                    const slides = wrapper.children;
-                    const slideHeight = 50;
-                    let currentIndex = 0;
-
-                    if (slides.length > 1) {
-                        noticeInterval = setInterval(() => {
-                            currentIndex = (currentIndex + 1) % slides.length;
-                            wrapper.style.top = `-${currentIndex * slideHeight}px`;
-                        }, 3000);
-                    }
-                }, error => console.error("Error fetching notices:", error));
-            };
-
-            const renderProductCard = (doc) => {
-                const product = doc.data();
-                const finalPrice = (product.discount && product.discount > 0) ? product.price * (1 - product.discount / 100) : product.price;
-                let priceHTML = `<div class="price-wrapper"><span class="final-price">${formatCurrency(finalPrice)}</span></div>`;
-                let discountBadge = '';
-
-                if (product.discount && product.discount > 0) {
-                    priceHTML = `
-                        <div class="price-wrapper">
-                            <span class="original-price">${formatCurrency(product.price)}</span>
-                            <span class="final-price">${formatCurrency(finalPrice)}</span>
-                        </div>`;
-                    discountBadge = `<div class="discount-badge">${product.discount}% OFF</div>`;
-                }
-
-                return `
-                    <div class="product-card" 
-                        data-product-id="${doc.id}" 
-                        data-product-name="${product.name}" 
-                        data-original-price="${product.price}"
-                        data-final-price="${finalPrice}"
-                        data-product-description="${product.description || ''}">
-                        ${discountBadge}
-                        <img src="${product.imageUrl || 'https://via.placeholder.com/150'}" alt="${product.name}">
-                        <div class="product-info">
-                            <h4>${product.name}</h4>
-                            ${priceHTML}
-                        </div>
-                    </div>`;
-            };
-            
-            const renderFullProductCard = (doc) => {
-                const product = { id: doc.id, ...doc.data() };
-                const finalPrice = (product.discount && product.discount > 0) ? product.price * (1 - product.discount / 100) : product.price;
-                let priceHTML = `<p class="price final-price">${formatCurrency(finalPrice)}</p>`;
-                let discountBadge = '';
-
-                if (product.discount && product.discount > 0) {
-                    priceHTML = `
-                        <div class="price-wrapper">
-                            <span class="original-price">${formatCurrency(product.price)}</span>
-                            <span class="final-price">${formatCurrency(finalPrice)}</span>
-                        </div>`;
-                    discountBadge = `<div class="discount-badge">${product.discount}% OFF</div>`;
-                }
-
-                return `
-                    <div class="product-card" 
-                        data-product-id="${product.id}" 
-                        data-product-name="${product.name}" 
-                        data-original-price="${product.price}"
-                        data-final-price="${finalPrice}"
-                        data-product-description="${product.description || ''}">
-                        ${discountBadge}
-                        <img src="${product.imageUrl || 'https://via.placeholder.com/150'}" alt="${product.name}">
-                        <div class="product-info">
-                            <h4>${product.name}</h4>
-                            <p class="description">${product.description || ''}</p>
-                            ${priceHTML}
-                            <button class="buy-now-btn">${getTranslation('buyNow')}</button>
-                        </div>
-                    </div>`;
-            };
-
-            const generateHomeProducts = () => {
-                const productGrid = document.getElementById('homeProductGrid');
-                productGrid.innerHTML = `<p style="text-align:center; color: #7f8c8d;">${getTranslation('loading')}</p>`;
-                const q = query(collection(db, 'products'), orderBy('timestamp', 'desc'), limit(4));
-                onSnapshot(q, (snapshot) => {
-                    if (snapshot.empty) {
-                        productGrid.innerHTML = `<p>${getTranslation('noRecentProducts')}</p>`;
-                        return;
-                    }
-                    productGrid.innerHTML = '';
-                    snapshot.forEach(doc => {
-                        productGrid.innerHTML += renderProductCard(doc);
-                    });
-                    document.querySelectorAll('#homeProductGrid .product-card').forEach(card => {
-                        card.addEventListener('click', (e) => {
-                            const data = e.currentTarget.dataset;
-                            openPurchaseModal(data.productId, data.productName, parseFloat(data.originalPrice), parseFloat(data.finalPrice), data.productDescription);
-                        });
-                    });
-                });
-            };
-
-            const generateProducts = () => {
-                const productContainer = document.getElementById('productList');
-                productContainer.innerHTML = `<p style="text-align:center; color: #7f8c8d;">${getTranslation('loadingProducts')}</p>`;
-                const q = query(collection(db, "products"), orderBy("timestamp", "desc"));
-                onSnapshot(q, snapshot => {
-                    if (snapshot.empty) {
-                        productContainer.innerHTML = `<p>${getTranslation('noDigitalProducts')}</p>`;
-                        return;
-                    }
-                    productContainer.innerHTML = '';
-                    snapshot.forEach(doc => {
-                        productContainer.innerHTML += renderFullProductCard(doc);
-                    });
-                    document.querySelectorAll('#productsPage .product-card').forEach(card => {
-                        card.addEventListener('click', (e) => {
-                            const data = e.currentTarget.dataset;
-                            openPurchaseModal(data.productId, data.productName, parseFloat(data.originalPrice), parseFloat(data.finalPrice), data.productDescription);
-                        });
-                    });
-                }, error => console.error("Error fetching products:", error));
-            };
-
-            const generateMyProducts = () => {
-                const productList = document.getElementById('myProductList');
-                if (!currentUser) return;
-                productList.innerHTML = `<p style="text-align:center; color: #7f8c8d;">${getTranslation('loadingYourProducts')}</p>`;
-
-                const q = query(collection(db, 'users', currentUser.uid, 'my_products'), orderBy('purchaseDate', 'desc'));
-                onSnapshot(q, (snapshot) => {
-                    if (snapshot.empty) {
-                        productList.innerHTML = `<p>${getTranslation('noPurchasedProducts')}</p>`;
-                        return;
-                    }
-                    let productsHTML = "";
-                    snapshot.forEach(doc => {
-                        const product = doc.data();
-                        productsHTML += `
-                            <div class="product-card">
-                                <img src="${product.imageUrl || 'https://via.placeholder.com/150'}" alt="${product.name}">
-                                <div class="product-info">
-                                    <h4>${product.name}</h4>
-                                    <p class="description">${product.description || ''}</p>
-                                    <p class="price">${getTranslation('purchased')}</p>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    productList.innerHTML = productsHTML;
-                });
-            };
-
-            const generateWithdrawHistory = () => {
-                const historyList = document.getElementById('withdrawHistoryList');
-                if (!currentUser) return;
-                historyList.innerHTML = `<p style="text-align:center; color: #7f8c8d;">${getTranslation('loadingHistory')}</p>`;
-
-                const q = query(
-                    collection(db, 'withdrawals')
-                );
-
-                onSnapshot(q, (snapshot) => {
-                    const userHistoryDocs = snapshot.docs
-                        .map(doc => doc.data())
-                        .filter(data => data.userId === currentUser.uid);
-
-                    if (userHistoryDocs.length === 0) {
-                        historyList.innerHTML = `<p data-lang-key="noWithdrawalHistory">${getTranslation('noWithdrawalHistory')}</p>`;
-                        return;
-                    }
-
-                    // Sort documents client-side
-                    userHistoryDocs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-
-                    let historyHTML = "";
-                    userHistoryDocs.forEach(data => {
-                        const statusClass = data.status === 'approved' ? 'approved' : (data.status === 'rejected' ? 'rejected' : 'pending');
-                        historyHTML += `
-                            <div class="history-item">
-                                <div class="history-details">
-                                    <h4>${data.method} - ${formatCurrency(data.amount)}</h4>
-                                    <p>To: ${data.account}</p>
-                                    <small>${data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleString() : 'Date not available'}</small>
-                                </div>
-                                <span class="history-status ${statusClass}">${data.status}</span>
-                            </div>
-                        `;
-                    });
-                    historyList.innerHTML = historyHTML;
-                }, (error) => {
-                    console.error("Error fetching withdrawal history: ", error);
-                    historyList.innerHTML = `<p style="color: red;">${getTranslation('errorLoadingHistory')}</p>`;
-                });
-            };
-            
-            const generatePaymentMethods = () => {
-                const container = document.getElementById('paymentMethodsContainer');
-                const docRef = doc(db, 'config', 'paymentMethods');
-                onSnapshot(docRef, (doc) => {
-                    let methods = [];
-                    if(doc.exists() && doc.data().methods && doc.data().methods.length > 0) {
-                         methods = doc.data().methods;
-                    } else {
-                        // Fallback to default Bangladeshi methods if Firestore is not configured
-                        methods = [
-                            { name: "bKash", logoUrl: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='15' fill='%23e2136e'/%3E%3Ctext x='50' y='60' font-size='30' fill='white' text-anchor='middle' font-family='Arial' font-weight='bold'%3EbKash%3C/text%3E%3C/svg%3E`, details: "01xxxxxxxxx (Personal)" },
-                            { name: "Nagad", logoUrl: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='15' fill='%23f58220'/%3E%3Ctext x='50' y='60' font-size='30' fill='white' text-anchor='middle' font-family='Arial' font-weight='bold'%3ENagad%3C/text%3E%3C/svg%3E`, details: "01xxxxxxxxx (Personal)" },
-                            { name: "Rocket", logoUrl: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='15' fill='%235c2d91'/%3E%3Ctext x='50' y='60' font-size='30' fill='white' text-anchor='middle' font-family='Arial' font-weight='bold'%3ERocket%3C/text%3E%3C/svg%3E`, details: "01xxxxxxxxx (Personal)" }
-                        ];
-                    }
-
-                    if (methods.length > 0) {
-                        container.innerHTML = methods.map(method => `
-                             <div class="card">
-                                 <div style="display:flex; align-items:center;"> 
-                                     <img src="${method.logoUrl}" alt="${method.name}" class="payment-logo"> 
-                                     <h3>Withdraw via ${method.name}</h3> 
-                                 </div>
-                                 <input type="number" class="withdraw-input" id="${method.name.toLowerCase()}Amount" placeholder="${currentCurrency === 'USD' ? 'Amount (USD)' : 'Amount (BDT)'}">
-                                 <input type="text" class="withdraw-input" id="${method.name.toLowerCase()}Account" placeholder="Your ${method.name} Details (e.g. Number)">
-                                 <button class="withdraw-btn" data-method="${method.name}">${getTranslation('requestWithdrawal')}</button>
-                            </div>
-                        `).join('');
-
-                        document.querySelectorAll('.withdraw-btn').forEach(btn => {
-                            btn.addEventListener('click', handleWithdrawalRequest);
-                        });
-                    } else {
-                        container.innerHTML = `<p>${getTranslation('noPaymentMethods')}</p>`;
-                    }
-                });
-            };
-
-            const handleWithdrawalRequest = async (event) => {
-                const btn = event.currentTarget;
-                const method = btn.dataset.method;
-                const amountInput = document.getElementById(`${method.toLowerCase()}Amount`);
-                const accountInput = document.getElementById(`${method.toLowerCase()}Account`);
-                
-                let amount = parseFloat(amountInput.value);
-                const account = accountInput.value.trim();
-                
-                // Convert BDT to USD if necessary for storage
-                let amountInUSD = (currentCurrency === 'BDT') ? amount / BDT_CONVERSION_RATE : amount;
-
-                const userRef = doc(db, 'users', currentUser.uid);
-                const userDoc = await getDoc(userRef);
-                const currentBalance = userDoc.data().balance;
-
-                if (!account || isNaN(amountInUSD) || amountInUSD <= 0) return showToast('invalidAmountOrAccount', true);
-                if (amountInUSD < settings.minWithdrawal) return showToast('minWithdrawal', true, {amount: formatCurrency(settings.minWithdrawal)});
-                if (amountInUSD > currentBalance) return showToast('insufficientBalance', true);
-                
-                btn.disabled = true;
-                btn.innerText = "Processing...";
-
-                try {
-                    const withdrawalRequest = {
-                        userId: currentUser.uid, 
-                        email: currentUser.email,
-                        userName: currentUser.displayName || 'A User',
-                        amount: amountInUSD, // Always store in USD
-                        method: method, 
-                        account: account, 
-                        status: 'pending',
-                        notified: false,
-                        timestamp: serverTimestamp()
-                    };
-                    await addDoc(collection(db, 'withdrawals'), withdrawalRequest);
-
-                    await updateDoc(userRef, {
-                        balance: increment(-amountInUSD)
-                    });
-                    
-                    showToast('withdrawalRequestSuccess');
-                    amountInput.value = '';
-                    accountInput.value = '';
-                } catch (error) {
-                    console.error("Withdrawal error:", error);
-                    showToast("failedToSendRequest", true);
-                } finally {
-                     btn.disabled = false;
-                     btn.innerText = getTranslation('requestWithdrawal');
-                }
-            };
-            
-            const handleProfileImageUpload = (event) => {
-                const file = event.target.files[0];
-                if (!file || !currentUser) return;
-
-                const storageRef = ref(storage, `profileImages/${currentUser.uid}`);
-                const uploadTask = uploadBytesResumable(storageRef, file);
-
-                showToast('uploadingImage');
-
-                uploadTask.on('state_changed', 
-                    (snapshot) => {}, 
-                    (error) => { showToast('uploadFailed', true, {message: error.message}); }, 
-                    async () => {
-                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                        await updateDoc(doc(db, 'users', currentUser.uid), { profileImageUrl: downloadURL });
-                        document.getElementById('profileImage').src = downloadURL;
-                        showToast('profilePictureUpdated');
-                    }
-                );
-            };
-
-            const openPurchaseModal = async (productId, productName, originalPrice, finalPrice, productDescription) => {
-                const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-                const userBalance = userDoc.data().balance || 0;
-
-                document.getElementById('modalProductName').innerText = productName;
-                const priceDetailsDiv = document.getElementById('modalPriceDetails');
-                
-                if (originalPrice !== finalPrice) {
-                    priceDetailsDiv.innerHTML = `
-                        <p>Original Price: <s style="color: #999;">${formatCurrency(originalPrice)}</s></p>
-                        <p>Discounted Price: <b style="font-size: 1.2em; color: var(--primary-color);">${formatCurrency(finalPrice)}</b></p>
-                    `;
-                } else {
-                    priceDetailsDiv.innerHTML = `<p>Price: <b>${formatCurrency(finalPrice)}</b></p>`;
-                }
-
-                document.getElementById('modalUserBalance').innerText = formatCurrency(userBalance);
-                
-                const paymentOptionsDiv = document.getElementById('paymentOptions');
-                const externalButtonsDiv = document.getElementById('externalPaymentButtons');
-                const confirmBtn = document.getElementById('confirmPurchaseBtn');
-                const externalDetailsDiv = document.getElementById('externalPaymentDetails');
-                const externalInstructionP = document.getElementById('externalPaymentInstruction');
-                const noMethodsMsg = document.getElementById('no-methods-msg');
-                const orText = document.getElementById('orText');
-
-                externalButtonsDiv.innerHTML = '';
-                externalDetailsDiv.style.display = 'none';
-                noMethodsMsg.style.display = 'none';
-                orText.style.display = 'none';
-                
-                paymentOptionsDiv.querySelectorAll('.payment-option, .payment-btn').forEach(el => el.classList.remove('selected'));
-
-                const methodsDoc = await getDoc(doc(db, 'config', 'paymentMethods'));
-                let methods = [];
-                 if (methodsDoc.exists() && methodsDoc.data().methods && methodsDoc.data().methods.length > 0) {
-                      methods = methodsDoc.data().methods;
-                } else {
-                      methods = [
-                         { name: "bKash", details: "01xxxxxxxxx (Personal)" },
-                         { name: "Nagad", details: "01xxxxxxxxx (Personal)" },
-                         { name: "Rocket", details: "01xxxxxxxxx (Personal)" }
-                     ];
-                }
-
-                if (methods.length > 0) {
-                    orText.style.display = 'block';
-                    methods.forEach(method => {
-                        const btn = document.createElement('button');
-                        btn.className = 'payment-btn';
-                        btn.dataset.method = method.name.toLowerCase();
-                        btn.dataset.details = method.details; // Store details
-                        btn.innerText = method.name;
-                        externalButtonsDiv.appendChild(btn);
-                    });
-                } else {
-                     noMethodsMsg.style.display = 'block';
-                }
-                
-                let selectedMethod = null;
-                let selectedMethodDetails = null;
-                const allOptions = paymentOptionsDiv.querySelectorAll('.payment-option, .payment-btn');
-
-                allOptions.forEach(opt => {
-                    opt.addEventListener('click', (e) => {
-                        allOptions.forEach(el => el.classList.remove('selected'));
-                        const currentOpt = e.currentTarget;
-                        currentOpt.classList.add('selected');
-                        selectedMethod = currentOpt.dataset.method;
-                        selectedMethodDetails = currentOpt.dataset.details;
-
-                        if (selectedMethod === 'balance') {
-                            externalDetailsDiv.style.display = 'none';
-                            confirmBtn.disabled = userBalance < finalPrice;
-                        } else {
-                            externalDetailsDiv.style.display = 'block';
-                            externalInstructionP.innerText = `Please send ${formatCurrency(finalPrice)} to our ${selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1)} account (${selectedMethodDetails}) and enter the Transaction ID below.`;
-                            confirmBtn.disabled = false;
-                        }
-                    });
-                });
-
-
-                confirmBtn.disabled = true; 
-                confirmBtn.onclick = () => confirmPurchase(productId, productName, finalPrice, selectedMethod);
-                document.getElementById('purchaseModal').classList.add('show');
-            };
-
-            const confirmPurchase = async (productId, productName, productPrice, method) => {
-                const confirmBtn = document.getElementById('confirmPurchaseBtn');
-                if (!method) return showToast('selectPaymentMethod', true);
-
-                confirmBtn.disabled = true;
-                confirmBtn.innerText = 'Processing...';
-
-                const userRef = doc(db, 'users', currentUser.uid);
-                
-                try {
-                    if (method === 'balance') {
-                        await runTransaction(db, async (transaction) => {
-                            const userDoc = await transaction.get(userRef);
-                            if (!userDoc.exists()) throw "User not found";
-                            
-                            const newBalance = (userDoc.data().balance || 0) - productPrice;
-                            if (newBalance < 0) throw "Insufficient funds";
-
-                            transaction.update(userRef, { balance: newBalance });
-                            
-                            const productDoc = await getDoc(doc(db, 'products', productId));
-                            const productData = productDoc.data();
-                            const purchaseRef = doc(collection(userRef, 'my_products'), productId);
-                            transaction.set(purchaseRef, { ...productData, purchaseDate: serverTimestamp() });
-
-                            const historyRef = doc(collection(userRef, 'history'));
-                            transaction.set(historyRef, {
-                                type: 'Product Purchase',
-                                detail: `Purchased '${productName}' for ${formatCurrency(productPrice)}`,
-                                date: serverTimestamp()
-                            });
-                        });
-                        showToast('purchaseSuccessful');
-                        document.getElementById('purchaseModal').classList.remove('show');
-                    } else {
-                        const trxId = document.getElementById('trxIdInput').value.trim();
-                        if (!trxId) throw new Error('Please enter the Transaction ID.');
-
-                        const orderData = {
-                            userId: currentUser.uid,
-                            email: currentUser.email,
-                            productId,
-                            productName,
-                            productPrice,
-                            paymentMethod: method,
-                            transactionId: trxId,
-                            status: 'pending',
-                            timestamp: serverTimestamp()
-                        };
-                        
-                        await addDoc(collection(db, 'orders'), orderData);
-                        showToast('orderPlaced');
-                        document.getElementById('purchaseModal').classList.remove('show');
-                    }
-                } catch (error) {
-                    showToast('purchaseFailed', true, { message: error.message });
-                } finally {
-                    confirmBtn.disabled = false;
-                    confirmBtn.innerText = getTranslation('orderPlace');
-                }
-            };
-
-
-            // --- EVENT LISTENERS ---
-            currencySelector.value = currentCurrency;
-            languageSelector.value = currentLanguage;
-            setLanguage(currentLanguage);
-            setCurrency(currentCurrency);
-
-            languageSelector.addEventListener('change', (e) => setLanguage(e.target.value));
-            currencySelector.addEventListener('change', (e) => setCurrency(e.target.value));
-
-            document.getElementById('profileImageUpload').addEventListener('change', handleProfileImageUpload);
-
-            const flipper = document.querySelector('.auth-flipper');
-            document.getElementById('showSignupLink').addEventListener('click', e => { e.preventDefault(); flipper.classList.add('flipped'); });
-            document.getElementById('showLoginLink').addEventListener('click', e => { e.preventDefault(); flipper.classList.remove('flipped'); });
-
-            document.getElementById('loginBtn').addEventListener('click', () => {
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
-                if(!email || !password) return showToast("fillAllFields", true);
-                signInWithEmailAndPassword(auth, email, password).catch(e => showToast(e.message, true));
-            });
-
-            document.getElementById('signupBtn').addEventListener('click', () => {
-                const name = document.getElementById('signupFullName').value;
-                const email = document.getElementById('signupEmail').value;
-                const pass = document.getElementById('signupPassword').value;
-                if(!name || !email || !pass) return showToast("fillAllFields", true);
-                createUserWithEmailAndPassword(auth, email, pass)
-                    .then(cred => updateProfile(cred.user, {displayName: name}))
-                    .catch(e => showToast(e.message, true));
-            });
-            
-            document.getElementById('submitReferralBtn').addEventListener('click', async () => {
-                const code = document.getElementById('referralCodeInput').value.trim();
-                if (!code) return showToast("enterCode", true);
-                const userRef = doc(db, 'users', currentUser.uid);
-                const userDoc = await getDoc(userRef);
-                const userData = userDoc.data();
-
-                if(userData.referralUsed) return showToast('referralUsed', true);
-                if(code === userData.referralCode) return showToast('cannotUseOwnCode', true);
-
-                const q = query(collection(db, 'users'), where('referralCode', '==', code), limit(1));
-                const referrerQuerySnapshot = await getDocs(q);
-                if (referrerQuerySnapshot.empty) return showToast('invalidCode', true);
-                
-                await updateDoc(userRef, {
-                    balance: increment(0.20),
-                    referralUsed: true
-                });
-                await addDoc(collection(userRef, 'history'), {
-                    type: 'Referral Bonus', detail: '+$0.20 for applying code.', date: serverTimestamp()
-                });
-                addNotification('+$0.20 Referral Bonus added!');
-                showToast('referralBonusAdded');
-            });
-
-            document.getElementById('convertPointsBtn').addEventListener('click', async () => {
-                const userRef = doc(db, 'users', currentUser.uid);
-                const userDoc = await getDoc(userRef);
-                const currentPoints = userDoc.data().points || 0;
-
-                if (currentPoints >= 1000) {
-                    const dollars = Math.floor(currentPoints / 1000);
-                    await updateDoc(userRef, {
-                        points: increment(-dollars * 1000),
-                        balance: increment(dollars)
-                    });
-                    await addDoc(collection(userRef, 'history'), {
-                        type: 'Points Conversion',
-                        detail: `-${dollars*1000} Pts, +$${dollars}.00 to balance.`,
-                        date: serverTimestamp()
-                    });
-                    showToast('pointsConverted');
-                } else {
-                    showToast('notEnoughPoints', true);
-                }
-            });
-
-            document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
-            document.getElementById('navHome').addEventListener('click', () => showPage('home'));
-            document.getElementById('navWork').addEventListener('click', () => showPage('work'));
-            document.getElementById('navProducts').addEventListener('click', () => showPage('products'));
-            document.getElementById('navWithdraw').addEventListener('click', () => showPage('withdraw'));
-            document.getElementById('profileButton').addEventListener('click', () => showPage('profile'));
-            document.getElementById('myProductsBtn').addEventListener('click', () => showPage('myProducts'));
-            document.getElementById('historyBtn').addEventListener('click', () => showPage('history'));
-            document.getElementById('withdrawHistoryBtn').addEventListener('click', () => showPage('withdrawHistory'));
-            document.getElementById('claimTasksButton').addEventListener('click', () => showPage('work'));
-            
-            document.getElementById('copyReferralBtn').addEventListener('click', () => {
-                const codeToCopy = document.getElementById('userReferralCode').innerText;
-                try {
-                    navigator.clipboard.writeText(codeToCopy);
-                    showToast('codeCopied');
-                } catch (err) {
-                     const textArea = document.createElement("textarea");
-                    textArea.value = codeToCopy;
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        showToast('codeCopied');
-                    } catch (err) {
-                        showToast('failedToCopy', true);
-                    }
-                    document.body.removeChild(textArea);
-                }
-            });
+        import { getFirestore, doc, getDocs, setDoc, addDoc, onSnapshot, collection, query, where, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-            const notificationButton = document.getElementById('notificationButton'), closeNotificationBtn = document.getElementById('closeNotificationBtn'), notificationOverlay = document.getElementById('notificationOverlay');
-            const showNotificationPanel = () => { document.getElementById('notificationPanel').classList.add('show'); notificationOverlay.classList.add('show'); document.getElementById('notificationBadge').style.display = 'none'; document.getElementById('notificationBadge').innerText = '0';};
-            const hideNotificationPanel = () => { document.getElementById('notificationPanel').classList.remove('show'); notificationOverlay.classList.remove('show'); };
-            notificationButton.addEventListener('click', showNotificationPanel);
-            closeNotificationBtn.addEventListener('click', hideNotificationPanel);
-            notificationOverlay.addEventListener('click', hideNotificationPanel);
+        const firebaseConfig = {
+            apiKey: "AIzaSyCiV4AjrQ8XWrAygsagNiO5MNNcG0efpTs",
+            authDomain: "digital-2313a.firebaseapp.com",
+            databaseURL: "https://digital-2313a-default-rtdb.firebaseio.com",
+            projectId: "digital-2313a",
+            storageBucket: "digital-2313a.appspot.com",
+            messagingSenderId: "391359795549",
+            appId: "1:391359795549:web:2616455e966f3bf6a658b4",
+            measurementId: "G-8N8VDT2BNK"
+        };
+        const appId = "1:391359795549:web:2616455e966f3bf6a658b4";
 
-            let isSearchActive = false;
-            document.getElementById('searchButton').addEventListener('click', () => {
-                isSearchActive = !isSearchActive;
-                document.querySelector('.logo').style.display = isSearchActive ? 'none' : 'block';
-                document.getElementById('searchBar').style.display = isSearchActive ? 'flex' : 'none';
-                document.getElementById('searchButton').innerHTML = isSearchActive ? `<i class="material-icons">close</i>` : `<i class="material-icons">search</i>`;
-                if (isSearchActive) document.getElementById('searchInput').focus();
+        let db;
+        
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+        } catch (e) {
+            console.error("Firebase Initialization Failed:", e);
+            document.getElementById('initial-error').textContent = "Firebase কনফিগারেশন সঠিক নয়।";
+            document.getElementById('initial-error').classList.remove('hidden');
+        }
+
+        let products = [];
+        let bannerSettings = {};
+        
+        let cart = [];
+        const checkoutState = { step: 1, customerInfo: {}, paymentMethod: null, appliedCoupon: null };
+        const paymentDetails = {
+            bkash: { name: 'bKash', number: '01700000000' },
+            nagad: { name: 'Nagad', number: '01800000000' },
+            usdt: { name: 'USDT (TRC20)', address: 'Txxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' }
+        };
+
+        const mainContent = document.getElementById('main-content');
+        const searchSection = document.getElementById('search-section');
+        const searchInput = document.getElementById('search-input');
+        
+        const HomePage = (banner) => `
+            <div class="space-y-12">
+                <div class="bg-gradient-to-r from-cyan-500 to-pink-500 p-8 rounded-2xl shadow-lg text-white text-center card-glow">
+                    <h2 class="text-3xl font-extrabold tracking-wider">${banner?.title || 'WELCOME OFFER'}</h2>
+                    <p class="mt-2 text-lg">${banner?.subtitle || 'Use code below for 10% OFF!'}</p>
+                    <div class="mt-4 inline-block bg-white text-black font-mono px-4 py-2 rounded-lg font-bold text-lg">${banner?.coupon || 'WELCOME10'}</div>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold mb-4">Available Products</h2>
+                    <div class="grid grid-cols-2 gap-6" id="products-list"></div>
+                </div>
+            </div>`;
+        
+        const ProductDetailPage = (product) => `
+            <div class="mb-4"><button class="back-btn text-gray-400">&larr; Back</button></div>
+            <div class="bg-card rounded-2xl p-6 text-center card-glow">
+                <img src="${product.image}" alt="${product.name}" class="w-40 h-40 rounded-lg mx-auto mb-6 shadow-lg">
+                <h1 class="text-3xl font-bold">${product.name}</h1>
+                 <p class="text-sm text-gray-400 mt-1">${product.category || ''}</p>
+                <div class="my-8">
+                    <h2 class="font-bold text-lg mb-3 text-primary">Features</h2>
+                    <ul class="space-y-2 text-gray-300 text-left list-disc list-inside">
+                        ${(product.features && Array.isArray(product.features) ? product.features : []).map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                </div>
+                ${product.stock === 0 
+                    ? `<button class="w-full p-3 rounded-lg bg-gray-600 text-gray-400 cursor-not-allowed uppercase font-bold">Out of Stock</button>`
+                    : `<div class="flex gap-4">
+                            <button class="add-to-cart-btn w-full p-3 rounded-full bg-gray-600 hover:bg-gray-500 font-bold" data-id="${product.id}">Add to Cart</button>
+                            <button class="buy-now-btn btn-primary w-full" data-id="${product.id}">Buy Now</button>
+                        </div>`
+                }
+            </div>`;
+        
+        const CartPage = () => `
+            <div class="mb-4"><button class="back-btn text-gray-400">&larr; Back</button></div>
+            <h2 class="text-2xl font-bold mb-6">Shopping Cart</h2>
+            <div id="cart-items-container" class="space-y-4"></div>`;
+
+        const CheckoutPage = () => `
+            <div class="mb-4"><button class="back-btn text-gray-400">&larr; Back</button></div>
+            <h2 class="text-2xl font-bold mb-6">Checkout</h2>
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex-1 text-center"><div id="step-1-indicator" class="step-indicator active w-8 h-8 mx-auto rounded-full flex items-center justify-center font-bold">1</div><p class="text-xs mt-1">তথ্য</p></div><div class="flex-1 h-px bg-gray-600"></div>
+                <div class="flex-1 text-center"><div id="step-2-indicator" class="step-indicator w-8 h-8 mx-auto rounded-full bg-gray-700 flex items-center justify-center font-bold">2</div><p class="text-xs mt-1 text-gray-500">পেমেন্ট</p></div><div class="flex-1 h-px bg-gray-600"></div>
+                <div class="flex-1 text-center"><div id="step-3-indicator" class="step-indicator w-8 h-8 mx-auto rounded-full bg-gray-700 flex items-center justify-center font-bold">3</div><p class="text-xs mt-1 text-gray-500">নিশ্চিতকরণ</p></div>
+            </div>
+            <div id="checkout-error" class="hidden p-3 bg-red-800 text-white rounded-md text-center mb-4"></div>
+            <div class="bg-card rounded-2xl p-6">
+                <div id="checkout-step-1">
+                    <div class="space-y-4">
+                        <div><label class="block mb-1 text-sm text-gray-400">আপনার পুরো নাম</label><input type="text" id="full-name" placeholder="নাম লিখুন" class="w-full p-3 rounded-lg bg-surface border border-gray-600"></div>
+                        <div><label class="block mb-1 text-sm text-gray-400">আপনার ইমেইল</label><input type="email" id="email" placeholder="ইমেইল লিখুন" class="w-full p-3 rounded-lg bg-surface border border-gray-600"></div>
+                        <div><label class="block mb-1 text-sm text-gray-400">কুপন কোড (ঐচ্ছিক)</label><div class="flex gap-2"><input type="text" id="coupon-code" placeholder="WELCOME10" class="w-full p-3 rounded-lg bg-surface border border-gray-600"><button id="apply-coupon-btn" class="bg-gray-600 px-4 rounded-lg">Apply</button></div><p id="coupon-message" class="text-sm mt-2"></p></div>
+                        <button id="checkout-next-1" class="btn-primary w-full mt-4">পরবর্তী ধাপ</button>
+                    </div>
+                </div>
+                <div id="checkout-step-2" class="hidden"><h3 class="font-bold mb-4">পেমেন্ট পদ্ধতি বাছাই করুন</h3><div class="space-y-3"><div class="payment-option p-4 rounded-lg cursor-pointer" data-method="bkash"><h4 class="font-bold">bKash</h4><p class="text-sm text-gray-400">বিকাশের মাধ্যমে পেমেন্ট করুন</p></div><div class="payment-option p-4 rounded-lg cursor-pointer" data-method="nagad"><h4 class="font-bold">Nagad</h4><p class="text-sm text-gray-400">নগদের মাধ্যমে পেমেন্ট করুন</p></div><div class="payment-option p-4 rounded-lg cursor-pointer" data-method="usdt"><h4 class="font-bold">USDT (TRC20)</h4><p class="text-sm text-gray-400">ক্রিপ্টোর মাধ্যমে পেমেন্ট করুন</p></div></div><button id="checkout-next-2" class="btn-primary w-full mt-6">পরবর্তী ধাপ</button></div>
+                <div id="checkout-step-3" class="hidden"></div>
+            </div>`;
+        
+        const MyProductsPage = () => `
+            <div class="mb-4"><button class="back-btn text-gray-400">&larr; Back</button></div>
+            <h2 class="text-2xl font-bold mb-6">আমার কেনা পণ্য</h2>
+            <div class="bg-card p-6 rounded-lg">
+                <p class="text-gray-400 mb-4">আপনার কেনা পণ্যগুলো দেখতে, কেনাকাটার সময় যে ইমেইলটি ব্যবহার করেছিলেন সেটি নিচে দিন।</p>
+                <div class="flex gap-2">
+                    <input type="email" id="my-products-email" placeholder="আপনার ইমেইল দিন" class="w-full p-3 rounded-lg bg-surface border border-gray-600">
+                    <button id="find-my-products-btn" class="btn-primary">খুঁজুন</button>
+                </div>
+                <div id="my-products-list" class="mt-6"></div>
+            </div>
+        `;
+        
+        const render = async (pageTemplate, ...args) => {
+            mainContent.innerHTML = await pageTemplate(...args);
+        };
+
+        const renderProductsToDiv = (divId, productArray) => {
+            const container = document.getElementById(divId);
+            if (!container) return;
+            container.innerHTML = productArray.map(p => `<div class="product-card cursor-pointer" data-id="${p.id}"><div class="bg-card p-4 rounded-2xl relative card-glow"><img src="${p.image}" alt="${p.name}" class="w-full h-32 object-cover rounded-lg mb-3"><h3 class="font-semibold text-lg truncate">${p.name}</h3><p class="text-xs text-gray-400">${p.category || ''}</p>${p.stock === 0 ? `<p class="text-sm text-red-400 font-bold mt-1">Out of Stock</p><span class="absolute top-2 right-2 text-xs bg-red-600 text-white px-2 py-1 rounded-full font-bold">Sold Out</span>` : `<p class="text-lg font-bold text-primary mt-1">$${p.price.toFixed(2)}</p>`}</div></div>`).join('');
+        };
+        
+        const updateCartPage = () => {
+            const container = document.getElementById('cart-items-container');
+            if (!container) return;
+            if (cart.length === 0) {
+                container.innerHTML = `<div class="text-center p-8 text-gray-400 bg-card rounded-lg">Your Cart is Empty</div>`; return;
+            }
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            container.innerHTML = `${cart.map(item => `<div class="flex items-center gap-4 bg-card p-3 rounded-lg"><img src="${item.image}" class="w-16 h-16 rounded-lg"><div class="flex-1"><h4 class="font-semibold">${item.name}</h4><p class="text-sm text-primary font-bold">$${item.price.toFixed(2)}</p></div><button class="remove-from-cart-btn text-red-400 hover:text-red-300" data-id="${item.id}">🗑️</button></div>`).join('')}<div class="border-t border-gray-700 pt-4 mt-4 space-y-2"><div class="flex justify-between"><span>Subtotal</span><span>$${subtotal.toFixed(2)}</span></div><div class="flex justify-between font-bold text-xl"><span>Total</span><span>$${subtotal.toFixed(2)}</span></div></div><button id="proceed-to-checkout-btn" class="btn-primary w-full mt-6">Proceed to Checkout</button>`;
+        };
+
+        let navigationStack = [];
+        const navigate = (page, data) => {
+            const currentState = { page, data };
+            const lastState = navigationStack[navigationStack.length - 1];
+
+            if (!lastState || lastState.page !== page || JSON.stringify(lastState.data) !== JSON.stringify(data)) {
+                 if (page === 'home') {
+                     navigationStack = [currentState];
+                 } else {
+                     navigationStack.push(currentState);
+                 }
+            }
+            
+            searchSection.classList.add('hidden');
+            mainContent.classList.remove('hidden');
+
+            if (page === 'home') {
+                render(HomePage, bannerSettings).then(() => {
+                    renderProductsToDiv('products-list', products);
+                });
+            } else if (page === 'product-detail') {
+                 if (!data || !data.id) {
+                     showToast("Error: Product ID missing.");
+                     navigate('home', null);
+                     return;
+                 }
+                const product = products.find(p => p.id === data.id);
+                 if (product) {
+                     render(ProductDetailPage, product);
+                 } else {
+                     showToast("Error: Product not found!");
+                     goBack();
+                 }
+            }
+            else if (page === 'cart') {
+                render(CartPage).then(() => updateCartPage());
+            }
+            else if (page === 'checkout') { 
+                checkoutState.step = 1; 
+                render(CheckoutPage);
+            }
+            else if (page === 'my-products') {
+                render(MyProductsPage);
+            }
+        };
+        
+        const goBack = () => {
+            if (navigationStack.length > 1) {
+                navigationStack.pop();
+                const previousState = navigationStack[navigationStack.length - 1];
+                if (previousState) {
+                    navigate(previousState.page, previousState.data);
+                }
+            }
+        };
+
+        const addToCart = (productId) => {
+            const product = products.find(p => p.id === productId);
+            if (product && !cart.find(item => item.id === productId)) {
+                cart.push({ ...product });
+                updateCartState();
+                showToast("Product Added to Cart!");
+                return true;
+            }
+            return false;
+        };
+        
+        const removeFromCart = (productId) => { 
+            cart = cart.filter(item => item.id !== productId); 
+            updateCartState(); 
+        };
+
+        const updateCartState = () => {
+            localStorage.setItem('pshStoreCart', JSON.stringify(cart));
+            document.getElementById('cart-count').textContent = cart.length;
+            if (navigationStack.some(s => s.page === 'cart')) {
+                updateCartPage();
+            }
+        };
+        
+        const updateCheckoutView = () => {
+            const { step } = checkoutState;
+            document.querySelectorAll('[id^="checkout-step-"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`checkout-step-${step}`).classList.remove('hidden');
+            document.querySelectorAll('.step-indicator').forEach((el, index) => {
+                if (index + 1 < step) { el.classList.add('active'); el.innerHTML = '✓'; } 
+                else if (index + 1 === step) { el.classList.add('active'); el.innerHTML = step; } 
+                else { el.classList.remove('active'); el.innerHTML = index + 1; }
             });
+            if (step === 3) renderCheckoutStep3();
+        };
+
+        const renderCheckoutStep3 = () => {
+            const container = document.getElementById('checkout-step-3');
+            if(!container) return;
+            const methodDetails = paymentDetails[checkoutState.paymentMethod];
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            const discountAmount = checkoutState.appliedCoupon ? subtotal * checkoutState.appliedCoupon.discount : 0;
+            const total = subtotal - discountAmount;
+            const detailKey = methodDetails.address ? 'Address' : 'Number';
+            const detailValue = methodDetails.address || methodDetails.number;
+            const paymentType = (methodDetails.name === 'bKash' || methodDetails.name === 'Nagad') ? 'Send Money' : 'Transfer';
+
+            container.innerHTML = `
+                <h3 class="font-bold text-center mb-4 text-xl">ম্যানুয়াল পেমেন্ট নির্দেশনা</h3>
+                <div class="text-left p-4 bg-surface rounded-lg space-y-4">
+                    <div class="text-center mb-4">
+                        <p class="text-gray-400">মোট পেমেন্ট করতে হবে:</p>
+                        <p class="text-4xl font-bold text-primary my-2">$${total.toFixed(2)}</p>
+                        ${ checkoutState.appliedCoupon ? `<p class="text-sm text-green-400"> ছাড়: $${discountAmount.toFixed(2)}</p>` : ''}
+                    </div>
+                    
+                    <ul class="text-sm text-gray-300 list-disc list-inside space-y-2">
+                        <li>আপনার ${methodDetails.name} অ্যাপ থেকে '${paymentType}' অপশনটি ব্যবহার করুন।</li>
+                        <li>নিচের ${detailKey} টি কপি করে সেখানে পেস্ট করুন এবং টাকার পরিমাণ নিশ্চিত করুন।</li>
+                        <li>পেমেন্ট সম্পন্ন হলে, আপনি একটি Transaction ID (TrxID) পাবেন।</li>
+                        <li>সেই TrxID টি কপি করে নিচের বক্সে পেস্ট করুন।</li>
+                    </ul>
+
+                    <div class="my-4 p-3 bg-gray-800 rounded-lg flex justify-between items-center">
+                        <span id="payment-info" class="font-mono text-lg break-all">${detailValue}</span>
+                        <button id="copy-btn" class="text-sm bg-gray-600 px-3 py-1 rounded-md">কপি</button>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <label class="block mb-1 text-sm text-gray-400">লেনদেনের আইডি (Transaction ID)</label>
+                    <input type="text" id="transaction-id" placeholder="এখানে TrxID পেস্ট করুন" class="w-full p-3 rounded-lg bg-surface border border-gray-600">
+                </div>
+                <button id="confirm-purchase-btn" class="btn-primary w-full mt-6">অর্ডার নিশ্চিত করুন</button>`;
+        };
+        
+        const handleFinalCheckout = async () => {
+            const transactionId = document.getElementById('transaction-id')?.value.trim();
+            const errorDiv = document.getElementById('checkout-error');
+            if (!errorDiv) return;
+            errorDiv.classList.add('hidden');
+
+            const trxIdRegex = /^[a-zA-Z0-9]{10}$/; 
+            if (!transactionId || !trxIdRegex.test(transactionId)) {
+                errorDiv.textContent = "অনুগ্রহ করে একটি সঠিক TrxID দিন (10 characters, letters and numbers only).";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            
+            const btn = document.getElementById('confirm-purchase-btn');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'Processing...';
+            }
+
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            const discountAmount = checkoutState.appliedCoupon ? subtotal * checkoutState.appliedCoupon.discount : 0;
+            const total = subtotal - discountAmount;
+            const orderDetails = { ...checkoutState.customerInfo, paymentMethod: checkoutState.paymentMethod, transactionId, items: cart.map(item => ({id: item.id, name: item.name, price: item.price})), total, appliedCoupon: checkoutState.appliedCoupon, status: 'Pending', date: new Date().toISOString() };
+            
+            const ordersCollectionRef = collection(db, `/artifacts/${appId}/public/data/orders`);
+            try {
+                await addDoc(ordersCollectionRef, orderDetails);
+
+                showToast("Order submitted successfully for review!");
+                cart = []; 
+                checkoutState.appliedCoupon = null; 
+                updateCartState(); 
+                
+                navigate('home', null);
+
+            } catch(e) { 
+                console.error("Checkout Error: ", e);
+                let errorMessage = "Could not complete purchase. Please try again.";
+                if (e.code === 'permission-denied') {
+                    errorMessage = "Purchase failed due to a permission issue. Please check security rules.";
+                }
+                errorDiv.textContent = errorMessage; 
+                errorDiv.classList.remove('hidden');
+                if(btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'অর্ডার নিশ্চিত করুন';
+                }
+            }
+        };
+
+        const showToast = (message) => {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        };
+        
+        const handleSearch = (e) => {
+            const term = e.target.value.toLowerCase();
+            const resultsContainer = document.getElementById('search-results');
+            if (!resultsContainer) return;
+            if (!term) { resultsContainer.innerHTML = `<div class="text-center text-gray-400"><svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg><p>Type to find scripts and games.</p></div>`; return; }
+            const results = products.filter(p => p.name.toLowerCase().includes(term));
+            if(results.length > 0) { resultsContainer.innerHTML = results.map(p => `<div class="product-card cursor-pointer text-left p-3 hover:bg-card rounded-lg flex items-center gap-4" data-id="${p.id}"><img src="${p.image}" class="w-10 h-10 rounded">${p.name}</div>`).join('');
+            } else { resultsContainer.innerHTML = `<p class="text-center text-gray-400">No products found for "${term}".</p>`; }
+        };
+
+        const handleMyProductsLookup = async () => {
+            const email = document.getElementById('my-products-email')?.value.trim();
+            const listDiv = document.getElementById('my-products-list');
+            if (!listDiv) return;
+
+            if (!email) {
+                listDiv.innerHTML = `<p class="text-red-400 text-center">অনুগ্রহ করে আপনার ইমেইল দিন।</p>`;
+                return;
+            }
+            listDiv.innerHTML = '<div class="flex justify-center"><div class="loader"></div></div>';
+            
+            const ordersRef = collection(db, `/artifacts/${appId}/public/data/orders`);
+            const q = query(ordersRef, where("email", "==", email), where("status", "==", "Completed"));
+            
+            try {
+                const querySnapshot = await getDocs(q);
+                const purchasedIds = new Set();
+                querySnapshot.forEach((doc) => {
+                    const order = doc.data();
+                    if (order.items && Array.isArray(order.items)) {
+                        order.items.forEach(item => purchasedIds.add(item.id));
+                    }
+                });
+
+                if (purchasedIds.size === 0) {
+                    listDiv.innerHTML = '<p class="text-center text-gray-400">এই ইমেইলে কোনো অনুমোদিত পণ্য পাওয়া যায়নি।</p>';
+                    return;
+                }
+
+                const userProducts = products.filter(p => purchasedIds.has(p.id));
+                listDiv.innerHTML = '<div class="space-y-4">' + userProducts.map(p => {
+                    return `<div class="bg-surface p-4 rounded-lg flex items-center gap-4">
+                        <img src="${p.image}" alt="${p.name}" class="w-16 h-16 rounded-lg">
+                        <div>
+                            <h4 class="font-semibold text-lg">${p.name}</h4>
+                            ${(p.downloadURL && p.downloadURL.trim() !== '')
+                                ? `<a href="${p.downloadURL}" target="_blank" rel="noopener noreferrer" class="text-sm btn-primary !py-1 !px-3 mt-2 inline-block">Download Access</a>` 
+                                : `<span class="text-sm text-gray-500 mt-1">No file available</span>`
+                            }
+                        </div>
+                    </div>`;
+                }).join('') + '</div>';
+
+            } catch (error) {
+                console.error("Error fetching user products:", error);
+                listDiv.innerHTML = '<p class="text-center text-red-400">An error occurred while fetching your products.</p>';
+            }
+        };
+        
+        async function loadInitialData() {
+            onSnapshot(collection(db, `/artifacts/${appId}/public/data/products`), (snapshot) => {
+                products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const lastState = navigationStack[navigationStack.length - 1];
+                
+                if (lastState && lastState.page === 'home') {
+                    renderProductsToDiv('products-list', products);
+                } else if (lastState && lastState.page === 'product-detail') {
+                    const productStillExists = products.some(p => p.id === lastState.data.id);
+                    if (!productStillExists) {
+                        showToast("The product you were viewing was removed.");
+                        goBack();
+                    }
+                }
+            });
+
+            onSnapshot(doc(db, `/artifacts/${appId}/public/data/settings`, "banner"), (doc) => {
+                 if (doc.exists()) bannerSettings = doc.data();
+                 const lastState = navigationStack[navigationStack.length - 1];
+                 if(lastState && lastState.page === 'home') navigate('home', null);
+            });
+        }
+
+        // --- Event Delegation Setup ---
+        function initializeEventListeners() {
+            document.body.addEventListener('click', (e) => {
+                const target = e.target;
+                
+                // Static elements
+                if (target.closest('#home-btn')) { navigate('home', null); return; }
+                if (target.closest('#cart-btn')) { navigate('cart', null); return; }
+                if (target.closest('#my-products-button')) { navigate('my-products', null); return; }
+                if (target.closest('#search-icon')) {
+                    mainContent.classList.toggle('hidden'); 
+                    searchSection.classList.toggle('hidden'); 
+                    if(!searchSection.classList.contains('hidden')) searchInput.focus(); 
+                    else { searchInput.value = ''; handleSearch({target: {value: ''}}); }
+                    return;
+                }
+
+                // Dynamic elements inside mainContent
+                const productCard = target.closest('.product-card');
+                if (productCard) {
+                    navigate('product-detail', { id: productCard.dataset.id });
+                    return;
+                }
+                if (target.closest('.back-btn')) { goBack(); return; }
+                const addToCartBtn = target.closest('.add-to-cart-btn');
+                if (addToCartBtn) { addToCart(addToCartBtn.dataset.id); return; }
+                const buyNowBtn = target.closest('.buy-now-btn');
+                if (buyNowBtn) { if (addToCart(buyNowBtn.dataset.id)) navigate('cart', null); return; }
+                if (target.closest('.remove-from-cart-btn')) { removeFromCart(target.closest('.remove-from-cart-btn').dataset.id); return; }
+                if (target.closest('#proceed-to-checkout-btn')) { navigate('checkout', null); return; }
+                if (target.closest('#find-my-products-btn')) { handleMyProductsLookup(); return; }
+
+
+                if (target.closest('#checkout-next-1')) {
+                    const name = document.getElementById('full-name').value, email = document.getElementById('email').value, errorDiv = document.getElementById('checkout-error');
+                    if (!name || !email) { errorDiv.textContent = "অনুগ্রহ করে আপনার নাম এবং ইমেইল দিন।"; errorDiv.classList.remove('hidden'); return; }
+                    errorDiv.classList.add('hidden');
+                    checkoutState.customerInfo = { name, email }; checkoutState.step = 2; updateCheckoutView();
+                    return;
+                }
+                if (target.closest('#apply-coupon-btn')) {
+                    const code = document.getElementById('coupon-code').value.toUpperCase();
+                    const msgEl = document.getElementById('coupon-message');
+                    if (code === (bannerSettings.coupon || "").toUpperCase()) {
+                        checkoutState.appliedCoupon = { code, discount: 0.10 };
+                        msgEl.textContent = `10% discount applied!`;
+                        msgEl.className = 'text-sm mt-2 text-green-400';
+                    } else {
+                        checkoutState.appliedCoupon = null;
+                        msgEl.textContent = 'Invalid coupon code.';
+                        msgEl.className = 'text-sm mt-2 text-red-400';
+                    }
+                    return;
+                }
+                const paymentOption = target.closest('.payment-option');
+                if (paymentOption) {
+                    document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+                    paymentOption.classList.add('selected');
+                    checkoutState.paymentMethod = paymentOption.dataset.method;
+                    return;
+                }
+                if (target.closest('#checkout-next-2')) {
+                    const errorDiv = document.getElementById('checkout-error');
+                    if (!checkoutState.paymentMethod) { errorDiv.textContent = "অনুগ্রহ করে একটি পেমেন্ট পদ্ধতি বাছাই করুন।"; errorDiv.classList.remove('hidden'); return; }
+                    errorDiv.classList.add('hidden'); checkoutState.step = 3; updateCheckoutView();
+                    return;
+                }
+                if (target.closest('#copy-btn')) {
+                    navigator.clipboard.writeText(document.getElementById('payment-info').innerText).then(() => showToast("কপি করা হয়েছে!"));
+                    return;
+                }
+                if (target.closest('#confirm-purchase-btn')) {
+                    handleFinalCheckout();
+                    return;
+                }
+            });
+
+            searchInput.oninput = handleSearch;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!db) return;
+            cart = JSON.parse(localStorage.getItem('pshStoreCart') || '[]');
+            
+            initializeEventListeners();
+            
+            navigate('home', null);
+            loadInitialData();
+            updateCartState();
         });
     </script>
 </body>
