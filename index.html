@@ -125,6 +125,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDocs, setDoc, addDoc, onSnapshot, collection, query, where, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         const firebaseConfig = {
@@ -140,10 +141,12 @@
         const appId = "1:391359795549:web:2616455e966f3bf6a658b4";
 
         let db;
+        let auth;
         
         try {
             const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
+            auth = getAuth(app);
         } catch (e) {
             console.error("Firebase Initialization Failed:", e);
             document.getElementById('initial-error').textContent = "Firebase কনফিগারেশন সঠিক নয়।";
@@ -256,6 +259,7 @@
                 <div class="space-y-4">
                     <div><label class="block mb-1 text-sm text-gray-400">আপনার পুরো নাম</label><input type="text" id="sell-full-name" placeholder="নাম লিখুন" class="w-full p-3 rounded-lg bg-surface border border-gray-600"></div>
                     <div><label class="block mb-1 text-sm text-gray-400">আপনার যোগাযোগের নম্বর (bKash/Nagad)</label><input type="text" id="sell-contact-number" placeholder="যোগাযোগের নম্বর" class="w-full p-3 rounded-lg bg-surface border border-gray-600"></div>
+                    <div><label class="block mb-1 text-sm text-gray-400">ফাইল/ছবির লিংক (ঐচ্ছিক)</label><input type="url" id="sell-item-link" placeholder="ফাইলটি Google Drive/Imgur এ আপলোড করে লিংক দিন" class="w-full p-3 rounded-lg bg-surface border border-gray-600"></div>
                     <div><label class="block mb-1 text-sm text-gray-400">আপনার পণ্যের বিবরণ/শর্ত</label><textarea id="sell-item-details" placeholder="আপনার পণ্যের অবস্থা সম্পর্কে লিখুন..." class="w-full p-3 rounded-lg bg-surface border border-gray-600 h-24"></textarea></div>
                     <button id="submit-sell-request-btn" class="btn-primary w-full mt-4" data-item-id="${item.id}" data-item-name="${item.name}" data-item-price="${item.price}">অনুরোধ জমা দিন</button>
                 </div>
@@ -543,10 +547,11 @@
             const name = document.getElementById('sell-full-name').value.trim();
             const contact = document.getElementById('sell-contact-number').value.trim();
             const details = document.getElementById('sell-item-details').value.trim();
+            const itemLink = document.getElementById('sell-item-link').value.trim();
             const errorDiv = document.getElementById('sell-form-error');
 
             if (!name || !contact || !details) {
-                errorDiv.textContent = "অনুগ্রহ করে সব তথ্য পূরণ করুন।";
+                errorDiv.textContent = "অনুগ্রহ করে নাম, যোগাযোগ নম্বর এবং বিবরণ পূরণ করুন।";
                 errorDiv.classList.remove('hidden');
                 return;
             }
@@ -559,6 +564,7 @@
                 customerName: name,
                 customerContact: contact,
                 itemCondition: details,
+                itemLink: itemLink,
                 itemId: btn.dataset.itemId,
                 itemName: btn.dataset.itemName,
                 itemPrice: parseFloat(btn.dataset.itemPrice),
@@ -647,6 +653,11 @@
         };
         
         async function loadInitialData() {
+            // Ensure db is initialized before trying to use it
+            if (!db) {
+                console.log("Firestore not initialized. Aborting data load.");
+                return;
+            }
             onSnapshot(collection(db, `/artifacts/${appId}/public/data/products`), (snapshot) => {
                 products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 const lastState = navigationStack[navigationStack.length - 1];
@@ -776,14 +787,28 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (!db) return;
-            cart = JSON.parse(localStorage.getItem('pshStoreCart') || '[]');
-            
-            initializeEventListeners();
-            
-            navigate('home', null);
-            loadInitialData();
-            updateCartState();
+            if (!db || !auth) {
+                console.error("Firebase services not initialized.");
+                return;
+            }
+
+            // Sign in anonymously to allow database write operations
+            signInAnonymously(auth)
+                .then(() => {
+                    console.log('User signed in anonymously.');
+                    
+                    // Once signed in, proceed with the app logic
+                    cart = JSON.parse(localStorage.getItem('pshStoreCart') || '[]');
+                    initializeEventListeners();
+                    navigate('home', null);
+                    loadInitialData();
+                    updateCartState();
+                })
+                .catch((error) => {
+                    console.error("Error signing in anonymously:", error);
+                    document.getElementById('initial-error').textContent = "প্রমাণীকরণ ব্যর্থ হয়েছে। আবার চেষ্টা করুন।";
+                    document.getElementById('initial-error').classList.remove('hidden');
+                });
         });
     </script>
 </body>
