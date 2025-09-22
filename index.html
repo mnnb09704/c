@@ -101,10 +101,15 @@
     <div class="max-w-screen-md mx-auto p-4">
         <header class="flex justify-between items-center mb-6">
             <h1 id="home-btn" class="text-2xl font-extrabold cursor-pointer tracking-wider" style="text-shadow: 0 0 10px var(--color-glow);">ALL SCRIPT</h1>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 sm:gap-4">
                 <button id="search-icon" class="p-2 rounded-full hover:bg-card transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></button>
                 <button id="cart-btn" class="relative p-2 rounded-full hover:bg-card transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.19.988.707.988H19m-9-6h2m-2 4h2" /></svg><span id="cart-count" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">0</span></button>
-                <button id="my-products-button" class="p-2 rounded-full hover:bg-card transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0v10l-8 4-8-4V7m16 0l-8 4-8-4" /></svg></button>
+                <button id="my-products-button" title="আমার কেনা পণ্য" class="p-2 rounded-full hover:bg-card transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0v10l-8 4-8-4V7m16 0l-8 4-8-4" /></svg></button>
+                <button id="sell-to-us-button" title="আমাদের কাছে বেচুন" class="p-2 rounded-full hover:bg-card transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </button>
             </div>
         </header>
         
@@ -148,6 +153,7 @@
         let products = [];
         let sections = [];
         let bannerSettings = {};
+        let wantedItems = [];
         
         let cart = [];
         const checkoutState = { step: 1, customerInfo: {}, paymentMethod: null, appliedCoupon: null };
@@ -221,6 +227,40 @@
             <div class="mb-4"><button class="back-btn text-gray-400">&larr; Back</button></div>
             <h2 class="text-2xl font-bold mb-6">Shopping Cart</h2>
             <div id="cart-items-container" class="space-y-4"></div>`;
+            
+        const SellToUsPage = (wantedItems) => `
+            <div class="mb-4"><button class="back-btn text-gray-400">&larr; Back</button></div>
+            <h2 class="text-3xl font-bold mb-6">আমাদের কাছে বিক্রি করুন</h2>
+            <p class="text-gray-400 mb-6">আমরা বর্তমানে এই আইটেমগুলো কিনছি। আপনার কাছে থাকলে, আমাদের কাছে বিক্রি করতে পারেন।</p>
+            <div id="wanted-items-container" class="space-y-4">
+                ${wantedItems.length > 0 ? wantedItems.map(item => `
+                    <div class="bg-card p-4 rounded-lg flex items-center gap-4 card-glow">
+                        <img src="${item.image}" alt="${item.name}" class="w-20 h-20 rounded-lg object-cover">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold">${item.name}</h3>
+                            <p class="text-gray-400 text-sm mt-1">${item.description || ''}</p>
+                            <p class="text-primary font-bold text-lg mt-2">আমরা কিনছি: $${item.price.toFixed(2)}</p>
+                        </div>
+                        <button class="sell-now-btn btn-primary !py-2 !px-4" data-id="${item.id}">এখনই বেচুন</button>
+                    </div>
+                `).join('') : '<p class="text-center text-gray-500 py-8">বর্তমানে আমরা কিছু কিনছি না।</p>'}
+            </div>
+        `;
+
+        const SellFormPage = (item) => `
+            <div class="mb-4"><button class="back-btn text-gray-400">&larr; Back</button></div>
+            <h2 class="text-3xl font-bold mb-2">আপনার "${item.name}" বিক্রি করুন</h2>
+            <p class="text-gray-400 mb-6">নিচের ফর্মটি পূরণ করে আপনার বিক্রির অনুরোধ জমা দিন। আমরা ২৪ ঘণ্টার মধ্যে আপনার সাথে যোগাযোগ করব।</p>
+            <div id="sell-form-error" class="hidden p-3 bg-red-800 text-white rounded-md text-center mb-4"></div>
+            <div class="bg-card rounded-2xl p-6">
+                <div class="space-y-4">
+                    <div><label class="block mb-1 text-sm text-gray-400">আপনার পুরো নাম</label><input type="text" id="sell-full-name" placeholder="নাম লিখুন" class="w-full p-3 rounded-lg bg-surface border border-gray-600"></div>
+                    <div><label class="block mb-1 text-sm text-gray-400">আপনার যোগাযোগের নম্বর (bKash/Nagad)</label><input type="text" id="sell-contact-number" placeholder="যোগাযোগের নম্বর" class="w-full p-3 rounded-lg bg-surface border border-gray-600"></div>
+                    <div><label class="block mb-1 text-sm text-gray-400">আপনার পণ্যের বিবরণ/শর্ত</label><textarea id="sell-item-details" placeholder="আপনার পণ্যের অবস্থা সম্পর্কে লিখুন..." class="w-full p-3 rounded-lg bg-surface border border-gray-600 h-24"></textarea></div>
+                    <button id="submit-sell-request-btn" class="btn-primary w-full mt-4" data-item-id="${item.id}" data-item-name="${item.name}" data-item-price="${item.price}">অনুরোধ জমা দিন</button>
+                </div>
+            </div>
+        `;
 
         const CheckoutPage = () => `
             <div class="mb-4"><button class="back-btn text-gray-400">&larr; Back</button></div>
@@ -346,6 +386,21 @@
             }
             else if (page === 'my-products') {
                 render(MyProductsPage);
+            } else if (page === 'sell-to-us') {
+                render(SellToUsPage, wantedItems);
+            } else if (page === 'sell-form') {
+                if (!data || !data.id) {
+                    showToast("Error: Item ID missing.");
+                    navigate('sell-to-us', null);
+                    return;
+                }
+                const item = wantedItems.find(i => i.id === data.id);
+                if (item) {
+                    render(SellFormPage, item);
+                } else {
+                    showToast("Error: Item not found!");
+                    goBack();
+                }
             }
         };
         
@@ -484,6 +539,47 @@
             }
         };
 
+        const handleSellRequestSubmit = async (btn) => {
+            const name = document.getElementById('sell-full-name').value.trim();
+            const contact = document.getElementById('sell-contact-number').value.trim();
+            const details = document.getElementById('sell-item-details').value.trim();
+            const errorDiv = document.getElementById('sell-form-error');
+
+            if (!name || !contact || !details) {
+                errorDiv.textContent = "অনুগ্রহ করে সব তথ্য পূরণ করুন।";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            errorDiv.classList.add('hidden');
+
+            btn.disabled = true;
+            btn.textContent = 'জমা হচ্ছে...';
+
+            const requestData = {
+                customerName: name,
+                customerContact: contact,
+                itemCondition: details,
+                itemId: btn.dataset.itemId,
+                itemName: btn.dataset.itemName,
+                itemPrice: parseFloat(btn.dataset.itemPrice),
+                status: 'Pending',
+                date: new Date().toISOString()
+            };
+
+            const requestsCollectionRef = collection(db, `/artifacts/${appId}/public/data/sellRequests`);
+            try {
+                await addDoc(requestsCollectionRef, requestData);
+                showToast("আপনার বিক্রির অনুরোধ সফলভাবে জমা হয়েছে!");
+                navigate('home', null);
+            } catch (e) {
+                console.error("Sell Request Error: ", e);
+                errorDiv.textContent = "একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।";
+                errorDiv.classList.remove('hidden');
+                btn.disabled = false;
+                btn.textContent = 'অনুরোধ জমা দিন';
+            }
+        };
+
         const showToast = (message) => {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -555,14 +651,8 @@
                 products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 const lastState = navigationStack[navigationStack.length - 1];
                 
-                if (lastState && lastState.page === 'home') {
-                    renderHomePageSections();
-                } else if (lastState && lastState.page === 'product-detail') {
-                    const productStillExists = products.some(p => p.id === lastState.data.id);
-                    if (!productStillExists) {
-                        showToast("The product you were viewing was removed.");
-                        goBack();
-                    }
+                if (lastState && (lastState.page === 'home' || lastState.page === 'section')) {
+                    navigate(lastState.page, lastState.data);
                 }
             });
 
@@ -571,6 +661,14 @@
                 const lastState = navigationStack[navigationStack.length - 1];
                 if (lastState && lastState.page === 'home') {
                     renderHomePageSections();
+                }
+            });
+            
+            onSnapshot(collection(db, `/artifacts/${appId}/public/data/wantedItems`), (snapshot) => {
+                wantedItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                 const lastState = navigationStack[navigationStack.length - 1];
+                if (lastState && lastState.page === 'sell-to-us') {
+                    render(SellToUsPage, wantedItems);
                 }
             });
 
@@ -588,6 +686,8 @@
                 if (target.closest('#home-btn')) { navigate('home', null); return; }
                 if (target.closest('#cart-btn')) { navigate('cart', null); return; }
                 if (target.closest('#my-products-button')) { navigate('my-products', null); return; }
+                if (target.closest('#sell-to-us-button')) { navigate('sell-to-us', null); return; }
+
                 if (target.closest('#search-icon')) {
                     mainContent.classList.toggle('hidden'); 
                     searchSection.classList.toggle('hidden'); 
@@ -613,6 +713,16 @@
                 if (addToCartBtn) { addToCart(addToCartBtn.dataset.id); return; }
                 const buyNowBtn = target.closest('.buy-now-btn');
                 if (buyNowBtn) { if (addToCart(buyNowBtn.dataset.id)) navigate('cart', null); return; }
+                const sellNowBtn = target.closest('.sell-now-btn');
+                if (sellNowBtn) {
+                    const itemId = sellNowBtn.dataset.id;
+                    navigate('sell-form', { id: itemId });
+                    return;
+                }
+                 if (target.closest('#submit-sell-request-btn')) {
+                    handleSellRequestSubmit(target.closest('#submit-sell-request-btn'));
+                    return;
+                }
                 if (target.closest('.remove-from-cart-btn')) { removeFromCart(target.closest('.remove-from-cart-btn').dataset.id); return; }
                 if (target.closest('#proceed-to-checkout-btn')) { navigate('checkout', null); return; }
                 if (target.closest('#find-my-products-btn')) { handleMyProductsLookup(); return; }
