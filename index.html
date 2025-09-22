@@ -69,6 +69,29 @@
         .payment-option.selected { border-color: var(--color-primary); box-shadow: 0 0 10px var(--color-glow); }
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--color-primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Styles for horizontal scrolling sections */
+        .horizontal-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        .horizontal-scroll::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, and Opera */
+        }
+        .horizontal-scroll .product-card {
+            width: 45%;
+            flex-shrink: 0;
+        }
+        @media (min-width: 640px) { /* sm breakpoint */
+            .horizontal-scroll .product-card {
+                width: 30%;
+            }
+        }
+
     </style>
 </head>
 <body class="bg-surface">
@@ -123,6 +146,7 @@
         }
 
         let products = [];
+        let sections = []; // To store product sections
         let bannerSettings = {};
         
         let cart = [];
@@ -138,15 +162,14 @@
         const searchInput = document.getElementById('search-input');
         
         const HomePage = (banner) => `
-            <div class="space-y-12">
+            <div class="space-y-8">
                 <div class="bg-gradient-to-r from-cyan-500 to-pink-500 p-8 rounded-2xl shadow-lg text-white text-center card-glow">
                     <h2 class="text-3xl font-extrabold tracking-wider">${banner?.title || 'WELCOME OFFER'}</h2>
                     <p class="mt-2 text-lg">${banner?.subtitle || 'Use code below for 10% OFF!'}</p>
                     <div class="mt-4 inline-block bg-white text-black font-mono px-4 py-2 rounded-lg font-bold text-lg">${banner?.coupon || 'WELCOME10'}</div>
                 </div>
-                <div>
-                    <h2 class="text-2xl font-bold mb-4">Available Products</h2>
-                    <div class="grid grid-cols-2 gap-6" id="products-list"></div>
+                <div id="home-sections-container" class="space-y-8">
+                    <!-- Dynamic sections will be rendered here -->
                 </div>
             </div>`;
         
@@ -215,10 +238,41 @@
             mainContent.innerHTML = await pageTemplate(...args);
         };
 
-        const renderProductsToDiv = (divId, productArray) => {
-            const container = document.getElementById(divId);
-            if (!container) return;
-            container.innerHTML = productArray.map(p => `<div class="product-card cursor-pointer" data-id="${p.id}"><div class="bg-card p-4 rounded-2xl relative card-glow"><img src="${p.image}" alt="${p.name}" class="w-full h-32 object-cover rounded-lg mb-3"><h3 class="font-semibold text-lg truncate">${p.name}</h3><p class="text-xs text-gray-400">${p.category || ''}</p>${p.stock === 0 ? `<p class="text-sm text-red-400 font-bold mt-1">Out of Stock</p><span class="absolute top-2 right-2 text-xs bg-red-600 text-white px-2 py-1 rounded-full font-bold">Sold Out</span>` : `<p class="text-lg font-bold text-primary mt-1">$${p.price.toFixed(2)}</p>`}</div></div>`).join('');
+        const renderHomePageSections = () => {
+            const container = document.getElementById('home-sections-container');
+            if (!container || sections.length === 0) return;
+
+            const sortedSections = [...sections].sort((a, b) => (a.order || 99) - (b.order || 99));
+            
+            container.innerHTML = sortedSections.map(section => {
+                const sectionProducts = products.filter(p => p.sectionId === section.id);
+                if (sectionProducts.length === 0) return ''; // Don't render empty sections
+
+                const productCardsHTML = sectionProducts.map(p => `
+                    <div class="product-card cursor-pointer" data-id="${p.id}">
+                        <div class="bg-card p-4 rounded-2xl relative card-glow h-full flex flex-col">
+                            <img src="${p.image}" alt="${p.name}" class="w-full h-32 object-cover rounded-lg mb-3">
+                            <div class="flex-grow">
+                                <h3 class="font-semibold text-lg truncate">${p.name}</h3>
+                                <p class="text-xs text-gray-400">${p.category || ''}</p>
+                            </div>
+                            ${p.stock === 0 
+                                ? `<p class="text-sm text-red-400 font-bold mt-1">Out of Stock</p><span class="absolute top-2 right-2 text-xs bg-red-600 text-white px-2 py-1 rounded-full font-bold">Sold Out</span>` 
+                                : `<p class="text-lg font-bold text-primary mt-1">$${p.price.toFixed(2)}</p>`
+                            }
+                        </div>
+                    </div>
+                `).join('');
+
+                return `
+                    <div>
+                        <h2 class="text-2xl font-bold mb-4">${section.name}</h2>
+                        <div class="horizontal-scroll">
+                            ${productCardsHTML}
+                        </div>
+                    </div>
+                `;
+            }).join('');
         };
         
         const updateCartPage = () => {
@@ -249,7 +303,7 @@
 
             if (page === 'home') {
                 render(HomePage, bannerSettings).then(() => {
-                    renderProductsToDiv('products-list', products);
+                    renderHomePageSections();
                 });
             } else if (page === 'product-detail') {
                  if (!data || !data.id) {
@@ -454,22 +508,22 @@
                 });
 
                 if (purchasedIds.size === 0) {
-                    listDiv.innerHTML = '<p class="text-center text-gray-400">এই ইমেইলে কোনো অনুমোদিত পণ্য পাওয়া যায়নি।</p>';
+                    listDiv.innerHTML = '<p class="text-center text-gray-400">এই ইমেইলে কোনো অনুমোদিত পণ্য পাওয়া যায়নি।</p>';
                     return;
                 }
 
                 const userProducts = products.filter(p => purchasedIds.has(p.id));
                 listDiv.innerHTML = '<div class="space-y-4">' + userProducts.map(p => {
                     return `<div class="bg-surface p-4 rounded-lg flex items-center gap-4">
-                        <img src="${p.image}" alt="${p.name}" class="w-16 h-16 rounded-lg">
-                        <div>
-                            <h4 class="font-semibold text-lg">${p.name}</h4>
-                            ${(p.downloadURL && p.downloadURL.trim() !== '')
-                                ? `<a href="${p.downloadURL}" target="_blank" rel="noopener noreferrer" class="text-sm btn-primary !py-1 !px-3 mt-2 inline-block">Download Access</a>` 
-                                : `<span class="text-sm text-gray-500 mt-1">No file available</span>`
-                            }
-                        </div>
-                    </div>`;
+                            <img src="${p.image}" alt="${p.name}" class="w-16 h-16 rounded-lg">
+                            <div>
+                                <h4 class="font-semibold text-lg">${p.name}</h4>
+                                ${(p.downloadURL && p.downloadURL.trim() !== '')
+                                    ? `<a href="${p.downloadURL}" target="_blank" rel="noopener noreferrer" class="text-sm btn-primary !py-1 !px-3 mt-2 inline-block">Download Access</a>` 
+                                    : `<span class="text-sm text-gray-500 mt-1">No file available</span>`
+                                }
+                            </div>
+                        </div>`;
                 }).join('') + '</div>';
 
             } catch (error) {
@@ -484,13 +538,22 @@
                 const lastState = navigationStack[navigationStack.length - 1];
                 
                 if (lastState && lastState.page === 'home') {
-                    renderProductsToDiv('products-list', products);
+                    renderHomePageSections();
                 } else if (lastState && lastState.page === 'product-detail') {
                     const productStillExists = products.some(p => p.id === lastState.data.id);
                     if (!productStillExists) {
                         showToast("The product you were viewing was removed.");
                         goBack();
                     }
+                }
+            });
+
+            // Listen for changes in sections
+            onSnapshot(collection(db, `/artifacts/${appId}/public/data/sections`), (snapshot) => {
+                sections = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const lastState = navigationStack[navigationStack.length - 1];
+                if (lastState && lastState.page === 'home') {
+                    renderHomePageSections();
                 }
             });
 
@@ -594,5 +657,3 @@
     </script>
 </body>
 </html>
-
-
